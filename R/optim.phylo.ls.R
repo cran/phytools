@@ -2,9 +2,6 @@
 # written by Liam J. Revell 2011
 
 optim.phylo.ls<-function(D,stree=NULL,set.neg.to.zero=TRUE,fixed=FALSE,tol=1e-10,collapse=TRUE){
-	
-	# load phangorn package
-	if(!require(phangorn)) stop("must first install \"phangorn\" package.")
 
 	# change D to a matrix (if actually an object of class "dist")
 	if(class(D)=="dist") D<-as.matrix(D)

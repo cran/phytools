@@ -30,3 +30,5 @@ posterior.evolrate(tree,ave.shift,mcmc,tips,showTree=FALSE)
 \examples{
 }
 \keyword{phylogenetics}
+\keyword{comparative method}
+\keyword{bayesian}

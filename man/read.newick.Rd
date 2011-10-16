@@ -28,3 +28,4 @@ tree<-"((Human,Chimp),Gorilla),Monkey);"
 phy<-read.newick(text=tree)
 }
 \keyword{phylogenetics}
+\keyword{input/output}

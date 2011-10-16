@@ -6,8 +6,6 @@
 ltt<-function(tree,plot=TRUE,drop.extinct=FALSE,log.lineages=TRUE,gamma=TRUE){
 	# set tolerance
 	tol<-1e-6
-	# require
-	if(!require(ape)) stop("must first install 'ape' package.") # require ape
 	# check 'phylo' object
 	if(class(tree)!="phylo") stop("tree object must be of class 'phylo.'")
 	# reorder the tree

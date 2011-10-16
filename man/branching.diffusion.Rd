@@ -31,3 +31,5 @@ branching.diffusion(sig2=1,b=0.0023,time.stop=1000,ylim=NULL,smooth=TRUE,pause=0
 \examples{
 }
 \keyword{phylogenetics}
+\keyword{animation}
+\keyword{plotting}

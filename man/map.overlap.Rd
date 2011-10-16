@@ -26,3 +26,4 @@ map.overlap(tree1,tree2,tol=1e-6)
 \examples{
 }
 \keyword{phylogenetics}
+\keyword{comparative method}

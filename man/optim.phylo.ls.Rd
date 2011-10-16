@@ -37,3 +37,6 @@ optim.phylo.ls(D,stree=NULL,set.neg.to.zero=TRUE,fixed=FALSE,tol=1e-10,collapse=
 \examples{
 }
 \keyword{phylogenetics}
+\keyword{inference}
+\keyword{distance matrix}
+\keyword{least squares}

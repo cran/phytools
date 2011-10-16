@@ -30,3 +30,4 @@ fastBM(tree,a=0,mu=0,sig2=1,bounds=c(-Inf,Inf),internal=FALSE,nsim=1)
 \examples{
 }
 \keyword{phylogenetics}
+\keyword{simulation}

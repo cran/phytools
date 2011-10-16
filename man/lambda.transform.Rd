@@ -25,3 +25,5 @@ lambda.transform(lambda,C)
 \examples{
 }
 \keyword{phylogenetics}
+\keyword{math}
+\keyword{comparative method}

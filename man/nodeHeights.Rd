@@ -1,6 +1,6 @@
 \name{nodeHeights}
 \alias{nodeHeights}
-\title{Estimate diversity at each node of the tree}
+\title{Compute the heights above the root of each node}
 \usage{
 nodeHeights(tree)
 }
@@ -8,7 +8,7 @@ nodeHeights(tree)
   \item{tree}{is a phylogenetic tree in \code{"phylo"} format.}
 }
 \description{
-  This function computes node heights for \code{\link{estDiversity}}.
+  This function computes node heights (primarily for \code{\link{estDiversity}}).
 }
 \details{
 }
@@ -22,5 +22,9 @@ nodeHeights(tree)
   \code{\link{estDiversity}}, \code{\link{fitDiversityModel}}
 }
 \examples{
+  tree<-rtree(10)
+  X<-nodeHeights(tree)
 }
 \keyword{phylogenetics}
+\keyword{utilities}
+\keyword{comparative method}

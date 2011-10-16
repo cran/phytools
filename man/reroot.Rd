@@ -28,3 +28,4 @@ reroot(tree,node.number,position)
 \examples{
 }
 \keyword{phylogenetics}
+\keyword{utilities}

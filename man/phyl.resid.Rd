@@ -14,6 +14,7 @@ phyl.resid(tree,x,Y,method="BM")
   This function fits one or multiple phylogenetic regressions (depending on the number of columns in \code{Y}) and computes the residuals.  Designed for phylogenetic size correction using GLS regression (e.g., Revell 2009; \emph{Evolution}).
 }
 \details{
+  Optionally fits lambda for each regression model.  Likelihood optimization of lambda is performed for \code{method="lambda"} using \code{\link{optimize}} on the interval (0,1).
 }
 \value{
   a list with the following components:
@@ -35,3 +36,7 @@ phyl.resid(tree,x,Y,method="BM")
 \examples{
 }
 \keyword{phylogenetics}
+\keyword{comparative method}
+\keyword{statistics}
+\keyword{least squares}
+\keyword{maximum likelihood}

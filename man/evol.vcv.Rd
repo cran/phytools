@@ -2,25 +2,28 @@
 \alias{evol.vcv}
 \title{Likelihood test for variation in the evolutionary VCV matrix}
 \usage{
-evol.vcv(scm.tre,dat,maxit=2000)
+evol.vcv(scm.tre,dat,maxit=2000,vars=FALSE)
 }
 \arguments{
   \item{scm.tre}{a phylogenetic tree in modified \code{"phylo"} format (see \code{\link{read.simmap}}).}
   \item{dat}{an \code{n} x \code{m} matrix of tip values for \code{m} continuously valued traits in \code{n} species - row names should be species names.}
   \item{maxit}{an optional integer value indicating the maximum number of iterations for optimization - may need to be increased for large trees.}
+  \item{vars}{an optional logical value indicating whether or not to estimate the variances of the parameter estimates from the Hessian matrix.}
 }
 \description{
   This function takes a modified \code{"phylo"} object with a mapped binary or multistate trait and data for an arbitrary number of continuously valued character.  It then fits the multiple evolutionary variance-covariance matrix (rate matrix) model of Revell & Collar (2009; \emph{Evolution}.
 }
 \details{
-  May have to increase \code{maxit} for large trees and more than 2 traits.
+  This function performs optimization by first optimizing the likelihood with respect to the Cholesky matrices using \code{\link{optim}}.  Optimization method is \code{method="Nelder-Mead"}.  Using box constraints does not make sense here as they would be applied to the Cholesky matrix rather than the target parameters.  May have to increase \code{maxit} for large trees and more than 2 traits.
 }
 \value{
   a list with the following components:
   \item{R.single}{vcv matrix for the single rate matrix model.}
+  \item{vars.single}{optionally, a matrix containing the variances of the elements of \code{R.single}.}
   \item{logL1}{log-likelihood for single matrix model.}
   \item{k1}{number of parameters in the single marix model.}
   \item{R.multiple}{\code{m} x \code{m} x \code{p} array containing the \code{p} estimated vcv matrices for the \code{p} regimes painted on the tree.}
+  \item{vars.multiple}{optionally, an array containing the variances of the parameter estimates in \code{R.multiple}.}
   \item{logL.multiple}{log-likelihood of the multi-matrix model.}
   \item{k2}{number of parameters estimated in this model.}
   \item{P.chisq}{P-value of the X^2 test on the likelihood ratio.}
@@ -36,3 +39,5 @@ evol.vcv(scm.tre,dat,maxit=2000)
 \examples{
 }
 \keyword{phylogenetics}
+\keyword{comparative method}
+\keyword{maximum likelihood}

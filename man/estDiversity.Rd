@@ -12,7 +12,7 @@ estDiversity(tree,x)
   This function estimates the lineage density at each node in the tree based on a biogeographic model (based on Mahler et al. 2010; \emph{Evolution}).
 }
 \details{
-  Very slow.
+  Very slow. This function (presently) relies on many calls to \code{ace}.
 }
 \value{
   a vector containing the estimated lineage density at each node
@@ -27,3 +27,5 @@ estDiversity(tree,x)
 \examples{
 }
 \keyword{phylogenetics}
+\keyword{comparative method}
+\keyword{maximum likelihood}

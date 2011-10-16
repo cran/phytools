@@ -2,8 +2,6 @@
 # written by Liam Revell 2011
 
 reroot<-function(tree,node.number,position){
-	# check for & load "ape"	
-	if(!require(ape)) stop("must first install 'ape' package.") # require ape	
 	# some minor error checking
 	if(class(tree)!="phylo") stop("tree object must be of class 'phylo.'")
 	if(node.number>length(tree$tip)){

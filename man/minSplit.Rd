@@ -31,3 +31,5 @@ minSplit(tree,split.list,method="sum",printD=FALSE)
 \examples{
 }
 \keyword{phylogenetics}
+\keyword{comparative method}
+\keyword{bayesian}

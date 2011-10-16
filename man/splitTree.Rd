@@ -5,14 +5,14 @@
 splitTree(tree,split)
 }
 \arguments{
-  \item{tree}{.}
-  \item{split}{.}
+  \item{tree}{phylogenetic tree.}
+  \item{split}{split encoded as a list with two elements: \code{node}: the node number tipward of the split; and \code{bp}: the position along the branch to break the tree, measured from the rootward end of the edge.}
 }
 \description{
-  Internal function for \code{\link{posterior.evolrate}}.
+  Primarily an internal function for \code{\link{posterior.evolrate}}, this function splits the tree at a given point, and returns the two subtrees as an object of class \code{"multiPhylo"}.
 }
 \details{
-  Do not use unless you know what you're doing.
+  Probably do not use this unless you can figure out what you are doing.
 }
 \value{
   two trees in a list.
@@ -25,3 +25,4 @@ splitTree(tree,split)
 \examples{
 }
 \keyword{phylogenetics}
+\keyword{utilities}

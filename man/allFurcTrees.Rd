@@ -30,3 +30,4 @@ allFurcTrees(n,tip.label=NULL,to.plot=TRUE)
 \examples{
 }
 \keyword{phylogenetics}
+\keyword{inference}

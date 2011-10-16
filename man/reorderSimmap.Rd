@@ -25,3 +25,5 @@ reorderSimmap(tree,order="cladewise")
 \examples{
 }
 \keyword{phylogenetics}
+\keyword{utilities}
+\keyword{comparative method}

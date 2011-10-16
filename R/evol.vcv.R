@@ -2,12 +2,41 @@
 # to different parts of a phylogenetic tree
 # Takes a tree with a binary or multistate character "painted" on the branches in SIMMAP format 
 # (see read.simmap()) and data for 1 or more continuous characters
-# Written by Liam J. Revell
+# Written by Liam J. Revell 2010, 2011
 
-evol.vcv<-function(scm.tre,dat,maxit=2000){
+evol.vcv<-function(scm.tre,dat,maxit=2000,vars=FALSE){
+	# function converts symmetric matrix to vector by taking upper diagonal
+	to.upper<-function(mat){
+		v<-vector(mode="numeric"); k<-1
+		for(i in 1:nrow(mat)) for(j in i:ncol(mat)){
+			v[k]<-mat[i,j]
+			k<-k+1
+		}
+		return(v)
+	}
 
-	# require dependencies
-	require(ape)
+	# function converts vector to upper diagonal matrix
+	upper.diag<-function(vect){
+		m<-(-1+sqrt(1+8*length(vect)))/2
+		mat<-matrix(0,m,m); k<-1
+		for(i in 1:m) for(j in i:m){
+			mat[i,j]<-vect[k]
+			k<-k+1
+		}
+		return(mat)
+	}
+
+	# function converts vector to symmetric matrix
+	to.symmetric<-function(vect){
+		m<-(-1+sqrt(1+8*length(vect)))/2
+		mat<-matrix(0,m,m); k<-1
+		for(i in 1:m) for(j in i:m){
+			mat[i,j]<-vect[k]
+			mat[j,i]<-mat[i,j]
+			k<-k+1
+		}
+		return(mat)
+	}
 
 	# bookkeeping
 	X<-as.matrix(dat)
@@ -30,7 +59,19 @@ evol.vcv<-function(scm.tre,dat,maxit=2000){
 	R<-t(X-one%*%a)%*%solve(C)%*%(X-one%*%a)/n
 
 	# compute the log-likelihood
-	logL1<--t(y-D%*%t(a))%*%solve(kronecker(R,C))%*%(y-D%*%t(a))/2-n*m*log(2*pi)/2-determinant(kronecker(R,C))$modulus[1]/2
+	lik<-function(R.vect,y,D,a,C,n,m1){
+		R<-to.symmetric(R.vect)
+		logL1<--t(y-D%*%t(a))%*%solve(kronecker(R,C))%*%(y-D%*%t(a))/2-n*m*log(2*pi)/2-determinant(kronecker(R,C))$modulus[1]/2
+	}
+	logL1<-lik(to.upper(R),y,D,a,C,n,m)
+	
+	if(vars){
+		# compute Hessian
+		H<-hessian(lik,to.upper(R),y=y,D=D,a=a,C=C,n=n,m1=m)
+		# compute variances
+		vars.single<-to.symmetric(diag(solve(-H)))
+		dimnames(vars.single)<-list(colnames(X),colnames(X))
+	}
 
 	# compute separate C for each state
 	multi.tre<-list(); class(multi.tre)<-"multiPhylo"
@@ -43,29 +84,8 @@ evol.vcv<-function(scm.tre,dat,maxit=2000){
 		C[,,i]<-temp[rownames(dat),rownames(dat)]
 	}
 
-	# function converts symmetric matrix to vector by taking upper diagonal
-	to.upper<-function(mat){
-		v<-vector(mode="numeric"); k<-1
-		for(i in 1:nrow(mat)) for(j in i:ncol(mat)){
-			v[k]<-mat[i,j]
-			k<-k+1
-		}
-		return(v)
-	}
-
-	# function converts vector to upper diagonal matrix
-	upper.diag<-function(vect){
-		m<-(-1+sqrt(1+8*length(vect)))/2
-		mat<-matrix(0,m,m); k<-1
-		for(i in 1:m) for(j in i:m){
-			mat[i,j]<-vect[k]
-			k<-k+1
-		}
-		return(mat)
-	}
-
-	# compute the log-likelihood
-	likelihood<-function(theta,y,C,D){
+	# compute the log-likelihood (from the cholesky matrices)
+	likelihood.cholR<-function(theta,y,C,D){
 		m<-length(y)/dim(C)[1]; n<-length(y)/m; p<-dim(C)[3]
 		cholR<-array(data=0,dim=c(m,m,p)); l<-1
 		for(i in 1:p) for(j in 1:m) for(k in j:m){ 
@@ -82,8 +102,9 @@ evol.vcv<-function(scm.tre,dat,maxit=2000){
 	starting<-vector(mode="numeric")
 	for(i in 1:p)
 		starting<-c(starting,to.upper(chol(R)))
+
 	# optimize using generic optimizer
-	r=optim(starting,fn=likelihood,y=y,C=C,D=D,control=list(maxit=maxit))
+	r=optim(starting,fn=likelihood.cholR,y=y,C=C,D=D,control=list(maxit=maxit))
 
 	# convert parameter estimates to matrices
 	R.i<-array(dim=c(m,m,p)); states<-vector(mode="character")
@@ -93,7 +114,40 @@ evol.vcv<-function(scm.tre,dat,maxit=2000){
 	}
 	dimnames(R.i)<-list(rownames(R),colnames(R),states)
 
-	# log-likelihood for the multi-matrix model	logL2<--r$value
+	# log-likelihood for the multi-matrix model
+	logL2<--r$value
+
+	# compute the log-likelihood (from the original matrices)
+	likelihood.R<-function(theta,y,C,D){
+		m<-length(y)/dim(C)[1]; n<-length(y)/m; p<-dim(C)[3]
+		R<-array(data=0,dim=c(m,m,p)); l<-1
+		for(i in 1:p) for(j in 1:m) for(k in j:m){ 
+			R[j,k,i]<-theta[l]; R[k,j,i]<-theta[l]
+			l<-l+1
+		}
+		V<-matrix(0,nrow(D),nrow(D))
+		for(i in 1:p) V<-V+kronecker(R[,,i],C[,,i])
+		a<-solve(t(D)%*%solve(V)%*%D)%*%(t(D)%*%solve(V)%*%y)
+		logL<--t(y-D%*%a)%*%solve(V)%*%(y-D%*%a)/2-n*m*log(2*pi)/2-determinant(V)$modulus[1]/2
+		return(-logL)
+	}
+
+	# convert R.i to a vector
+	R.vect<-vector(mode="numeric")
+	for(i in 1:p)
+		R.vect<-c(R.vect,to.upper(R.i[,,i]))
+	H<-hessian(likelihood.R,R.vect,y=y,C=C,D=D)
+
+	# convert Hessian diagonal to matrices
+	if(vars){ 
+		Vars<-array(dim=c(m,m,p))
+		Vh<-diag(solve(H))
+		for(i in 1:p){
+			Vars[,,i]<-matrix(data=t(to.symmetric(Vh[((i-1)*m*(m+1)/2+1):(i*(m*(m+1)/2))])),m,m)
+			states[i]=multi.tre[[i]]$state
+		}
+		dimnames(Vars)<-list(rownames(R),colnames(R),states)
+	}
 
 	# report convergence
 	if(r$convergence==0)
@@ -102,6 +156,9 @@ evol.vcv<-function(scm.tre,dat,maxit=2000){
 		converged<-"Optimization may not have converged.  Consider increasing maxit."
 
 	# return results
-	return(list(R.single=R,logL1=as.numeric(logL1),k1=m*(m+1)/2+m,R.multiple=R.i,logL.multiple=logL2,k2=p*m*(m+1)/2+m,P.chisq=pchisq(2*(logL2-as.numeric(logL1)),(p-1)*m*(m+1)/2,lower.tail=FALSE),convergence=converged))
+	if(vars)
+		return(list(R.single=R,vars.single=vars.single,logL1=as.numeric(logL1),k1=m*(m+1)/2+m,R.multiple=R.i,vars.multiple=Vars,logL.multiple=logL2,k2=p*m*(m+1)/2+m,P.chisq=pchisq(2*(logL2-as.numeric(logL1)),(p-1)*m*(m+1)/2,lower.tail=FALSE),convergence=converged))
+	else
+		return(list(R.single=R,logL1=as.numeric(logL1),k1=m*(m+1)/2+m,R.multiple=R.i,logL.multiple=logL2,k2=p*m*(m+1)/2+m,P.chisq=pchisq(2*(logL2-as.numeric(logL1)),(p-1)*m*(m+1)/2,lower.tail=FALSE),convergence=converged))
 
 }

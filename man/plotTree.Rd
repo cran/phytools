@@ -28,3 +28,4 @@ plotTree(tree,fsize=1.0,ftype="reg",lwd=2,pts=TRUE)
 \examples{
 }
 \keyword{phylogenetics}
+\keyword{plotting}

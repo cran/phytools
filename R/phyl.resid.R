@@ -3,10 +3,6 @@
 # written by Liam Revell 2011, ref. Revell (2009; Evolution)
 
 phyl.resid<-function(tree,x,Y,method="BM"){
-
-	# check 'ape'
-	if(!require(ape)) stop("function requires 'ape' package. please install.")
-
 	# check tree
 	if(class(tree)!="phylo") stop("tree must be an object of class 'phylo.'")
 
@@ -22,7 +18,8 @@ phyl.resid<-function(tree,x,Y,method="BM"){
 	if(is.null(rownames(Y))){
 		print("y has no names. function will assume that the order of y matches tree$tip.label")
 		rownames(Y)<-tree$tip.label
-	} else Y<-as.matrix(Y[tree$tip.label,]) # sort
+	} else Y<-as.matrix(Y[tree$tip.label,]) # sort
+
 	# analyze
 	if(method=="BM"){ 
 		C<-vcv.phylo(tree)

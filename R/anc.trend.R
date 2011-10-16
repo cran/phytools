@@ -2,10 +2,6 @@
 # written by Liam J. Revell 2011
 
 anc.trend<-function(phy,x,maxit=2000){
-
-	# preliminaries
-	# require dependencies
-	require(ape)
 	# set global
 	tol<-1e-8
 	# compute C

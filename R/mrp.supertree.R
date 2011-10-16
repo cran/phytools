@@ -4,10 +4,6 @@
 
 mrp.supertree<-function(phy,weights=NULL){
 	
-	# require dependencies
-	if(!require(ape)) stop("must first install 'ape' package.")
-	if(!require(phangorn)) stop("must first install 'phangorn' package.")
-
 	# some minor error checking
 	if(!class(phy)=="multiPhylo") stop("phy must be object of class 'multiPhylo.'")
 

@@ -14,6 +14,7 @@ phyl.pca(tree,Y,method="BM",mode="cov")
   This function performs phylogenetic PCA (e.g., Revell 2009; \emph{Evolution}).
 }
 \details{
+  If \code{method="lambda"} lambda is optimized on the interval (0,1) using \code{\link{optimize}}.
 }
 \value{
   a list with the following components:
@@ -36,3 +37,6 @@ phyl.pca(tree,Y,method="BM",mode="cov")
 \examples{
 }
 \keyword{phylogenetics}
+\keyword{maximum likelihood}
+\keyword{comparative method}
+\keyword{statistics}

@@ -28,3 +28,4 @@ add.everywhere(tree,tip.name)
 \examples{
 }
 \keyword{phylogenetics}
+\keyword{utilities}

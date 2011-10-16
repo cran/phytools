@@ -2,8 +2,6 @@
 # written by Liam Revell 2011
 
 allFurcTrees<-function(n,tip.label=NULL,to.plot=TRUE){
-	# load "ape"
-	if(!require(ape)) stop("must first install 'ape' package")
 	# check to see if tip labels have been provided
 	if(is.null(tip.label)) tip.label=as.character(1:n)
 	# now pick three species at random to start

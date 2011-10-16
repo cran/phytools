@@ -30,3 +30,5 @@ phylomorphospace(tree,X,A=NULL,label=TRUE,control=list())
 \examples{
 }
 \keyword{phylogenetics}
+\keyword{comparative method}
+\keyword{plotting}

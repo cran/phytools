@@ -2,8 +2,6 @@
 # written by Liam Revell 2011
 
 phyl.pairedttest<-function(tree,x1,x2=NULL,se1=NULL,se2=NULL,lambda=1.0,h0=0.0,fixed=FALSE){
-	# check for & load "ape"	
-	if(!require(ape)) stop("must first install 'ape' package.") # require ape	
 	# check tree
 	if(class(tree)!="phylo") stop("tree object must be of class 'phylo.'")
 	# convert x1 to a matrix if necessary

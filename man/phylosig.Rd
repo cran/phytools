@@ -15,6 +15,7 @@ phylosig(tree,x,method="K",test=FALSE,nsim=1000)
   This function computes phylogenetic signal using two different methods.  It can also conduct the hypothesis tests for significant phylogenetic signal.
 }
 \details{
+  Lambda optimization is performed using \code{\link{optimize}} with the range of lambda set between 0 and the theoretical upper limit of lambda (determined by the relative height of the most recent internal node on the tree).
 }
 \value{
   if \code{(method="K")}, a list with the following components:
@@ -35,5 +36,11 @@ phylosig(tree,x,method="K",test=FALSE,nsim=1000)
 \seealso{
 }
 \examples{
+  tree<-rbdtree(1,0,Tmax=4)
+  x<-fastBM(tree)
+  phylosig(tree,x,method="lambda",test=TRUE)
 }
 \keyword{phylogenetics}
+\keyword{comparative method}
+\keyword{maximum likelihood}
+\keyword{simulation}

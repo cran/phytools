@@ -31,3 +31,6 @@ mrp.supertree(phy,weights=NULL)
 \examples{
 }
 \keyword{phylogenetics}
+\keyword{inference}
+\keyword{parsimony}
+\keyword{supertree}

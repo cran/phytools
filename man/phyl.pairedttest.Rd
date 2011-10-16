@@ -18,6 +18,7 @@ phyl.pairedttest(tree,x1,x2=NULL,se1=NULL,se2=NULL,lambda=1.0,h0=0.0,fixed=FALSE
   This function conducts a phylogenetic paired t-test, roughly following Lindenfors et al. (2010; \emph{J. Evol. Biol.}).
 }
 \details{
+  Likelihood optimization is performed using \code{\link{optim}} with \code{method="L-BFGS-B"} with box constraints on lambda (0,1).
 }
 \value{
   a list with the following components:
@@ -40,3 +41,6 @@ phyl.pairedttest(tree,x1,x2=NULL,se1=NULL,se2=NULL,lambda=1.0,h0=0.0,fixed=FALSE
 \examples{
 }
 \keyword{phylogenetics}
+\keyword{comparative method}
+\keyword{maximum likelihood}
+\keyword{statistics}

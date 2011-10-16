@@ -30,3 +30,5 @@ write.simmap(tree,file=NULL,append=FALSE,map.order=NULL)
 \examples{
 }
 \keyword{phylogenetics}
+\keyword{comparative method}
+\keyword{input/output}

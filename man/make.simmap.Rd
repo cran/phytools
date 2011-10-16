@@ -34,3 +34,7 @@ make.simmap(tree,x,model="SYM",nsim=1)
 \examples{
 }
 \keyword{phylogenetics}
+\keyword{comparative method}
+\keyword{simulation}
+\keyword{bayesian}
+
