@@ -26,3 +26,4 @@ drop.tip.simmap(tree,tip)
 \examples{
 }
 \keyword{phylogenetics}
+\keyword{utilities}

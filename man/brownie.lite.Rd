@@ -49,3 +49,4 @@ brownie.lite(tree,x,maxit=2000,test="chisq",nsim=100)
 \examples{
 }
 \keyword{phylogenetics}
+\keyword{comparative method}

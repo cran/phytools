@@ -30,8 +30,12 @@ phylANOVA(tree,x,y,nsim=1000,posthoc=TRUE,p.adj="holm")
 }
 \author{Liam Revell \email{liam.revell@umb.edu}}
 \seealso{
-  \code{\link{anova}}, \code{\link{pairwise.t.test}}, \code{\link{tTests}}
+  \code{\link{anova}}, \code{\link{pairwise.t.test}}
 }
 \examples{
 }
 \keyword{phylogenetics}
+\keyword{comparative method}
+\keyword{statistics}
+\keyword{least squares}
+\keyword{simulation}

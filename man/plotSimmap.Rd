@@ -36,3 +36,5 @@ leg<-c("blue","red"); names(leg)<-c("aqua","terr")
 plotSimmap(phy,leg,ftype="i")
 }
 \keyword{phylogenetics}
+\keyword{plotting}
+\keyword{comparative method}

@@ -5,13 +5,12 @@
 expm(Y)
 }
 \arguments{
-  \item{Y}{.}
+  \item{Y}{a matrix.}
 }
 \description{
-  Internal function for \code{\link{make.simmap}}.
+  Wrapper for \code{\link{MatrixExp}} that retains row/column names.
 }
 \details{
-  Do not use unless you know what you're doing.
 }
 \value{
   a matrix.
@@ -23,4 +22,4 @@ expm(Y)
 }
 \examples{
 }
-\keyword{phylogenetics}
+\keyword{math}

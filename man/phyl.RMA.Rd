@@ -14,6 +14,7 @@ phyl.RMA(x,y,tree,method="BM")
   This function performs phylogenetic RMA regression.
 }
 \details{
+  Optionally jointly estimates lambda if \code{method="lambda"}. Likelihood optimization of lambda is performed using \code{\link{optimize}} on the interval (0,1).
 }
 \value{
   a list with the following components:
@@ -32,3 +33,6 @@ phyl.RMA(x,y,tree,method="BM")
 \examples{
 }
 \keyword{phylogenetics}
+\keyword{comparative method}
+\keyword{maximum likelihood}
+\keyword{statistics}

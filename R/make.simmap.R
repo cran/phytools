@@ -2,8 +2,6 @@
 # written by Liam Revell 2011
 
 make.simmap<-function(tree,x,model="SYM",nsim=1){
-	# check dependencies
-	if(!require(ape)) warning("install ape")
 	# reorder to cladewise
 	tree<-reorder.phylo(tree,"cladewise")
 	# fit discrete character model

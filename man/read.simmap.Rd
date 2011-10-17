@@ -35,3 +35,5 @@ X<-"((A:{aqua,0.3:terr,0.4:aqua,0.3},B:{aqua,1.0}):{aqua,1.0},(C:{aqua,0.25:terr
 phy<-read.simmap(text=X)
 }
 \keyword{phylogenetics}
+\keyword{comparative method}
+\keyword{input/output}

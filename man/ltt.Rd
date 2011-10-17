@@ -31,5 +31,11 @@ ltt(tree,plot=TRUE,drop.extinct=FALSE,log.lineages=TRUE,gamma=TRUE)
   \code{\link{gammatest}}
 }
 \examples{
+  tree<-rbdtree(birth=1,death=0,Tmax=4)
+  ltt(tree)
+  tree<-rlineage(birth=1,death=0.25,Tmax=4)
+  ltt(tree,gamma=FALSE)
 }
 \keyword{phylogenetics}
+\keyword{plotting}
+\keyword{diversification analysis}

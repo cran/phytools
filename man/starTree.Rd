@@ -26,3 +26,4 @@ starTree(species,branch.lengths=NULL)
 \examples{
 }
 \keyword{phylogenetics}
+\keyword{utilities}

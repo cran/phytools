@@ -6,13 +6,13 @@ drop.clade(tree,tip)
 }
 \arguments{
   \item{tree}{phylogeny.}
-  \item{tip}{.}
+  \item{tip}{set of tips in a clade.}
 }
 \description{
-  Internal function for \code{\link{posterior.evolrate}}.
+  Mostly internal function for \code{\link{posterior.evolrate}}; function drops the clade containing the species in \code{tip}.
 }
 \details{
-  Do not use unless you know what you're doing.
+  Probably should not use unless you know what you're doing.
 }
 \value{
   a tree.
@@ -25,3 +25,4 @@ drop.clade(tree,tip)
 \examples{
 }
 \keyword{phylogenetics}
+\keyword{utilities}

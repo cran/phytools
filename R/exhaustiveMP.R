@@ -4,8 +4,6 @@
 # written by Liam J. Revell 2011
 
 exhaustiveMP<-function(data,tree=NULL,method="branch.and.bound"){
-	# require dependences
-	if(!require(phangorn)) stop("must first install 'phangorn' package.")
 	if(method=="branch.and.bound"){
 		if(length(data)>15) stop("branch and bound only allowed for n<=15")
 		if(is.null(tree)){
@@ -62,7 +60,6 @@ branch.and.bound<-function(data,tree){
 # written by Liam J. Revell 2011
 
 add.everywhere<-function(tree,tip.name){
-	if(!require(ape)) stop("function needs 'ape' package.")
 	if(class(tree)!="phylo") stop("tree should be an object of class 'phylo.'")
 	tree<-unroot(tree) # unroot tree
 	tree$edge.length<-rep(1,nrow(tree$edge)) # set all edge lengths to 1.0

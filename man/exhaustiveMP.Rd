@@ -30,3 +30,5 @@ exhaustiveMP(data,tree=NULL,method="branch.and.bound")
 \examples{
 }
 \keyword{phylogenetics}
+\keyword{inference}
+\keyword{parsimony}

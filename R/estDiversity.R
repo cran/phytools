@@ -2,8 +2,6 @@
 # written by Liam J. Revell 2011
 
 estDiversity<-function(tree,x){
-	# check for & load "ape"	
-	if(!require(ape)) stop("must first install 'ape' package.") # require ape	
 	# some minor error checking
 	if(class(tree)!="phylo") stop("tree object must be of class 'phylo.'")
 	# first get the node heights

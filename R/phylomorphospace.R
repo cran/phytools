@@ -9,8 +9,6 @@ phylomorphospace<-function(tree,X,A=NULL,label=TRUE,control=list()){
 
 	# check to see if A should be estimated
 	if(is.null(A)){
-		# load dependencies
-		require(ape)
 		A<-matrix(NA,tree$Nnode,2,dimnames=list(as.character(length(tree$tip.label)+1:tree$Nnode),colnames(X)))
 		for(i in 1:2) A[,i]<-ace(X[,i],tree)$ace
 	}
@@ -19,9 +17,6 @@ phylomorphospace<-function(tree,X,A=NULL,label=TRUE,control=list()){
 	con=list(col.edge=matrix(data="black",nrow(tree$edge),1,dimnames=list(as.character(tree$edge[,2]),"color")),col.node=matrix(data="black",nrow(tree$edge)+1,1,dimnames=list(as.character(c(tree$edge[1,1],tree$edge[,2])),"color")))
 	con[(namc<-names(control))]<-control
 	con$col.edge<-as.matrix(con$col.edge); con$col.node<-as.matrix(con$col.node)
-
-	# load dependencies
-	require(calibrate)
 
 	# plot root state
 	plot(x=A[1,1],y=A[1,2],xlim=range(c(X[,1],A[,1])),ylim=range(c(X[,2],A[,2])),xlab=colnames(X)[1],ylab=colnames(X)[2])

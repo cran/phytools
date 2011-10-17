@@ -25,3 +25,5 @@ ls.tree(tree,D)
 \examples{
 }
 \keyword{phylogenetics}
+\keyword{inference}
+\keyword{least squares}

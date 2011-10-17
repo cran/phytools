@@ -13,7 +13,7 @@ anc.trend(phy,x,maxit=2000)
   This function estimates the evolutionary parameters and ancestral states for Brownian evolution with directional trend.
 }
 \details{
-  Note that this will generally only work and produce sensible results for a phylogeny with some non-contemporary tips (i.e., a tree with some fossil species).
+  Note that this will generally only work and produce sensible results for a phylogeny with some non-contemporary tips (i.e., a tree with some fossil species).  The function uses \code{\link{optim}} with \code{method="L-BFGS-B"}; however optimization is only constrained for the \code{sig2} which must be >0.
 }
 \value{
   a list with the following components:
@@ -30,5 +30,10 @@ anc.trend(phy,x,maxit=2000)
   \code{\link{ace}}, \code{\link{optim}}
 }
 \examples{
+tree<-rtree(50)
+x<-fastBM(tree,mu=2) # simulate using fastBM with a trend (m!=0)
+anc.trend(tree,x) # fit model & estimate ancestral states
 }
 \keyword{phylogenetics}
+\keyword{comparative method}
+\keyword{maximum likelihood}

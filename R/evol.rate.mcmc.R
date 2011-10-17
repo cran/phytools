@@ -5,8 +5,6 @@
 # function for Bayesian MCMC
 # written by Liam Revell 2010/2011
 evol.rate.mcmc<-function(tree,x,ngen=10000,control=list()){
-	# check for & load "ape"	
-	if(!require(ape)) stop("must first install 'ape' package.") # require ape	
 	# some minor error checking
 	if(class(tree)!="phylo") stop("tree object must be of class 'phylo.'")
 	if(is.matrix(x)) x<-x[,1]

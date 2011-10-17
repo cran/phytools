@@ -4,8 +4,6 @@
 # written by Liam Revell 2010/2011, ref. Revell (2009; Evolution)
 
 phyl.pca<-function(tree,Y,method="BM",mode="cov"){
-	# check 'ape'
-	if(!require(ape)) stop("function requires 'ape' package. please install.")
 	# check tree
 	if(class(tree)!="phylo") stop("tree must be an object of class 'phylo.'")
 

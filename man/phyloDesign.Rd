@@ -5,13 +5,13 @@
 phyloDesign(tree)
 }
 \arguments{
-  \item{tree}{.}
+  \item{tree}{phylogenetic tree.}
 }
 \description{
-  Internal function for \code{\link{optim.phylo.ls}}.
+  Primarily an internal function for \code{\link{optim.phylo.ls}}, thisi function creates a design matrix for least squares phylogenetic analysis.
 }
 \details{
-  Do not use unless you know what you're doing.
+    This function returns a matrix containing the edges in the tree (in columns) and pairs of tip node numbers (in rows). Values in the matrix are either \code{1} if the edge is on the shortest path between the two tips; and \code{0} otherwise. Probably do not use unless you know what you're doing.
 }
 \value{
   a matrix.
@@ -24,3 +24,5 @@ phyloDesign(tree)
 \examples{
 }
 \keyword{phylogenetics}
+\keyword{inference}
+\keyword{least squares}

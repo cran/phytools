@@ -2,8 +2,6 @@
 # written by Liam J. Revell 2011
 
 phylosig<-function(tree,x,method="K",test=FALSE,nsim=1000){
-	# check for & load "ape"	
-	if(!require(ape)) stop("must first install 'ape' package.") # require ape	
 	# some minor error checking
 	if(class(tree)!="phylo") stop("tree object must be of class 'phylo.'")
 	if(is.matrix(x)) x<-x[,1]

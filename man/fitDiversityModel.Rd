@@ -14,6 +14,7 @@ fitDiversityModel(tree,x,d=NULL,showTree=TRUE)
   This function fits a diversity-dependent phenotypic evolution model (based on Mahler et al. 2010; \emph{Evolution}).
 }
 \details{
+  The optimization is performed using \code{\link{optim}} with \code{method="L-BFGS-B"}, but box constraints are only used for the change parameter (\code{psi}).
 }
 \value{
   a list with the following components:
@@ -33,3 +34,5 @@ fitDiversityModel(tree,x,d=NULL,showTree=TRUE)
 \examples{
 }
 \keyword{phylogenetics}
+\keyword{comparative method}
+\keyword{maximum likelihood}

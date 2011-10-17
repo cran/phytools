@@ -25,3 +25,4 @@ treeSlice(tree,slice)
 \examples{
 }
 \keyword{phylogenetics}
+\keyword{utilities}

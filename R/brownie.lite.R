@@ -4,8 +4,6 @@
 # Based on "Brownie" by O'Meara et al. 2006
 # Written by Liam Revell 2010
 brownie.lite<-function(tree,x,maxit=2000,test="chisq",nsim=100){
-	# require dependencies
-	require(ape)
 	# bookkeeping
 	x<-as.matrix(x)
 	n<-nrow(x) # number of species

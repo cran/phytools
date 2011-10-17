@@ -5,13 +5,13 @@
 rstate(y)
 }
 \arguments{
-  \item{y}{.}
+  \item{y}{vector of probabilities. Must have names & should probably add to \code{1.0}.}
 }
 \description{
-  Internal function for \code{\link{make.simmap}}.
+  Primarily an internal function for \code{\link{make.simmap}}.
 }
 \details{
-  Do not use unless you know what you're doing.
+  This function picks a random element in a vector according to the probability assigned that element.  It returns the name.
 }
 \value{
   a character or string.
@@ -23,4 +23,6 @@ rstate(y)
 }
 \examples{
 }
-\keyword{phylogenetics}
+\keyword{math}
+\keyword{utilities}
+\keyword{statistics}
