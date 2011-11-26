@@ -1,7 +1,7 @@
 # this function computes a phylogenetic reduced major axis (RMA) regression
 # written by Liam Revell 2010/2011
 
-phyl.RMA<-function(x,y,tree,method="BM"){
+phyl.RMA<-function(x,y,tree,method="BM",lambda=NULL,fixed=FALSE){
 
 	x<-x[tree$tip.label]; y<-y[tree$tip.label]
 
@@ -47,7 +47,10 @@ phyl.RMA<-function(x,y,tree,method="BM"){
 	}
 
 	if(method=="lambda")
-		result<-optimize(f=likelihood,interval=c(0,1),X=X,phy=tree,maximum=TRUE)
+		if(fixed==FALSE)
+			result<-optimize(f=likelihood,interval=c(0,1),X=X,phy=tree,maximum=TRUE)
+		else
+			result<-list(objective=likelihood(lambda,X,tree),maximum=lambda)
 	else if(method=="BM")
 		result<-list(objective=likelihood(1.0,X,tree),maximum=1.0)
 	else
