@@ -6,7 +6,7 @@ brownie.lite(tree,x,maxit=2000,test="chisq",nsim=100)
 }
 \arguments{
   \item{tree}{a phylogenetic tree in modified \code{"phylo"} format (see \code{\link{read.simmap}} and \code{\link{make.simmap}}).}
-  \item{x}{a vector of tip values for species; \code{names(dat)} should be the species names.}
+  \item{x}{a vector of tip values for species; \code{names(x)} should be the species names.}
   \item{maxit}{an optional integer value indicating the maximum number of iterations for optimization - may need to be increased for large trees.}
   \item{test}{an optional string indicating the method for hypothesis testing - options are \code{"chisq"} or \code{"simulation"}.}
   \item{nsim}{number of simulations (only used if \code{test="simulation"}).}

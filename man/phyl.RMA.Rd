@@ -2,13 +2,15 @@
 \alias{phyl.RMA}
 \title{Phylogenetic reduced major axis (RMA) regression}
 \usage{
-phyl.RMA(x,y,tree,method="BM")
+phyl.RMA(x,y,tree,method="BM",lambda=NULL,fixed=FALSE)
 }
 \arguments{
   \item{x}{vector with names.}
   \item{y}{vector with names.}
   \item{tree}{a phylogenetic tree in \code{"phylo"} format.}
   \item{method}{method to obtain the correlation structure: can be \code{"BM"} or \code{"lambda"}.}
+  \item{lambda}{value of \code{lambda} for fixed lambda.}
+  \item{fixed}{logical value indicating whether or not lambda should be fixed.}
 }
 \description{
   This function performs phylogenetic RMA regression.
