@@ -14,6 +14,7 @@ make.simmap(tree,x,model="SYM",nsim=1)
 	This function fits a continuous-time reversible Markov model for the evolution of \code{x} (using \code{\link{ace}}) and then simulates stochastic character histories using that model and the tip states on the tree.
 }
 \details{
+	Samples trees from the conditional posterior distribution - conditioning on the maximum likelihood transition matrix given our model.
 }
 \value{
   a modified phylogenetic tree of class \code{"phylo"} (or a modified \code{"multiPhylo"} object, for \code{nsim} > 1) with the following additional elements:
@@ -29,7 +30,7 @@ make.simmap(tree,x,model="SYM",nsim=1)
 }
 \author{Liam Revell \email{liam.revell@umb.edu}}
 \seealso{
-  \code{\link{brownie.lite}}, \code{\link{evol.vcv}}, \code{\link{read.simmap}}, \code{\link{plotSimmap}}
+  \code{\link{brownie.lite}}, \code{\link{brownieREML}}, \code{\link{evol.vcv}}, \code{\link{read.simmap}}, \code{\link{plotSimmap}}
 }
 \examples{
 }

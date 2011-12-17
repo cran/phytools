@@ -24,7 +24,7 @@ brownieREML<-function(tree,x,maxit=2000){
 		logL<-sum(dnorm(picX[,1],sd=sqrt(picX[,2]),log=TRUE))
 		return(-logL)
 	}
-	res2<-optim(rep(1,p)*runif(n=p),likelihood2,tree=tree,x=x,method="L-BFGS-B",lower=rep(0,p))
+	res2<-optim(rep(1,p)*runif(n=p),likelihood2,tree=tree,x=x,method="L-BFGS-B",lower=rep(1e-8,p))
 
 	sig2<-res2$par; names(sig2)<-colnames(tree$mapped.edge)
 	logL2<--res2$value

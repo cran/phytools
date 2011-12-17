@@ -3,6 +3,10 @@
 # written by Liam Revell 2011, ref. Revell (2009; Evolution)
 
 phyl.resid<-function(tree,x,Y,method="BM"){
+
+	# check 'ape'
+	if(!require(ape)) stop("function requires 'ape' package. please install.")
+
 	# check tree
 	if(class(tree)!="phylo") stop("tree must be an object of class 'phylo.'")
 
@@ -28,11 +32,12 @@ phyl.resid<-function(tree,x,Y,method="BM"){
 		return(list(beta=beta,resid=resid))
 	} else if(method=="lambda"){
 		C<-vcv.phylo(tree)
+		maxLambda<-max(C)/max(C[upper.tri(C)])
 		lambda<-vector()
 		logL<-vector()
 		beta<-matrix(NA,ncol(X),ncol(Y),dimnames=list(colnames(X),colnames(Y)))
 		for(i in 1:ncol(Y)){
-			res<-optimize(f=likelihood.lambda,interval=c(0,1),y=Y[,i],X=X,C=C,maximum=TRUE)
+			res<-optimize(f=likelihood.lambda,interval=c(0,maxLambda),y=Y[,i],X=X,C=C,maximum=TRUE)
 			lambda[i]<-res$maximum
 			logL[i]<-as.numeric(res$objective)
 			C.l<-lambda.transform(lambda[i],C)

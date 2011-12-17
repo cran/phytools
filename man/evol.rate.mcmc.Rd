@@ -11,7 +11,7 @@ evol.rate.mcmc(tree,x,ngen=10000,control=list())
   \item{control}{a list of control parameters containing the following elements: \code{sig1}: starting value for sig(1)^2; \code{sig2}: starting value for sig(2)^2; \code{a}: starting value for a; \code{sd1}: standard deviation for the normal proposal distribution for sig(1)^2; \code{sd2}: standard deviation for the normal proposal distribution for sig(2)^2; \code{kloc}: scaling parameter for tree move proposals - 1/lambda for the reflected exponential distribution; \code{sdlnr}: standard deviation on the log-normal prior on sig(1)^2/sig(2)^2; \code{rand.shift}: probability of proposing a random shift in the tree (improves mixing); \code{print}: print frequency for the MCMC; \code{sample}: sample frequency.}
 }
 \description{
-  This function takes a phylogenetic tree and data for a single continuously valued character and uses a Bayesian MCMC approach to identify the phylogenetic location of a shift in the eovlutionary rate through time.
+  This function takes a phylogenetic tree and data for a single continuously valued character and uses a Bayesian MCMC approach to identify the phylogenetic location of a shift in the evolutionary rate through time.
 }
 \details{
   Default values of \code{control} are given in Revell et al. (In press).
@@ -27,7 +27,7 @@ evol.rate.mcmc(tree,x,ngen=10000,control=list())
 }
 \author{Liam Revell \email{liam.revell@umb.edu}}
 \seealso{
-  \code{\link{brownie.lite}}, \code{\link{evol.vcv}}, \code{\link{minSplit}}, \code{\link{posterior.evolrate}}
+  \code{\link{anc.Bayes}}, \code{\link{brownie.lite}}, \code{\link{evol.vcv}}, \code{\link{minSplit}}, \code{\link{posterior.evolrate}}
 }
 \examples{
 }

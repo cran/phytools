@@ -27,7 +27,7 @@ anc.trend(phy,x,maxit=2000)
 }
 \author{Liam Revell \email{liam.revell@umb.edu}}
 \seealso{
-  \code{\link{ace}}, \code{\link{optim}}
+  \code{\link{ace}}, \code{\link{anc.Bayes}}, \code{\link{anc.ML}}, \code{\link{optim}}
 }
 \examples{
 tree<-rtree(50)
