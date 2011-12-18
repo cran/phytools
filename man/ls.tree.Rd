@@ -5,11 +5,11 @@
 ls.tree(tree,D)
 }
 \arguments{
-  \item{tree}{.}
-  \item{D}{.}
+  \item{tree}{phylogeny.}
+  \item{D}{distance matrix.}
 }
 \description{
-  Internal function for \code{\link{optim.phylo.ls}}.
+  Computes the least squares branch lengths conditioned on a topology and distance matrix. Internal function for \code{\link{optim.phylo.ls}}.
 }
 \details{
   Do not use unless you know what you're doing.

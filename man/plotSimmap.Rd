@@ -5,7 +5,7 @@
 plotSimmap(tree,colors=NULL,fsize=1.0,ftype="reg",lwd=2,pts=TRUE)
 }
 \arguments{
-  \item{tree}{a modified object of class "phylo" containing a stochastic mapping (e.g., see \code{\link{read.simmap}} & \code{\link{make.simmap}}).}
+  \item{tree}{a modified object of class "phylo" or "multiPhylo" containing a stochastic mapping or set of mappings (e.g., see \code{\link{read.simmap}} & \code{\link{make.simmap}}).}
   \item{colors}{a vector with names translating the mapped states to colors - see \code{Examples}.}
   \item{fsize}{relative font size for tip labels.}
   \item{ftype}{font type - options are \code{"reg"}, \code{"i"} (italics), \code{"b"} (bold), or \code{"bi"} (bold-italics).}
@@ -13,7 +13,7 @@ plotSimmap(tree,colors=NULL,fsize=1.0,ftype="reg",lwd=2,pts=TRUE)
   \item{pts}{logical value indicating whether or not to plot filled circles at each vertex of the tree, as well as at transition points between mapped states.  Default is \code{TRUE}.}
 }
 \description{
-  Function plots a stochastic character mapped tree.
+  Function plots one or multiple stochastic character mapped trees.
 }
 \details{
 }

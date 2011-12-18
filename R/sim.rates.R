@@ -1,11 +1,13 @@
 # simulates with multiple evolutionary rates in different parts of the tree
 # written by Liam J. Revell 2011
 
-sim.rates<-function(mtree,sig2,anc=0,nsim=1,plot=F){
+sim.rates<-function(mtree,sig2,anc=0,nsim=1,internal=F,plot=F){
+	# check dependencies
+	if(!require(phytools)) stop("install phytools")
 	if(class(mtree)!="phylo") stop("mtree should be an object of class 'phylo'")
 	if(is.null(mtree$mapped.edge)){
 		message("mtree does not contain a mapped discrete character history, using fastBM")
-		X<-fastBM(mtree,a=anc,sig2=sig2[1],nsim=nsim)
+		X<-fastBM(mtree,a=anc,sig2=sig2[1],nsim=nsim,internal=internal)
 	} else {
 		# first name (if necessary) and reorder sig2
 		if(is.null(names(sig2))){
@@ -24,7 +26,7 @@ sim.rates<-function(mtree,sig2,anc=0,nsim=1,plot=F){
 		class(tree)<-"phylo"
 		if(plot) plot(tree)
 		# simulate
-		X<-fastBM(tree,a=anc,nsim=nsim)
+		X<-fastBM(tree,a=anc,nsim=nsim,internal=internal)
 	}
 	return(X)
 }

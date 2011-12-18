@@ -1,6 +1,6 @@
 \name{map.overlap}
 \alias{map.overlap}
-\title{Ancestral character estimation with a trend}
+\title{Proportional overlap between two mapped character histories on a tree}
 \usage{
 map.overlap(tree1,tree2,tol=1e-6)
 }

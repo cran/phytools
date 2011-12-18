@@ -44,9 +44,10 @@ brownie.lite(tree,x,maxit=2000,test="chisq",nsim=100)
 }
 \author{Liam Revell \email{liam.revell@umb.edu}}
 \seealso{
-  \code{\link{evol.vcv}}, \code{\link{evol.rate.mcmc}}
+  \code{\link{brownieREML}}, \code{\link{evol.vcv}}
 }
 \examples{
 }
 \keyword{phylogenetics}
 \keyword{comparative method}
+\keyword{maximum likelihood}
