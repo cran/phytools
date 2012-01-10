@@ -28,6 +28,7 @@ phylosig(tree,x,method="K",test=FALSE,nsim=1000,se=NULL)
   \item{lambda}{fitted value of lambda.}
   \item{sig2}{rate of evolution, for estimation with sampling error.}
   \item{logL}{log-likelihood.}
+  \item{logL0}{log-likelihood for \code{lambda=0.0}.}
   \item{P}{P-value of the likelihood ratio test.}
 }
 \references{

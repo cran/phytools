@@ -17,6 +17,7 @@ mcmcBM.full<-function(tree,x,ngen=10000,control=list()){
 
 	# populate control list
 	con=list(sig2=sig2,a=a,xbar=xbar,v=v,pr.mean=pr.mean,pr.var=pr.var,prop=prop,sample=100)
+	names(con$v)<-gsub("\\)","",gsub("var\\(","",names(con$v)))
 	con[(namc<-names(control))]<-control
 	con<-con[!sapply(con,is.null)]
 	# print control parameters to screen

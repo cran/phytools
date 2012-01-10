@@ -1,30 +1,14 @@
 # function for computing phylogenetic signal by the lambda (Pagel 1999) of K (Blomberg et al. 2003) methods
-# written by Liam J. Revell 2011
+# written by Liam J. Revell 2011/2012
 
 phylosig<-function(tree,x,method="K",test=FALSE,nsim=1000,se=NULL){
 	# some minor error checking
 	if(class(tree)!="phylo") stop("tree object must be of class 'phylo.'")
-	if(is.matrix(x)) x<-x[,1]
-	if(is.null(names(x))){
-		if(length(x)==length(tree$tip)){
-			print("x has no names; assuming x is in the same order as tree$tip.label")
-			names(x)<-tree$tip.label
-		} else
-			stop("x has no names and is a different length than tree$tip.label")
-	}
-	if(any(is.na(match(tree$tip.label,names(x))))){
-		print("some species in tree are missing from data, dropping missing taxa from the tree")
-		tree<-drop.tip(tree,tree$tip.label[-match(names(x),tree$tip.label)])
-	}
-	if(any(is.na(match(names(x),tree$tip.label)))){
-		print("some species in data are missing from tree, dropping missing taxa from the data")
-		x<-x[tree$tip.label]
-	}
-	if(any(is.na(x))){
-		print("some data given as 'NA', dropping corresponding species from tree")
-		tree<-drop.tip(tree,names(which(is.na(x))))
-	}
+	x<-matchDatatoTree(tree,x,"x")
+	tree<-matchTreetoData(tree,x,"x")
 	if(!is.null(se)){
+		se<-matchDatatoTree(tree,se,"se")
+		tree<-matchTreetoData(tree,se,"se")
 		me=TRUE
 		M<-diag(se^2)
 		rownames(M)<-colnames(M)<-names(se)
@@ -128,20 +112,54 @@ phylosig<-function(tree,x,method="K",test=FALSE,nsim=1000,se=NULL){
 			else {
 				logL0<-likelihoodLambda(theta=0,C=C,y=x) # compute likelihood of lambda=0
 				P<-1-as.numeric(pchisq(2*(res$objective[1,1]-logL0),df=1)) # P-value
-				return(list(lambda=res$maximum,logL=res$objective[1,1],P=P)) # return lambda, logL, and P-value
+				return(list(lambda=res$maximum,logL=res$objective[1,1],logL0=logL0[1,1],P=P)) # return lambda, logL, and P-value
 			}
 		} else {
 			M<-M[rownames(C),colnames(C)]
-			s<-c(mean(pic(x,tree)^2),1.0)
+			s<-c(mean(pic(x,multi2di(tree))^2),1.0)
 			res<-optim(s,likelihoodLambda.me,C=C,y=x,M=M,method="L-BFGS-B",lower=c(0,0),upper=c(Inf,maxLambda))
 			if(!test)
 				return(list(lambda=res$par[2],sig2=res$par[1],logL=-res$value))
 			else {
 				res0<-optim(c(s[1],0),likelihoodLambda.me,C=C,y=x,M=M,method="L-BFGS-B",lower=c(0,0),upper=c(Inf,1e-10))
 				P<-1-as.numeric(pchisq(2*(res0$value-res$value),df=1))
-				return(list(lambda=res$par[2],sig2=res$par[1],logL=-res$value,P=P))
+				return(list(lambda=res$par[2],sig2=res$par[1],logL=-res$value,logL0=-res0$value,P=P))
 			}
 		}
 	} else
 		stop(paste("do not recognize method = \"",method,"\"; methods are \"K\" and \"lambda\"",sep=""))
+}
+
+# function
+# written by Liam J. Revell 2011
+
+matchDatatoTree<-function(tree,x,name){
+	if(is.matrix(x)) x<-x[,1]
+	if(is.null(names(x))){
+		if(length(x)==length(tree$tip)){
+			print(paste(name,"has no names; assuming x is in the same order as tree$tip.label"))
+			names(x)<-tree$tip.label
+		} else
+			stop(paste(name,"has no names and is a different length than tree$tip.label"))
+	}
+	if(any(is.na(match(names(x),tree$tip.label)))){
+		print(paste("some species in",name,"are missing from tree, dropping missing taxa from",name))
+		x<-x[intersect(tree$tip.label,names(x))]
+	}
+	return(x)
+}
+
+# function
+# written by Liam J. Revell 2011
+
+matchTreetoData<-function(tree,x,name){
+	if(any(is.na(match(tree$tip.label,names(x))))){
+		print(paste("some species in tree are missing from",name,", dropping missing taxa from the tree"))
+		tree<-drop.tip(tree,setdiff(tree$tip.label,names(x)))
+	}
+	if(any(is.na(x))){
+		print(paste("some data in",name,"given as 'NA', dropping corresponding species from tree"))
+		tree<-drop.tip(tree,names(which(is.na(x))))
+	}
+	return(tree)
 }

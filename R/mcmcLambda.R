@@ -8,12 +8,12 @@ mcmcLambda<-function(tree,x,ngen=10000,control=list()){
 	temp<-aggregate(x,list(species=as.factor(names(x))),mean)
 	xbar<-temp[,2]; names(xbar)<-temp[,1]; xbar<-xbar[tree$tip.label]
 	sig2<-mean(pic(xbar,tree)^2)
-	lambda<-1.0
+	lambda<-1.0; max.lambda<-maxLambda(tree)
 	a<-mean(xbar)
 	intV<-mean(aggregate(x,list(species=as.factor(names(x))),var)[,2],na.rm=T)
 	prop<-c(0.01*sig2,0.02,0.01*sig2,rep(0.01*sig2*max(vcv(tree)),n),0.01*intV)
-	pr.mean<-c(1000,0.5,rep(0,n+1),1000)
-	pr.var<-c(pr.mean[1]^2,1,rep(1000,n+1),pr.mean[length(pr.mean)]^2)
+	pr.mean<-c(1000,max.lambda/2,rep(0,n+1),1000)
+	pr.var<-c(pr.mean[1]^2,max.lambda,rep(1000,n+1),pr.mean[length(pr.mean)]^2)
 
 	# populate control list
 	con=list(sig2=sig2,lambda=lambda,a=a,xbar=xbar,intV=intV,pr.mean=pr.mean,pr.var=pr.var,prop=prop,sample=100)
@@ -71,9 +71,9 @@ mcmcLambda<-function(tree,x,ngen=10000,control=list()){
 		} else if(j==1){
 			# update lambda
 			lambda.prime<-lambda+rnorm(n=1,sd=sqrt(con$prop[j+1]))
-			while(lambda.prime<0||lambda.prime>1){
+			while(lambda.prime<0||lambda.prime>max.lambda){
 				if(lambda.prime<0) lambda.prime<--lambda.prime
-				if(lambda.prime>1) lambda.prime<-2-lambda.prime
+				if(lambda.prime>max.lambda) lambda.prime<-2*max.lambda-lambda.prime
 			}
 			# update C with new lambda
 			C.prime<-lambda.transform(lambda.prime,C1)
@@ -133,4 +133,12 @@ mcmcLambda<-function(tree,x,ngen=10000,control=list()){
 	# done MCMC
 	message("Done MCMC.")
 	return(X)
+}
+
+# computes maximum value of lambda
+# written by Liam Revell 2011
+
+maxLambda<-function(tree){
+	H<-nodeHeights(tree)
+	max(H[,2])/max(H[,1])
 }
