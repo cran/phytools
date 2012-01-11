@@ -1,6 +1,6 @@
 \name{phylANOVA}
 \alias{phylANOVA}
-\title{Generate all bi- and multifurcating unrooted trees}
+\title{Phylogenetic ANOVA and post-hoc tests}
 \usage{
 phylANOVA(tree,x,y,nsim=1000,posthoc=TRUE,p.adj="holm")
 }
