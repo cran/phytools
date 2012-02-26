@@ -14,8 +14,6 @@ ltt(tree,plot=TRUE,drop.extinct=FALSE,log.lineages=TRUE,gamma=TRUE)
 \description{
   This function computes LTT plot with extant and extinct lineages, and optionally conducts gamma-test of Pybus & Harvey (2000).
 }
-\details{
-}
 \value{
   a list with the following components:
   \item{times}{a vector of branching times.}

@@ -17,11 +17,7 @@ paste.tree(tr1,tr2)
 \value{
   a tree.
 }
-\references{
-}
 \author{Liam Revell \email{liam.revell@umb.edu}}
-\seealso{
-}
 \examples{
   tr1<-rtree(10)
   tr2<-rtree(10)

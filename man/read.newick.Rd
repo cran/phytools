@@ -17,8 +17,6 @@ read.newick(file="",text)
 \value{
   a phylogenetic tree of class \code{"phylo"}
 }
-\references{
-}
 \author{Liam Revell \email{liam.revell@umb.edu}}
 \seealso{
   \code{\link{read.tree}}, \code{\link{read.nexus}}

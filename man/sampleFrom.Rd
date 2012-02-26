@@ -14,19 +14,9 @@ sampleFrom(xbar=0,xvar=1,n=1,randn=NULL,type="norm")
 \description{
   Function samples from a set of normal distributions with parameters given in \code{xbar} and \code{xvar}.
 }
-\details{
-}
 \value{
   a vector, with labels.
 }
-\references{
-
-}
 \author{Liam Revell \email{liam.revell@umb.edu}}
-\seealso{
-}
-\examples{
-
-}
 \keyword{phylogenetics}
 \keyword{statistics}

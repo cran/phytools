@@ -18,7 +18,7 @@ anc.ML<-function(tree,x,maxit=2000){
 	# compute C
 	C<-vcvPhylo(tree)
 	invC<-solve(C)
-	detC<-determinant(C,log=T)$modulus[1]
+	detC<-determinant(C,logarithm=TRUE)$modulus[1]
 	x[rownames(C)[1:length(tree$tip)]]->x
 
 	# assign starting values

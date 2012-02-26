@@ -33,7 +33,7 @@ anc.Bayes<-function(tree,x,ngen=10000,control=list()){
 	# compute C
 	C<-vcvPhylo(tree)
 	invC<-solve(C)
-	detC<-determinant(C,log=T)$modulus[1]
+	detC<-determinant(C,logarithm=TRUE)$modulus[1]
 
 	# now set starting values for MCMC
 	sig2<-con$sig2; a<-con$a; y<-con$y

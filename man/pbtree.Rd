@@ -14,17 +14,13 @@ pbtree(b=1,n=NULL,t=NULL,scale=NULL,nsim=1)
 \description{
   This function simulates stochastic pure-birth (Yule) trees.
 }
-\details{
-}
 \value{
   a tree or list of trees.
 }
-\references{
-}
 \author{Liam Revell \email{liam.revell@umb.edu}}
-\seealso{
-}
 \examples{
+   # simulate a pure-birth tree with 1000 tips, scaled to a length of 1.0
+   tree<-pbtree(n=1000,scale=1)
 }
 \keyword{phylogenetics}
 \keyword{simulation}

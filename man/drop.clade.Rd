@@ -17,12 +17,6 @@ drop.clade(tree,tip)
 \value{
   a tree.
 }
-\references{
-}
 \author{Liam Revell \email{liam.revell@umb.edu}}
-\seealso{
-}
-\examples{
-}
 \keyword{phylogenetics}
 \keyword{utilities}

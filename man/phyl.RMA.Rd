@@ -2,7 +2,7 @@
 \alias{phyl.RMA}
 \title{Phylogenetic reduced major axis (RMA) regression}
 \usage{
-phyl.RMA(x,y,tree,method="BM",lambda=NULL,fixed=FALSE)
+phyl.RMA(x,y,tree,method="BM",lambda=NULL,fixed=FALSE,h0=1.0)
 }
 \arguments{
   \item{x}{vector with names.}
@@ -11,6 +11,7 @@ phyl.RMA(x,y,tree,method="BM",lambda=NULL,fixed=FALSE)
   \item{method}{method to obtain the correlation structure: can be \code{"BM"} or \code{"lambda"}.}
   \item{lambda}{value of \code{lambda} for fixed lambda.}
   \item{fixed}{logical value indicating whether or not lambda should be fixed.}
+  \item{h0}{null hypothesis for \code{beta}. Defaults to 1.0. Note that a null hypothesis of 0.0 is not allowed.}
 }
 \description{
   This function performs phylogenetic RMA regression.
@@ -24,15 +25,12 @@ phyl.RMA(x,y,tree,method="BM",lambda=NULL,fixed=FALSE)
   \item{V}{a VCV matrix for the traits.}
   \item{lambda}{fitted value of lambda (\code{method="lambda"} only).}
   \item{logL}{log-likelihood (\code{method="lambda"} only).}
+  \item{test}{a vector containing results for hypothesis tests on \code{beta}.}
   \item{resid}{a vector of residuals for \code{y} given \code{x}.}
-}
-\references{
 }
 \author{Liam Revell \email{liam.revell@umb.edu}}
 \seealso{
   \code{\link{phyl.pca}}, \code{\link{phyl.resid}}
-}
-\examples{
 }
 \keyword{phylogenetics}
 \keyword{comparative method}

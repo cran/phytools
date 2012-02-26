@@ -13,22 +13,18 @@ minSplit(tree,split.list,method="sum",printD=FALSE)
 \description{
   This function takes a phylogenetic tree and a list of splits and identifies the split with the smallest summed or summed squared distances to all the other splits.  Used to be called \code{min.split()}.
 }
-\details{
-}
 \value{
   a list with the following components:
   \item{node}{node for the minimum split.}
   \item{bp}{location on the branch leading to \code{node} of the minimum split.}
 }
 \references{
-  Revell, L. J., D. L. Mahler, P. Peres-Neto, and B. D. Redelings. In review.
-  A new method for identifying exceptional phenotypic diversification.
+ Revell, L. J., D. L. Mahler, P. Peres-Neto, and B. D. Redelings. 2012.
+  A new method for identifying exceptional phenotypic diversification. \emph{Evolution}, \bold{66}, 135-146.
 }
 \author{Liam Revell \email{liam.revell@umb.edu}}
 \seealso{
   \code{\link{evol.rate.mcmc}}, \code{\link{posterior.evolrate}}
-}
-\examples{
 }
 \keyword{phylogenetics}
 \keyword{comparative method}

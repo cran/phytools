@@ -2,7 +2,7 @@
 \alias{phylosig}
 \title{Compute phylogenetic signal with two methods}
 \usage{
-phylosig(tree,x,method="K",test=FALSE,nsim=1000,se=NULL)
+phylosig(tree,x,method="K",test=FALSE,nsim=1000,se=NULL,start=NULL,control=list())
 }
 \arguments{
   \item{tree}{a phylogenetic tree in \code{"phylo"} format.}
@@ -11,6 +11,8 @@ phylosig(tree,x,method="K",test=FALSE,nsim=1000,se=NULL)
   \item{test}{logical indicating whether or not to conduct a hypothesis test of \code{"K"} or \code{"lambda"}.}
   \item{nsim}{for \code{method="K"}, number of simulations in randomization test.}
   \item{se}{named vector containing the standard errors for each species.}
+  \item{start}{vector of starting values for optimization of (respectively) sigma^2 and lambda. Only used in \code{method="lambda"} and \code{se!=NULL}.}
+  \item{control}{list of control parameters for multidimensional optimization, implemented in \code{\link{optim}}. Only used in \code{method="lambda"} and \code{se!=NULL}.}
 }
 \description{
   This function computes phylogenetic signal using two different methods.  It can also conduct the hypothesis tests for significant phylogenetic signal, and estimate phylogenetic signal incorporating sampling error following Ives et al. (2007).
@@ -30,6 +32,8 @@ phylosig(tree,x,method="K",test=FALSE,nsim=1000,se=NULL)
   \item{logL}{log-likelihood.}
   \item{logL0}{log-likelihood for \code{lambda=0.0}.}
   \item{P}{P-value of the likelihood ratio test.}
+  \item{convergence}{value for convergence, for estimation with sampling error only. (See \code{\link{optim}}).}
+  \item{message}{message from \code{\link{optim}}, for estimation with sampling error only.}
 }
 \references{
   Pagel, M. 1999. Inferring the historical patterns of biological evolution. \emph{Nature}, \bold{401}, 877--884.
@@ -40,8 +44,6 @@ phylosig(tree,x,method="K",test=FALSE,nsim=1000,se=NULL)
   Ives, A. R., P. E. Midford, T. Garland Jr. 2007. Within-species variation and measurement error in phylogenetic comparative biology. \emph{Systematic Biology}, \bold{56}, 252-270.
 }
 \author{Liam Revell \email{liam.revell@umb.edu}}
-\seealso{
-}
 \examples{
   tree<-rbdtree(1,0,Tmax=4)
   x<-fastBM(tree)

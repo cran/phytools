@@ -17,13 +17,9 @@ drop.tip.simmap(tree,tip)
 \value{
   a modified \code{"phylo"} object containing the element \code{$mapped.edge} with the time spent in each state along each edge of the tree.
 }
-\references{
-}
 \author{Liam Revell \email{liam.revell@umb.edu}}
 \seealso{
   \code{\link{brownie.lite}}, \code{\link{drop.tip}}, \code{\link{evol.vcv}}, \code{\link{read.simmap}}
-}
-\examples{
 }
 \keyword{phylogenetics}
 \keyword{utilities}

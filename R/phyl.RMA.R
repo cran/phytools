@@ -1,7 +1,7 @@
 # this function computes a phylogenetic reduced major axis (RMA) regression
-# written by Liam Revell 2010/2011
+# written by Liam Revell 2010,2011,2012
 
-phyl.RMA<-function(x,y,tree,method="BM",lambda=NULL,fixed=FALSE){
+phyl.RMA<-function(x,y,tree,method="BM",lambda=NULL,fixed=FALSE,h0=1.0){
 
 	x<-x[tree$tip.label]; y<-y[tree$tip.label]
 
@@ -42,7 +42,7 @@ phyl.RMA<-function(x,y,tree,method="BM",lambda=NULL,fixed=FALSE){
 		one<-matrix(1,n,1)
 		y<-as.matrix(as.vector(X))
 		# compute the log-likelihood	
-		logL<--t(y-D%*%t(a))%*%solve(kronecker(R,C))%*%(y-D%*%t(a))/2-n*m*log(2*pi)/2-log(det(kronecker(R,C)))/2
+		logL<--t(y-D%*%t(a))%*%solve(kronecker(R,C))%*%(y-D%*%t(a))/2-n*m*log(2*pi)/2-determinant(kronecker(R,C),logarithm=TRUE)$modulus[1]/2
 		return(logL)
 	}
 
@@ -69,6 +69,16 @@ phyl.RMA<-function(x,y,tree,method="BM",lambda=NULL,fixed=FALSE){
 
 	r<-y-(beta0+beta1*x)
 
-	return(list(RMA.beta=c(beta0,beta1),V=temp$R,lambda=est.lambda,logL=as.numeric(result$objective),resid=as.matrix(r)))
+	r2<-temp$R[1,2]^2/(temp$R[1,1]*temp$R[2,2])
+
+	T<-abs(log(beta1)-log(h0))/sqrt((1-r2)/(length(tree$tip)-2))
+
+	df<-2+(length(tree$tip)-2)/(1+0.5*r2)
+
+	P<-2*pt(T,df=df,lower.tail=FALSE)
+
+	test<-c(r2,T,df,P); names(test)<-c("r2","T","df","P")
+
+	return(list(RMA.beta=c(beta0,beta1),V=temp$R,lambda=est.lambda,logL=as.numeric(result$objective),test=test,resid=as.matrix(r)))
 
 }

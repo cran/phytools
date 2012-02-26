@@ -17,12 +17,10 @@ lambda.transform(lambda,C)
 \value{
   a matrix.
 }
-\references{
-}
 \author{Liam Revell \email{liam.revell@umb.edu}}
-\seealso{
-}
 \examples{
+	tree<-pbtree(n=100)
+	V.lambda<-lambda.transform(0.7,vcv.phylo(tree))
 }
 \keyword{phylogenetics}
 \keyword{math}

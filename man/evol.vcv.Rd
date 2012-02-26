@@ -11,10 +11,10 @@ evol.vcv(scm.tre,dat,maxit=2000,vars=FALSE)
   \item{vars}{an optional logical value indicating whether or not to estimate the variances of the parameter estimates from the Hessian matrix.}
 }
 \description{
-  This function takes a modified \code{"phylo"} object with a mapped binary or multistate trait and data for an arbitrary number of continuously valued character.  It then fits the multiple evolutionary variance-covariance matrix (rate matrix) model of Revell & Collar (2009; \emph{Evolution}.
+  This function takes a modified \code{"phylo"} object with a mapped binary or multistate trait and data for an arbitrary number of continuously valued character.  It then fits the multiple evolutionary variance-covariance matrix (rate matrix) model of Revell & Collar (2009; \emph{Evolution}).
 }
 \details{
-  This function performs optimization by first optimizing the likelihood with respect to the Cholesky matrices using \code{\link{optim}}.  Optimization method is \code{method="Nelder-Mead"}.  Using box constraints does not make sense here as they would be applied to the Cholesky matrix rather than the target parameters.  May have to increase \code{maxit} for large trees and more than 2 traits.
+  This function performs optimization by first optimizing the likelihood with respect to the Cholesky matrices using \code{\link{optim}}.  Optimization is by \code{method="Nelder-Mead"}.  Using box constraints does not make sense here as they would be applied to the Cholesky matrix rather than the target parameters.  May have to increase \code{maxit} for large trees and more than 2 traits.
 }
 \value{
   a list with the following components:
@@ -35,8 +35,6 @@ evol.vcv(scm.tre,dat,maxit=2000,vars=FALSE)
 \author{Liam Revell \email{liam.revell@umb.edu}}
 \seealso{
   \code{\link{evol.rate.mcmc}}, \code{\link{brownie.lite}}
-}
-\examples{
 }
 \keyword{phylogenetics}
 \keyword{comparative method}

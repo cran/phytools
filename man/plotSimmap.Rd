@@ -2,20 +2,22 @@
 \alias{plotSimmap}
 \title{Plot stochastic character mapped tree}
 \usage{
-plotSimmap(tree,colors=NULL,fsize=1.0,ftype="reg",lwd=2,pts=TRUE)
+plotSimmap(tree,colors=NULL,fsize=1.0,ftype="reg",lwd=2,pts=TRUE,node.numbers=FALSE)
 }
 \arguments{
   \item{tree}{a modified object of class "phylo" or "multiPhylo" containing a stochastic mapping or set of mappings (e.g., see \code{\link{read.simmap}} & \code{\link{make.simmap}}).}
   \item{colors}{a vector with names translating the mapped states to colors - see \code{Examples}.}
   \item{fsize}{relative font size for tip labels.}
   \item{ftype}{font type - options are \code{"reg"}, \code{"i"} (italics), \code{"b"} (bold), or \code{"bi"} (bold-italics).}
-	\item{lwd}{line width for plotting.}
+  \item{lwd}{line width for plotting.}
   \item{pts}{logical value indicating whether or not to plot filled circles at each vertex of the tree, as well as at transition points between mapped states.  Default is \code{TRUE}.}
+  \item{node.numbers}{a logical value indicating whether or not node numbers should be plotted.}
 }
 \description{
   Function plots one or multiple stochastic character mapped trees.
 }
 \details{
+  The underscore character \code{"_"} is automatically swapped for a space in tip labels, as in \code{\link{plot.phylo}}.
 }
 \value{
   plots a tree.

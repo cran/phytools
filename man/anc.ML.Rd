@@ -12,17 +12,12 @@ anc.ML(tree,x,maxit=2000)
 \description{
   This function estimates the evolutionary parameters and ancestral states for Brownian evolution using likelihood.
 }
-\details{
-
-}
 \value{
   a list with the following components:
   \item{sig2}{the variance of the BM process.}
   \item{ace}{a vector with the ancestral states.}
   \item{logLik}{the log-likelihood.}
   \item{convergence}{the value of \code{$convergence} returned by \code{optim()} (0 is good).}
-}
-\references{
 }
 \author{Liam Revell \email{liam.revell@umb.edu}}
 \seealso{

@@ -39,7 +39,7 @@ mcmcLambda<-function(tree,x,ngen=10000,control=list()){
 	C1<-vcv.phylo(tree) # used for updates of lambda
 	C<-lambda.transform(con$lambda,C1)
 	invC<-solve(C)
-	detC<-determinant(C,log=T)$modulus[1]
+	detC<-determinant(C,logarithm=TRUE)$modulus[1]
 
 	# now set starting values for MCMC
 	sig2<-con$sig2; lambda<-con$lambda; a<-con$a; xbar<-con$xbar; intV<-con$intV
@@ -78,7 +78,7 @@ mcmcLambda<-function(tree,x,ngen=10000,control=list()){
 			# update C with new lambda
 			C.prime<-lambda.transform(lambda.prime,C1)
 			invC.prime<-solve(C.prime)
-			detC.prime<-determinant(C.prime,log=T)$modulus[1]
+			detC.prime<-determinant(C.prime,logarithm=TRUE)$modulus[1]
 			L.prime<-likelihood(C.prime,invC.prime,detC.prime,x,sig2,a,xbar,intV)
 			Pr.prime<-log.prior(sig2,lambda.prime,a,xbar,intV)
 			post.odds<-min(1,exp(Pr.prime+L.prime-Pr-L),na.rm=T)

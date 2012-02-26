@@ -11,18 +11,12 @@ reorderSimmap(tree,order="cladewise")
 \description{
   Function returns a reordered modified \code{"phylo"} object by using \code{reorder.phylo} but then sorting the additional elements \code{$mapped.edge} and \code{$maps} to have the same order as \code{$edge}.
 }
-\details{
-}
 \value{
   a modified \code{"phylo"} object.
-}
-\references{
 }
 \author{Liam Revell \email{liam.revell@umb.edu}}
 \seealso{
   \code{\link{reorder.phylo}}, \code{\link{plotSimmap}}
-}
-\examples{
 }
 \keyword{phylogenetics}
 \keyword{utilities}

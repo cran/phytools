@@ -34,8 +34,6 @@ optim.phylo.ls(D,stree=NULL,set.neg.to.zero=TRUE,fixed=FALSE,tol=1e-10,collapse=
 \seealso{
   \code{\link{exhaustiveMP}}, \code{\link{nni}}
 }
-\examples{
-}
 \keyword{phylogenetics}
 \keyword{inference}
 \keyword{distance matrix}

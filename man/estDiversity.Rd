@@ -24,8 +24,6 @@ estDiversity(tree,x)
 \seealso{
   \code{\link{fitDiversityModel}}
 }
-\examples{
-}
 \keyword{phylogenetics}
 \keyword{comparative method}
 \keyword{maximum likelihood}

@@ -13,12 +13,8 @@ anc.Bayes(tree,x,ngen=10000,control=list())
 \description{
   This function uses Bayesian MCMC to sample from the posterior distribution for the states at internal nodes in the tree.
 }
-\details{
-}
 \value{
   a matrix with number of rows \code{ngen/sample+1} containing the posterior sample and likelihoods.  Matrix columns are labeled either {sig2} or by the node number of the internal node.
-}
-\references{
 }
 \author{Liam Revell \email{liam.revell@umb.edu}}
 \seealso{

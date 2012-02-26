@@ -17,13 +17,9 @@ starTree(species,branch.lengths=NULL)
 \value{
   a phylogenetic tree in \code{"phylo"} format.
 }
-\references{
-}
 \author{Liam Revell \email{liam.revell@umb.edu}}
 \seealso{
   \code{\link{stree}}
-}
-\examples{
 }
 \keyword{phylogenetics}
 \keyword{utilities}

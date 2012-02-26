@@ -13,8 +13,6 @@ evolvcv.lite(tree,X,maxit=2000,tol=1e-10)
 \description{
   This function takes a modified \code{"phylo"} object with a mapped binary or multistate trait and data for two and only two continuously valued character.  It then fits four different evolutionary models: common rates and correlation; different rates, common correlation; different correlations, common rates; no common structure.
 }
-\details{
-}
 \value{
   a list with the results summarized for each model.
 }
@@ -24,8 +22,6 @@ evolvcv.lite(tree,X,maxit=2000,tol=1e-10)
 \author{Liam Revell \email{liam.revell@umb.edu}}
 \seealso{
   \code{\link{brownie.lite}}, \code{\link{evol.vcv}}
-}
-\examples{
 }
 \keyword{phylogenetics}
 \keyword{comparative method}

@@ -27,8 +27,6 @@ exhaustiveMP(data,tree=NULL,method="branch.and.bound")
 \seealso{
   \code{\link{mrp.supertree}}, \code{\link{optim.parsimony}}, \code{\link{pratchet}}
 }
-\examples{
-}
 \keyword{phylogenetics}
 \keyword{inference}
 \keyword{parsimony}

@@ -32,8 +32,6 @@ make.simmap(tree,x,model="SYM",nsim=1)
 \seealso{
   \code{\link{brownie.lite}}, \code{\link{brownieREML}}, \code{\link{evol.vcv}}, \code{\link{read.simmap}}, \code{\link{plotSimmap}}
 }
-\examples{
-}
 \keyword{phylogenetics}
 \keyword{comparative method}
 \keyword{simulation}

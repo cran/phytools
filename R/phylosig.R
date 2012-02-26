@@ -1,7 +1,7 @@
 # function for computing phylogenetic signal by the lambda (Pagel 1999) of K (Blomberg et al. 2003) methods
 # written by Liam J. Revell 2011/2012
 
-phylosig<-function(tree,x,method="K",test=FALSE,nsim=1000,se=NULL){
+phylosig<-function(tree,x,method="K",test=FALSE,nsim=1000,se=NULL,start=NULL,control=list()){
 	# some minor error checking
 	if(class(tree)!="phylo") stop("tree object must be of class 'phylo.'")
 	x<-matchDatatoTree(tree,x,"x")
@@ -13,6 +13,12 @@ phylosig<-function(tree,x,method="K",test=FALSE,nsim=1000,se=NULL){
 		M<-diag(se^2)
 		rownames(M)<-colnames(M)<-names(se)
 	} else me=FALSE
+	if(!is.null(start)&&!is.null(se)){
+		if(start[1]<=0||start[2]<0||start[2]>maxLambda(tree)){
+			message("some of the elements of 'start' are invalid, resetting to random")
+			start<-NULL
+		}
+	}
 	# done error handling
 	if(method=="K"){
 		C<-vcv.phylo(tree)
@@ -98,15 +104,14 @@ phylosig<-function(tree,x,method="K",test=FALSE,nsim=1000,se=NULL){
 			n<-nrow(Cl)
 			y<-y[rownames(Cl)]
 			a<-as.numeric(sum(invV%*%y)/sum(invV))
-			sig2<-as.numeric(t(y-a)%*%invV%*%(y-a)/n)
 			logL<--t(y-a)%*%invV%*%(y-a)/2-n*log(2*pi)/2-determinant(V,logarithm=TRUE)$modulus/2
 			return(-logL)
 		}
 		C<-vcv.phylo(tree)
 		x<-x[rownames(C)]
-		maxLambda<-max(C)/max(C[upper.tri(C)])
+		maxlam<-maxLambda(tree)
 		if(!me){
-			res<-optimize(f=likelihoodLambda,interval=c(0,maxLambda),y=x,C=C,maximum=TRUE) # optimize lambda
+			res<-optimize(f=likelihoodLambda,interval=c(0,maxlam),y=x,C=C,maximum=TRUE) # optimize lambda
 			if(!test)
 				return(list(lambda=res$maximum,logL=res$objective[1,1])) # return lambda and log-likelihood
 			else {
@@ -116,14 +121,15 @@ phylosig<-function(tree,x,method="K",test=FALSE,nsim=1000,se=NULL){
 			}
 		} else {
 			M<-M[rownames(C),colnames(C)]
-			s<-c(mean(pic(x,multi2di(tree))^2),1.0)
-			res<-optim(s,likelihoodLambda.me,C=C,y=x,M=M,method="L-BFGS-B",lower=c(0,0),upper=c(Inf,maxLambda))
+			if(is.null(start)) s<-c(0.02*runif(n=1)*mean(pic(x,multi2di(tree))^2),runif(n=1))
+			else s<-start
+			res<-optim(s,likelihoodLambda.me,C=C,y=x,M=M,method="L-BFGS-B",lower=c(0,0),upper=c(Inf,maxlam),control=control)
 			if(!test)
-				return(list(lambda=res$par[2],sig2=res$par[1],logL=-res$value))
+				return(list(lambda=res$par[2],sig2=res$par[1],logL=-res$value,convergence=res$convergence,message=res$message))
 			else {
-				res0<-optim(c(s[1],0),likelihoodLambda.me,C=C,y=x,M=M,method="L-BFGS-B",lower=c(0,0),upper=c(Inf,1e-10))
+				res0<-optim(c(s[1],0),likelihoodLambda.me,C=C,y=x,M=M,method="L-BFGS-B",lower=c(0,0),upper=c(Inf,1e-10),control=control)
 				P<-1-as.numeric(pchisq(2*(res0$value-res$value),df=1))
-				return(list(lambda=res$par[2],sig2=res$par[1],logL=-res$value,logL0=-res0$value,P=P))
+				return(list(lambda=res$par[2],sig2=res$par[1],logL=-res$value,convergence=res$convergence,message=res$message,logL0=-res0$value,P=P))
 			}
 		}
 	} else
@@ -162,4 +168,14 @@ matchTreetoData<-function(tree,x,name){
 		tree<-drop.tip(tree,names(which(is.na(x))))
 	}
 	return(tree)
+}
+
+# function
+# written by Liam J. Revell 2011
+
+maxLambda<-function(tree){
+	if(is.ultrametric(tree)){
+		H<-nodeHeights(tree)
+		return(max(H[,2])/max(H[,1]))
+	} else return(1)
 }

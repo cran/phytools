@@ -2,7 +2,7 @@
 \alias{plotTree}
 \title{Plots rooted phylogenetic tree}
 \usage{
-plotTree(tree,color=NULL,fsize=1.0,ftype="reg",lwd=2,pts=TRUE)
+plotTree(tree,color=NULL,fsize=1.0,ftype="reg",lwd=2,pts=TRUE,node.numbers=FALSE)
 }
 \arguments{
   \item{tree}{a phylogenetic tree in \code{"phylo"} format; or multiple trees as an object of class \code{"multiPhylo"}.}
@@ -11,16 +11,13 @@ plotTree(tree,color=NULL,fsize=1.0,ftype="reg",lwd=2,pts=TRUE)
   \item{ftype}{a string specifying which font type to use. Options are: \code{"reg"},\code{"b"},\code{"i"}, \code{"bi"}, and \code{"off"}.}
   \item{lwd}{a numeric value specifying edge width.}
   \item{pts}{a logical value indicating whether to plot points at nodes.}
+  \item{node.numbers}{a logical value indicating whether or not node numbers should be plotted.}
 }
 \description{
   This function plots a rooted phylogram.
 }
-\details{
-}
 \value{
   This function plots a rooted phylogram.
-}
-\references{
 }
 \author{Liam Revell \email{liam.revell@umb.edu}}
 \seealso{

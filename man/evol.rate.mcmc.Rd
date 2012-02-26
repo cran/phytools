@@ -14,7 +14,7 @@ evol.rate.mcmc(tree,x,ngen=10000,control=list())
   This function takes a phylogenetic tree and data for a single continuously valued character and uses a Bayesian MCMC approach to identify the phylogenetic location of a shift in the evolutionary rate through time.
 }
 \details{
-  Default values of \code{control} are given in Revell et al. (In press).
+  Default values of \code{control} are given in Revell et al. (2012).
 }
 \value{
   a list with the following components:
@@ -22,14 +22,12 @@ evol.rate.mcmc(tree,x,ngen=10000,control=list())
   \item{tips}{list of stips in state sig(1)^2 for each sampled generation of MCMC (to polarize the rate shift).}
 }
 \references{
-  Revell, L. J., D. L. Mahler, P. Peres-Neto, and B. D. Redelings. In press.
-  A new method for identifying exceptional phenotypic diversification. Evolution (available Only Early).
+  Revell, L. J., D. L. Mahler, P. Peres-Neto, and B. D. Redelings. 2012.
+  A new method for identifying exceptional phenotypic diversification. \emph{Evolution}, \bold{66}, 135-146.
 }
 \author{Liam Revell \email{liam.revell@umb.edu}}
 \seealso{
   \code{\link{anc.Bayes}}, \code{\link{brownie.lite}}, \code{\link{evol.vcv}}, \code{\link{minSplit}}, \code{\link{posterior.evolrate}}
-}
-\examples{
 }
 \keyword{phylogenetics}
 \keyword{comparative method}

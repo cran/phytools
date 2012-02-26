@@ -34,8 +34,6 @@ phyl.cca(tree,X,Y,lambda=1.0,fixed=TRUE)
 \seealso{
   \code{\link{phyl.pca}}
 }
-\examples{
-}
 \keyword{phylogenetics}
 \keyword{comparative method}
 \keyword{statistics}
