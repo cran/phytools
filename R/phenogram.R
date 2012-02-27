@@ -1,7 +1,7 @@
 # function creates a phenogram
-# written by Liam J. Revell 2011
+# written by Liam J. Revell 2011, 2012
 
-phenogram<-function(tree,x,fsize=1.0,ftype="reg",colors=NULL){
+phenogram<-function(tree,x,fsize=1.0,ftype="reg",colors=NULL,axes=list()){
 	# check tree
 	if(class(tree)!="phylo") stop("tree should be an object of class 'phylo'")
 	# check font
@@ -16,7 +16,11 @@ phenogram<-function(tree,x,fsize=1.0,ftype="reg",colors=NULL){
 	names(x)[1:length(tree$tip)]<-1:length(tree$tip)
 	X<-matrix(x[as.character(tree$edge)],nrow(tree$edge),ncol(tree$edge))
 	plot.new()
-	plot.window(ylim=c(min(x),max(x)),xlim=c(min(H),max(H)+fsize*max(strwidth(tree$tip.label))))
+	if(is.null(axes$trait)) ylim<-c(min(x),max(x))
+	else ylim<-axes$trait
+	if(is.null(axes$time)) xlim<-c(min(H),max(H)+fsize*max(strwidth(tree$tip.label)))
+	else xlim<-c(axes$time[1],axes$time[2]+fsize*max(strwidth(tree$tip.label)))
+	plot.window(ylim=ylim,xlim=xlim)
 	if(is.null(tree$maps)){
 		for(i in 1:nrow(H)){ 
 			lines(H[i,],X[i,])

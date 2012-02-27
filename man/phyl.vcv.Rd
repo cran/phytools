@@ -18,13 +18,7 @@ phyl.vcv(X,C,lambda)
 \value{
   matrix.
 }
-\references{
-}
 \author{Liam Revell \email{liam.revell@umb.edu}}
-\seealso{
-}
-\examples{
-}
 \keyword{phylogenetics}
 \keyword{statistics}
 \keyword{utilities}

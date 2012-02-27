@@ -11,18 +11,12 @@ treeSlice(tree,slice)
 \description{
   This function slices a tree at a particular height above the root and returns all non-trivial subtrees (i.e., subtrees with more than 1 taxon). Uses \code{\link{extract.clade}} in the "ape" package.
 }
-\details{
-}
 \value{
   a \code{"phylo"} or \code{"multiPhylo"} object.
-}
-\references{
 }
 \author{Liam Revell \email{liam.revell@umb.edu}}
 \seealso{
   \code{\link{extract.clade}}
-}
-\examples{
 }
 \keyword{phylogenetics}
 \keyword{utilities}

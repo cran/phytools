@@ -2,7 +2,7 @@
 \alias{brownie.lite}
 \title{Likelihood test for rate variation}
 \usage{
-brownie.lite(tree,x,maxit=2000,test="chisq",nsim=100)
+brownie.lite(tree,x,maxit=2000,test="chisq",nsim=100,se=NULL)
 }
 \arguments{
   \item{tree}{a phylogenetic tree in modified \code{"phylo"} format (see \code{\link{read.simmap}} and \code{\link{make.simmap}}).}
@@ -10,13 +10,13 @@ brownie.lite(tree,x,maxit=2000,test="chisq",nsim=100)
   \item{maxit}{an optional integer value indicating the maximum number of iterations for optimization - may need to be increased for large trees.}
   \item{test}{an optional string indicating the method for hypothesis testing - options are \code{"chisq"} or \code{"simulation"}.}
   \item{nsim}{number of simulations (only used if \code{test="simulation"}).}
+  \item{se}{a vector containing the standard errors for each estimated mean in \code{x}.}
 }
 \description{
-  This function takes a modified \code{"phylo"} object with a mapped binary or multistate trait (see \code{\link{read.simmap}}) and data for a single
-  continuously valued character.  It then fits the Brownian rate variation ("noncensored") model of O'Meara et al. (2006; \emph{Evolution}).  This is 
-	also the basic model implemented in Brian O'Meara's "Brownie" program.
+  This function takes a modified \code{"phylo"} object with a mapped binary or multistate trait (see \code{\link{read.simmap}}) and data for a single continuously valued character.  It then fits the Brownian rate variation ("noncensored") model of O'Meara et al. (2006; \emph{Evolution}).  This is also the basic model implemented in Brian O'Meara's "Brownie" program.
 }
 \details{
+  Sampling error in the estimation of species means can also be accounted for by assigning the vector \code{se} with the species specific sampling errors for \code{x}.
 }
 \value{
   a list with the following components:
@@ -45,8 +45,6 @@ brownie.lite(tree,x,maxit=2000,test="chisq",nsim=100)
 \author{Liam Revell \email{liam.revell@umb.edu}}
 \seealso{
   \code{\link{brownieREML}}, \code{\link{evol.vcv}}
-}
-\examples{
 }
 \keyword{phylogenetics}
 \keyword{comparative method}

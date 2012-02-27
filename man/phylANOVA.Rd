@@ -32,8 +32,6 @@ phylANOVA(tree,x,y,nsim=1000,posthoc=TRUE,p.adj="holm")
 \seealso{
   \code{\link{anova}}, \code{\link{pairwise.t.test}}
 }
-\examples{
-}
 \keyword{phylogenetics}
 \keyword{comparative method}
 \keyword{statistics}

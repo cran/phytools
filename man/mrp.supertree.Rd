@@ -28,8 +28,6 @@ mrp.supertree(phy,weights=NULL)
 \seealso{
   \code{\link{exhaustiveMP}}, \code{\link{optim.parsimony}}, \code{\link{pratchet}}
 }
-\examples{
-}
 \keyword{phylogenetics}
 \keyword{inference}
 \keyword{parsimony}

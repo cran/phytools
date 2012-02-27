@@ -17,18 +17,12 @@ branching.diffusion(sig2=1,b=0.0023,time.stop=1000,ylim=NULL,smooth=TRUE,pause=0
 \description{
   This function creates an animation of branching random diffusion (i.e., BM with speciation).
 }
-\details{
-}
 \value{
   None.
-}
-\references{
 }
 \author{Liam Revell \email{liam.revell@umb.edu}}
 \seealso{
   \code{\link{fastBM}}
-}
-\examples{
 }
 \keyword{phylogenetics}
 \keyword{animation}

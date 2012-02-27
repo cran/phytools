@@ -25,7 +25,5 @@ reroot(tree,node.number,position)
 \seealso{
   \code{\link{root}}
 }
-\examples{
-}
 \keyword{phylogenetics}
 \keyword{utilities}

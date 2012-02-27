@@ -23,8 +23,6 @@ anc.trend(phy,x,maxit=2000)
   \item{logL}{the log-likelihood.}
   \item{convergence}{the value of \code{$convergence} returned by \code{optim()} (0 is good).}
 }
-\references{
-}
 \author{Liam Revell \email{liam.revell@umb.edu}}
 \seealso{
   \code{\link{ace}}, \code{\link{anc.Bayes}}, \code{\link{anc.ML}}, \code{\link{optim}}

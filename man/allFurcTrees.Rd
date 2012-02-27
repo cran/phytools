@@ -27,7 +27,5 @@ allFurcTrees(n,tip.label=NULL,to.plot=TRUE)
 \seealso{
   \code{\link{add.everywhere}}, \code{\link{exhaustiveMP}}
 }
-\examples{
-}
 \keyword{phylogenetics}
 \keyword{inference}

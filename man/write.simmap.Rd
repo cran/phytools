@@ -13,8 +13,6 @@ write.simmap(tree,file=NULL,append=FALSE,map.order=NULL)
 \description{
 	This function writes stochastic character mapped trees to file using the Newick style format of SIMMAP v1.0 (Bollback 2006). Note, can only write one tree at a time to file (hence the \code{append} option).
 }
-\details{
-}
 \value{
   a file or string (if \code{file=NULL}).
 }
@@ -28,6 +26,13 @@ write.simmap(tree,file=NULL,append=FALSE,map.order=NULL)
   \code{\link{make.simmap}}, \code{\link{read.simmap}}, \code{\link{plotSimmap}}
 }
 \examples{
+	# simulate a tree & data
+	tree<-sim.history(pbtree(n=100,scale=1),Q=matrix(c(-1,1,1,-1),2,2))
+	# generate stochastic character maps
+	mtrees<-make.simmap(tree,tree$states,nsim=20)
+	# write them to file
+	# for(i in 1:length(mtrees)) 
+	#   write.simmap(mtrees[[i]],file="treefile.tre",append=TRUE)
 }
 \keyword{phylogenetics}
 \keyword{comparative method}

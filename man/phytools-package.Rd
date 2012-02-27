@@ -11,15 +11,14 @@ phytools: Phylogenetic Tools for comparative biology (and other things)
   The complete list of functions can be displayed with
   \code{library(help = phytools)}.
 
-  More information on \pkg{phytools} can be found at \url{http://anolis.oeb.harvard.edu/~liam/R-phylogenetics/}.
+  More information on \pkg{phytools} can be found at \url{http://faculty.umb.edu/liam.revell/phytools}.
 }
-
 \author{
   Liam J. Revell
 
   Maintainer: Liam J. Revell <liam.revell@umb.edu>
 }
 \references{
-    Revell, L. J. (2011). phytools: Phylogenetic Tools for Comparative Biology (and other things). http://anolis.oeb.harvard.edu/~liam/R-phylogenetics
+    Revell, L. J. (In press) phytools: An R package for phylogenetic comparative biology (and other things). Methods Ecol. Evol. doi:10.1111/j.2041-210X.2011.00169.x
 }
 \keyword{package}

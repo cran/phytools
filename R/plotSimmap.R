@@ -1,10 +1,10 @@
 # function plots a stochastic character mapped tree
 # written by Liam Revell 2011
 
-plotSimmap<-function(tree,colors=NULL,fsize=1.0,ftype="reg",lwd=2,pts=TRUE){
+plotSimmap<-function(tree,colors=NULL,fsize=1.0,ftype="reg",lwd=2,pts=TRUE,node.numbers=FALSE){
 	if(class(tree)=="multiPhylo"){
 		par(ask=TRUE)
-		for(i in 1:length(tree)) plotSimmap(tree[[i]],colors=colors,fsize=fsize,ftype=ftype,lwd=lwd,pts=pts)
+		for(i in 1:length(tree)) plotSimmap(tree[[i]],colors=colors,fsize=fsize,ftype=ftype,lwd=lwd,pts=pts,node.numbers=node.numbers)
 	} else {
 		# check font
 		ftype<-which(c("off","reg","b","i","bi")==ftype)-1
@@ -17,6 +17,8 @@ plotSimmap<-function(tree,colors=NULL,fsize=1.0,ftype="reg",lwd=2,pts=TRUE){
 		# check tree
 		if(class(tree)!="phylo") stop("tree should be object of class 'phylo.'")
 		if(is.null(tree$maps)) stop("tree should contain mapped states on edges.")
+		# swap out "_" character for spaces (assumes _ is a place holder)
+		tree$tip.label<-gsub("_"," ",tree$tip.label)
 		# reorder
 		cw<-reorderSimmap(tree)
 		pw<-reorderSimmap(tree,"pruningwise")
@@ -63,8 +65,21 @@ plotSimmap<-function(tree,colors=NULL,fsize=1.0,ftype="reg",lwd=2,pts=TRUE){
 				x<-x+cw$maps[[i]][j]; j<-j+1
 			}
 		}
+		if(node.numbers){
+			symbols(0,mean(Y[cw$edge[cw$edge[,1]==(length(cw$tip)+1),2]]),rectangles=matrix(c(1.2*fsize*strwidth(as.character(length(cw$tip)+1)),1.4*fsize*strheight(as.character(length(cw$tip)+1))),1,2),inches=F,bg="white",add=T)
+			text(0,mean(Y[cw$edge[cw$edge[,1]==(length(cw$tip)+1),2]]),length(cw$tip)+1,cex=fsize)
+			for(i in 1:nrow(cw$edge)){
+				x<-node.height[i,2]
+				if(cw$edge[i,2]>length(tree$tip)){
+					symbols(x,Y[cw$edge[i,2]],rectangles=matrix(c(1.2*fsize*strwidth(as.character(cw$edge[i,2])),1.4*fsize*strheight(as.character(cw$edge[i,2]))),1,2),inches=F,bg="white",add=T)
+					text(x,Y[cw$edge[i,2]],cw$edge[i,2],cex=fsize)
+				}
+			}
+		}
 		for(i in 1:n) if(ftype) text(node.height[which(cw$edge[,2]==i),2],Y[i],cw$tip.label[i],pos=4,offset=0.2*lwd/3+0.2/3,cex=fsize,font=ftype)
 	}
+	# reset margin
+	par(mar=c(5,4,4,2)+0.1)
 }
 	
 # function reorders simmap tree

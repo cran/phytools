@@ -11,11 +11,10 @@ nodeHeights(tree)
   This function computes node heights (primarily for \code{\link{estDiversity}}).
 }
 \details{
+  The function also gives a handy way to get the total length of the tree from the root to the heighest tip which will be given by \code{max(nodeHeights(tree))}.
 }
 \value{
   a matrix of the same dimensions as \code{tree$edge} containing the height above the root of each node in \code{edge}.
-}
-\references{
 }
 \author{Liam Revell \email{liam.revell@umb.edu}}
 \seealso{

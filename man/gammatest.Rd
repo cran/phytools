@@ -23,8 +23,12 @@ gammatest(x)
 }
 \author{Liam Revell \email{liam.revell@umb.edu}}
 \seealso{
+  \code{\link{ltt}}
 }
 \examples{
+tree<-pbtree(n=1000)
+z<-ltt(tree,gamma=FALSE)
+g<-gammatest(z)
 }
 \keyword{phylogenetics}
 \keyword{comparative method}

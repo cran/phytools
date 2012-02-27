@@ -14,8 +14,6 @@ phylomorphospace(tree,X,A=NULL,label=TRUE,control=list())
 \description{
   This function creates a phylomorphospace plot for two characters following Sidlauskas (2008; \emph{Evolution}).
 }
-\details{
-}
 \value{
   this function creates a phylomorphospace plot
 }
@@ -25,9 +23,10 @@ phylomorphospace(tree,X,A=NULL,label=TRUE,control=list())
   Sidlauskas, B. 2008. Continuous and arrested morphological diversification in sister clades of characiform fishes: A phylomorphospace approach. \emph{Evolution}, \bold{62}, 3135--3156.
 }
 \author{Liam Revell \email{liam.revell@umb.edu}}
-\seealso{
-}
 \examples{
+   tree<-pbtree(n=25)
+   X<-fastBM(tree,nsim=2)
+   phylomorphospace(tree,X)
 }
 \keyword{phylogenetics}
 \keyword{comparative method}

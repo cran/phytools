@@ -31,8 +31,6 @@ fitDiversityModel(tree,x,d=NULL,showTree=TRUE)
 \seealso{
   \code{\link{brownie.lite}}, \code{\link{estDiversity}}, \code{\link{evol.rate.mcmc}}
 }
-\examples{
-}
 \keyword{phylogenetics}
 \keyword{comparative method}
 \keyword{maximum likelihood}

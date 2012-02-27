@@ -33,8 +33,6 @@ phyl.resid(tree,x,Y,method="BM")
 \seealso{
   \code{\link{phyl.pca}}, \code{\link{gls}}
 }
-\examples{
-}
 \keyword{phylogenetics}
 \keyword{comparative method}
 \keyword{statistics}

@@ -34,8 +34,6 @@ phyl.pca(tree,Y,method="BM",mode="cov")
 \seealso{
   \code{\link{phyl.resid}}
 }
-\examples{
-}
 \keyword{phylogenetics}
 \keyword{maximum likelihood}
 \keyword{comparative method}

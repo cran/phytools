@@ -17,13 +17,7 @@ ls.tree(tree,D)
 \value{
   a tree with branch lengths.
 }
-\references{
-}
 \author{Liam Revell \email{liam.revell@umb.edu}}
-\seealso{
-}
-\examples{
-}
 \keyword{phylogenetics}
 \keyword{inference}
 \keyword{least squares}

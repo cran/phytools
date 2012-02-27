@@ -36,10 +36,6 @@ phyl.pairedttest(tree,x1,x2=NULL,se1=NULL,se2=NULL,lambda=1.0,h0=0.0,fixed=FALSE
 
 }
 \author{Liam Revell \email{liam.revell@umb.edu}}
-\seealso{
-}
-\examples{
-}
 \keyword{phylogenetics}
 \keyword{comparative method}
 \keyword{maximum likelihood}

@@ -17,12 +17,6 @@ splitTree(tree,split)
 \value{
   two trees in a list.
 }
-\references{
-}
 \author{Liam Revell \email{liam.revell@umb.edu}}
-\seealso{
-}
-\examples{
-}
 \keyword{phylogenetics}
 \keyword{utilities}

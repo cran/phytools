@@ -16,13 +16,7 @@ rstate(y)
 \value{
   a character or string.
 }
-\references{
-}
 \author{Liam Revell \email{liam.revell@umb.edu}}
-\seealso{
-}
-\examples{
-}
 \keyword{math}
 \keyword{utilities}
 \keyword{statistics}

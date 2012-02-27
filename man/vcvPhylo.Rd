@@ -11,18 +11,10 @@ vcvPhylo(tree,anc.nodes=T)
 \description{
   This function returns a so-called \emph{phylogenetic variance covariance matrix} (e.g., see \code{\link{vcv.phylo}}), but (optionally) including ancestral nodes.
 }
-\details{
-}
 \value{
   matrix.
 }
-\references{
-}
 \author{Liam Revell \email{liam.revell@umb.edu}}
-\seealso{
-}
-\examples{
-}
 \keyword{phylogenetics}
 \keyword{statistics}
 \keyword{utilities}

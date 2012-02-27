@@ -14,20 +14,19 @@ fastBM(tree,a=0,mu=0,sig2=1,bounds=c(-Inf,Inf),internal=FALSE,nsim=1)
   \item{nsim}{number of simulations.}
 }
 \description{
-  This function conducts fast BM simulation on a tree.
-}
-\details{
+  This function conducts fast quantitative trait simulation on a phylogeny under several different models: Brownian motion (default), BM with a trend (for \code{mu!=0}), and bounds (for \code{bounds!=c(-Inf,Inf)}). 
 }
 \value{
   a vector (for \code{nsim=1}) or matrix containing the tip states for the \code{n} species in the tree, and (optionally) the ancestral states for internal nodes.
-}
-\references{
 }
 \author{Liam Revell \email{liam.revell@umb.edu}}
 \seealso{
   \code{\link{branching.diffusion}}
 }
 \examples{
+tree<-pbtree(n=1000)
+x<-fastBM(tree,sig2=0.1) # Brownian motion
+y<-fastBM(tree,mu=1) # with a trend
 }
 \keyword{phylogenetics}
 \keyword{simulation}
