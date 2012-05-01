@@ -1,6 +1,7 @@
 export(add.everywhere, allFurcTrees, anc.Bayes, anc.ML, anc.trend, branching.diffusion)
 export(brownie.lite, brownieREML, drop.clade, drop.tip.simmap, estDiversity, evol.rate.mcmc)
 export(evol.vcv, evolvcv.lite, exhaustiveMP, expm, fastBM, findMRCA, fitBayes, fitDiversityModel, gammatest, getDescendants)
+export(getExtant, getExtinct)
 export(lambda.transform, ls.tree, ltt, make.era.map, make.simmap, map.overlap, minSplit, mrp.supertree)
 export(nodeHeights, optim.phylo.ls, paintSubTree, paste.tree, pbtree, phenogram, phyl.cca, phyl.pairedttest, phyl.pca)
 export(phyl.resid, phyl.RMA, phyl.vcv, phylANOVA, phyloDesign, phylomorphospace)
