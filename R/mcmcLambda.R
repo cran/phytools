@@ -1,5 +1,5 @@
 # function
-# written by Liam J. Revell 2011
+# written by Liam J. Revell 2011, 2012
 
 mcmcLambda<-function(tree,x,ngen=10000,control=list()){
 
@@ -67,7 +67,7 @@ mcmcLambda<-function(tree,x,ngen=10000,control=list()){
 				sig2<-sig2.prime
 				L<-L.prime
 				Pr<-Pr.prime
-			} else if(i%%con$sample==0) X[i/con$sample+1,]<-c(i,sig2,lambda,a,xbar,intV,L.prime)
+			} else if(i%%con$sample==0) X[i/con$sample+1,]<-c(i,sig2,lambda,a,xbar,intV,L)
 		} else if(j==1){
 			# update lambda
 			lambda.prime<-lambda+rnorm(n=1,sd=sqrt(con$prop[j+1]))
@@ -88,7 +88,7 @@ mcmcLambda<-function(tree,x,ngen=10000,control=list()){
 				C<-C.prime; invC<-invC.prime; detC<-detC.prime
 				L<-L.prime
 				Pr<-Pr.prime
-			} else if(i%%con$sample==0) X[i/con$sample+1,]<-c(i,sig2,lambda,a,xbar,intV,L.prime)
+			} else if(i%%con$sample==0) X[i/con$sample+1,]<-c(i,sig2,lambda,a,xbar,intV,L)
 		} else if(j==2){
 			# update a
 			a.prime<-a+rnorm(n=1,sd=sqrt(con$prop[j+1]))
@@ -100,7 +100,7 @@ mcmcLambda<-function(tree,x,ngen=10000,control=list()){
 				a<-a.prime
 				L<-L.prime
 				Pr<-Pr.prime
-			} else if(i%%con$sample==0) X[i/con$sample+1,]<-c(i,sig2,lambda,a,xbar,intV,L.prime)
+			} else if(i%%con$sample==0) X[i/con$sample+1,]<-c(i,sig2,lambda,a,xbar,intV,L)
 		} else if(j>2&&j<=(n+2)) {
 			k<-j-2 # update tip mean k
 			xbar.prime<-xbar
@@ -113,7 +113,7 @@ mcmcLambda<-function(tree,x,ngen=10000,control=list()){
 				xbar<-xbar.prime
 				L<-L.prime
 				Pr<-Pr.prime
-			} else if(i%%con$sample==0) X[i/con$sample+1,]<-c(i,sig2,lambda,a,xbar,intV,L.prime)
+			} else if(i%%con$sample==0) X[i/con$sample+1,]<-c(i,sig2,lambda,a,xbar,intV,L)
 		} else if(j>(n+2)){
 			# update var
 			intV.prime<-intV+rnorm(n=1,sd=sqrt(con$prop[j+1]))
@@ -126,7 +126,7 @@ mcmcLambda<-function(tree,x,ngen=10000,control=list()){
 				intV<-intV.prime
 				L<-L.prime
 				Pr<-Pr.prime
-			} else if(i%%con$sample==0) X[i/con$sample+1,]<-c(i,sig2,lambda,a,xbar,intV,L.prime)	
+			} else if(i%%con$sample==0) X[i/con$sample+1,]<-c(i,sig2,lambda,a,xbar,intV,L)	
 		}
 	}
 

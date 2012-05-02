@@ -2,19 +2,20 @@
 \alias{read.simmap}
 \title{Read SIMMAP style trees from file}
 \usage{
-read.simmap(file="",text,format="phylip",rev.order=TRUE)
+read.simmap(file="",text,format="phylip",rev.order=TRUE,version=1)
 }
 \arguments{
-  \item{file}{name of text file with one or multiple SIMMAP v1.0 style trees.}
-  \item{text}{character string containing the tree.}
-  \item{format}{format of the trees: either \code{"phylip"} or \code{"nexus"} - the latter is the default output from SIMMAP v1.0.}
-  \item{rev.order}{a logical value indicating whether the states and times along each branch is given (from root to tip) in right-to-left order (if TRUE) or in left-to-right order.}
+  \item{file}{name of text file with one or multiple SIMMAP v1.0 or v1.5 style trees.}
+  \item{text}{character string containing the tree. If \code{version=1.5} this argument is ignored. (This format tree can only be read from file in the present version.)}
+  \item{format}{format of the trees: either \code{"phylip"} or \code{"nexus"} - the latter is the default output from SIMMAP. If \code{version=1.5} this argument is ignored.}
+  \item{rev.order}{a logical value indicating whether the states and times along each branch is given (from root to tip) in right-to-left order (if TRUE) or in left-to-right order. If \code{version=1.5} this argument is ignored.}
+  \item{version}{version of SIMMAP for input tree. If the tree(s) was/were simulated in SIMMAP v1.0 or written to file by \code{link{make.simmap}} then \code{version=1.0}; if the tree(s) was/were simulated using SIMMAP v1.5 then \code{version=1.5}.}
 }
 \description{
   This reads one or multiple SIMMAP style trees from file.
 }
 \details{
-  This function does not yet accept trees in SIMMAP v1.5 format; however it does read a more flexible format than is produced by SIMMAP v1.0 (for instance, multi-character mapped states and more than 7 mapped states).  Uses some modified code from \code{\link{read.nexus}} from the "ape" package to read the NEXUS block created by SIMMAP.  Also creates the attribute \code{"map.order"} which indicates whether the stochastic map was read in from left to right or right to left.  This attribute is used by default by \code{\link{write.simmap}} to write the tree in the same order. 
+  This function now accepts trees in both SIMMAP v1.0 and SIMMAP v1.5 format. In addition, it can read a more flexible format than is produced by SIMMAP (for instance, multi-character mapped states and more than 7 mapped states).  Uses some modified code from \code{\link{read.nexus}} from the "ape" package to read the NEXUS block created by SIMMAP.  Also creates the attribute \code{"map.order"} which indicates whether the stochastic map was read in from left to right or right to left.  This attribute is used by default by \code{\link{write.simmap}} to write the tree in the same order. 
 }
 \value{
   a modified phylogenetic tree of class \code{"phylo"} with the following additional elements:

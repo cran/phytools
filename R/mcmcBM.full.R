@@ -67,7 +67,7 @@ mcmcBM.full<-function(tree,x,ngen=10000,control=list()){
 				sig2<-sig2.prime
 				L<-L.prime
 				Pr<-Pr.prime
-			} else if(i%%con$sample==0) X[i/con$sample+1,]<-c(i,sig2,a,xbar,v,L.prime)
+			} else if(i%%con$sample==0) X[i/con$sample+1,]<-c(i,sig2,a,xbar,v,L)
 		} else if(j==1){
 			# update a
 			a.prime<-a+rnorm(n=1,sd=sqrt(con$prop[j+1]))
@@ -79,7 +79,7 @@ mcmcBM.full<-function(tree,x,ngen=10000,control=list()){
 				a<-a.prime
 				L<-L.prime
 				Pr<-Pr.prime
-			} else if(i%%con$sample==0) X[i/con$sample+1,]<-c(i,sig2,a,xbar,v,L.prime)
+			} else if(i%%con$sample==0) X[i/con$sample+1,]<-c(i,sig2,a,xbar,v,L)
 		} else if(j>1&&j<=(n+1)) {
 			k<-j-1 # update tip mean k
 			xbar.prime<-xbar
@@ -92,7 +92,7 @@ mcmcBM.full<-function(tree,x,ngen=10000,control=list()){
 				xbar<-xbar.prime
 				L<-L.prime
 				Pr<-Pr.prime
-			} else if(i%%con$sample==0) X[i/con$sample+1,]<-c(i,sig2,a,xbar,v,L.prime)
+			} else if(i%%con$sample==0) X[i/con$sample+1,]<-c(i,sig2,a,xbar,v,L)
 		} else if(j>(n+1)){
 			k<-j-n-1 # update var
 			v.prime<-v
@@ -106,7 +106,7 @@ mcmcBM.full<-function(tree,x,ngen=10000,control=list()){
 				v<-v.prime
 				L<-L.prime
 				Pr<-Pr.prime
-			} else if(i%%con$sample==0) X[i/con$sample+1,]<-c(i,sig2,a,xbar,v,L.prime)	
+			} else if(i%%con$sample==0) X[i/con$sample+1,]<-c(i,sig2,a,xbar,v,L)	
 		}
 	}
 
