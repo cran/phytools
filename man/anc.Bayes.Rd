@@ -23,7 +23,7 @@ anc.Bayes(tree,x,ngen=10000,control=list())
 \examples{
 tree<-rtree(50)
 x<-fastBM(tree,sig2=2) # simulate using fastBM
-X<-anc.Bayes(tree,x,ngen=100000) # sample ancestral states
+X<-anc.Bayes(tree,x,ngen=10000) # sample ancestral states
 estimates<-colMeans(X[21:nrow(X),]) # get estimates, excluding burnin
 }
 \keyword{phylogenetics}

@@ -26,7 +26,7 @@ gammatest(x)
   \code{\link{ltt}}
 }
 \examples{
-tree<-pbtree(n=1000)
+tree<-pbtree(n=200)
 z<-ltt(tree,gamma=FALSE)
 g<-gammatest(z)
 }
