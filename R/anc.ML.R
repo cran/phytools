@@ -27,7 +27,7 @@ anc.ML<-function(tree,x,maxit=2000){
 	sig2<-mean(pic(x,multi2di(tree))^2)*runif(n=1,max=2)
 
 	# optimize
-	res<-optim(c(sig2,a,y),fn=likelihood,C=C,invC=invC,detC=detC,x=x,method="L-BFGS-B",lower=c(1e-10,rep(-Inf,tree$Nnode)),control=list(maxit=maxit))
+	res<-optim(c(sig2,a,y),fn=likelihood,C=C,invC=invC,detC=detC,x=x,method="L-BFGS-B",lower=c(100*.Machine$double.eps,rep(-Inf,tree$Nnode)),control=list(maxit=maxit))
 	
 	# return result
 	states<-res$par[2:length(res$par)]

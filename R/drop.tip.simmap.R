@@ -1,20 +1,65 @@
-# this function drops tips from the modified "phylo" format trees created by read.simmap() and maintains the $mapped.edge matrix
-# written by Liam Revell, 2010
+# function drops tip or tips from a SIMMAP style tree created by read.simmap, make.simmap, or sim.history
+# written by Liam Revell 2012
+
 drop.tip.simmap<-function(tree,tip){
-	# set tolerance
-	tol<-1e-8
-	# create the basic tree structure
-	new.tree<-drop.tip(tree,tip)
-	new.tree$mapped.edge<-matrix(NA,nrow(new.tree$edge),ncol(tree$mapped.edge),dimnames=list(edge=apply(new.tree$edge,1,function(x) paste(x,collapse=",")),state=colnames(tree$mapped.edge)))
-	j<-1
-	for(i in 1:ncol(tree$mapped.edge)){
-		phy<-tree
-		phy$edge.length<-phy$mapped.edge[,i]
-		phy<-drop.tip(phy,tip)
-		new.tree$mapped.edge[,j]<-phy$edge.length
-		colnames(new.tree$mapped.edge)[j]<-colnames(phy$mapped.edge)[i]
-		if(sum(new.tree$mapped.edge[,j])>tol) j<-j+1 # this has the effect of eliminating any mapped traits absent from the pruned tree
+	tip<-which(tree$tip.label%in%tip)
+	edges<-match(tip,tree$edge[,2])
+	z<-setdiff(1:nrow(tree$edge),edges)
+	tree$edge<-tree$edge[z,]
+	tree$edge.length<-tree$edge.length[z]
+	tree$maps<-tree$maps[z]
+	z<-setdiff(tree$edge[,2],tree$edge[,1])
+	z<-z[z>length(tree$tip)]
+	while(length(z)>0){
+		edges<-match(z,tree$edge[,2])
+		y<-setdiff(1:nrow(tree$edge),edges)
+		tree$edge<-tree$edge[y,]
+		tree$edge.length<-tree$edge.length[y]
+		tree$maps<-tree$maps[y]
+		z<-setdiff(tree$edge[,2],tree$edge[,1])
+		z<-z[z>length(tree$tip)]
 	}
-	new.tree$mapped.edge<-matrix(new.tree$mapped.edge[,1:(j-1)],nrow(new.tree$mapped.edge),j-1,dimnames=list(edge=rownames(new.tree$mapped.edge),state=colnames(new.tree$mapped.edge)[1:(j-1)]))
-	return(new.tree)
+	z<-setdiff(tree$edge[,2],tree$edge[,1])
+	tree$tip.label<-tree$tip.label[z]
+	tree$edge[which(tree$edge[,2]%in%z),2]<-1:length(tree$tip)
+	while(sum(tree$edge[1,1]==tree$edge[,1])==1){
+		tree$edge<-tree$edge[2:nrow(tree$edge),]
+		tree$edge.length<-tree$edge.length[2:length(tree$edge.length)]
+		tree$maps<-tree$maps[2:length(tree$maps)]
+	}
+	i<-1
+	while(i<nrow(tree$edge)){
+		single<-sum(tree$edge[i,2]==tree$edge[,1])==1
+		while(single){
+			z<-match(tree$edge[i,2],tree$edge[,1])
+			tree$edge[i,2]<-tree$edge[z,2]
+			tree$edge.length[i]<-tree$edge.length[i]+tree$edge.length[z]
+			if(names(tree$maps[[i]])[length(tree$maps[[i]])]!=names(tree$maps[[z]])[1]){
+				tree$maps[[i]]<-c(tree$maps[[i]],tree$maps[[z]])
+			} else {
+				tree$maps[[i]][length(tree$maps[[i]])]<-tree$maps[[i]][length(tree$maps[[i]])]+tree$maps[[z]][1]
+				if(length(tree$maps[[z]])>1) tree$maps[[i]]<-c(tree$maps[[i]],tree$maps[[z]][2:length(tree$maps[[z]])])
+			}
+			y<-setdiff(1:nrow(tree$edge),z)
+			tree$edge<-tree$edge[y,]
+			tree$edge.length<-tree$edge.length[y]
+			tree$maps<-tree$maps[y]
+			single<-sum(tree$edge[i,2]==tree$edge[,1])==1
+		}
+		i<-i+1
+	}
+	z<-unique(as.vector(tree$edge))
+	z<-z[z>length(tree$tip)]
+	y<-order(z)+length(tree$tip)
+	for(i in 1:nrow(tree$edge)) for(j in 1:2) if(tree$edge[i,j]%in%z) tree$edge[i,j]<-y[which(tree$edge[i,j]==z)]
+	tree$Nnode<-max(tree$edge)-length(tree$tip)
+	tree$node.states<-matrix(NA,nrow(tree$edge),2)
+	for(i in 1:nrow(tree$edge)) tree$node.states[i,]<-c(names(tree$maps[[i]])[1],names(tree$maps[[i]])[length(tree$maps[[i]])])
+	if(!is.null(tree$states)) tree$states<-tree$states[tree$tip.label]
+	allstates<-vector()
+	for(i in 1:nrow(tree$edge)) allstates<-c(allstates,names(tree$maps[[i]]))
+	allstates<-unique(allstates)
+	tree$mapped.edge<-matrix(data=0,length(tree$edge.length),length(allstates),dimnames=list(edge=apply(tree$edge,1,function(x) paste(x,collapse=",")),state=allstates))
+	for(i in 1:length(tree$maps)) for(j in 1:length(tree$maps[[i]])) tree$mapped.edge[i,names(tree$maps[[i]])[j]]<-tree$mapped.edge[i,names(tree$maps[[i]])[j]]+tree$maps[[i]][j]
+	return(tree)
 }
