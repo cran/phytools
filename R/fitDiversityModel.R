@@ -1,13 +1,9 @@
 # this function fits a "diversity-dependent-evolutionary-diversification" model (similar to Mahler et al. 2010)
-# written by Liam Revell, 2010/2011
+# written by Liam Revell, 2010/2011/2012
 
-fitDiversityModel<-function(tree,x,d=NULL,showTree=TRUE){
+fitDiversityModel<-function(tree,x,d=NULL,showTree=TRUE,tol=1e-6){
 	# some minor error checking
 	if(class(tree)!="phylo") stop("tree object must be of class 'phylo.'")
-	if(!is.binary.tree(tree)){
-		message("tree must be fully bifurcating. randomly resolving.")
-		tree<-multi2di(tree)
-	}
 	if(is.data.frame(x)) x<-as.matrix(x)
 	if(is.matrix(x)) x<-x[,1]
 	if(is.null(names(x))){
@@ -35,19 +31,12 @@ fitDiversityModel<-function(tree,x,d=NULL,showTree=TRUE){
 		if(is.null(names(d))){
 			if(length(d)==tree$Nnode){
 				message("d has no names; assuming d is in node number order of the resolved tree")
-				names(d)<-c(length(tree$tip)+1:tree$Nnode)
+				names(d)<-c(length(tree$tip)+tol:tree$Nnode)
 			} else
 				stop("d has no names and is a different length than tree$Nnode for the resolved tree")
 		}
-	}
-	# tolerance
-	tol<-1e-8
-	# compute tree length
-	tree.length<-mean(diag(vcv(tree)))
-	# compute contrasts
-	pic.x<-pic(x,tree)
-	# if computing d
-	if(is.null(d)){
+	} else {
+		message("no values for lineage density provided; computing assuming single biogeographic region")
 		# compute lineage diversity at each node
 		ages<-branching.times(tree)
 		d<-vector()
@@ -55,30 +44,66 @@ fitDiversityModel<-function(tree,x,d=NULL,showTree=TRUE){
 		names(d)<-names(ages)
 	}
 	maxd<-max(d)
-	d<-d/(maxd+1)
+	d<-d/(maxd+tol)
 	# likelihood function
-	likelihood<-function(theta,y,phy,diversity){
-		sig0<-theta[1]
-		scaled.psi<-theta[2]
+	lik<-function(theta,y,phy,diversity){
+		scaled.psi<-theta
 		for(i in 1:nrow(phy$edge)){
 			vi<-phy$edge.length[i]
 			phy$edge.length[i]<-vi+vi*scaled.psi*diversity[as.character(phy$edge[i,1])]
 		}
-		D<-vcv(phy)*sig0
+		D<-vcv(phy)
 		D<-D[names(y),names(y)]
 		Dinv<-solve(D)
 		a<-as.numeric(colSums(Dinv)%*%y/sum(Dinv))
+		sig0<-as.numeric(t(y-a)%*%Dinv%*%(y-a)/nrow(D))
+		Dinv<-Dinv/sig0; D<-D*sig0
 		logL<-as.numeric(-t(y-a)%*%Dinv%*%(y-a)/2-determinant(D)$modulus[1]/2-length(y)*log(2*pi)/2)
 		if(showTree) plot(phy)
-		return(-logL)
+		return(logL)
 	}
 	# optimize
-	res=optim(c(mean(pic.x^2),0),likelihood,y=x,phy=tree,diversity=d,method="L-BFGS-B",lower=c(tol,-1),upper=c(Inf,1),hessian=TRUE)	
-	# return result
+	res<-optimize(lik,c(-1,1),y=x,phy=tree,diversity=d,maximum=TRUE)
+	# compute condition sig0
+	compute_sig0<-function(scaled.psi,y,phy,diversity){
+		for(i in 1:nrow(phy$edge)){
+			vi<-phy$edge.length[i]
+			phy$edge.length[i]<-vi+vi*scaled.psi*diversity[as.character(phy$edge[i,1])]
+		}
+		D<-vcv(phy)
+		D<-D[names(y),names(y)]
+		Dinv<-solve(D)
+		a<-as.numeric(colSums(Dinv)%*%y/sum(Dinv))
+		sig0<-as.numeric(t(y-a)%*%Dinv%*%(y-a)/nrow(D))
+		return(sig0)
+	}
+	sig0=compute_sig0(res$maximum,x,tree,d)
+	# compute the Hessian
+	compute_Hessian<-function(scaled.psi,sig0,y,phy,d,maxd){
+		psi<-scaled.psi*sig0/(maxd+tol)
+		likHessian<-function(theta,y,phy,d,maxd){
+			sig0<-theta[1]
+			psi<-theta[2]
+			for(i in 1:nrow(phy$edge)){
+				vi<-phy$edge.length[i]
+				phy$edge.length[i]<-vi*(sig0+psi*d[as.character(phy$edge[i,1])]*(maxd+tol))
+			}
+			D<-vcv(phy)
+			D<-D[names(y),names(y)]
+			Dinv<-solve(D)
+			a<-as.numeric(colSums(Dinv)%*%y/sum(Dinv))
+			logL<-as.numeric(-t(y-a)%*%Dinv%*%(y-a)/2-determinant(D)$modulus[1]/2-length(y)*log(2*pi)/2)
+			return(logL)
+		}
+		H<-hessian(likHessian,c(sig0,psi),y=y,phy=phy,d=d,maxd=maxd)
+		return(H)
+	}
+	H<-compute_Hessian(res$maximum,sig0,x,tree,d,maxd)
+	# return results to user
 	if(var(d)>0)
-		return(list(logL=-res$value,sig0=res$par[1],psi=res$par[2]*res$par[1]/(maxd+1),vcv=matrix(solve(res$hessian),2,2,dimnames=list(c("sig0","psi"),c("sig0","psi"))),convergence=(res$convergence==0)))
+		return(list(logL=res$objective,sig0=sig0,psi=sig0*res$maximum/(maxd+tol),vcv=matrix(solve(-H),2,2,dimnames=list(c("sig0","psi"),c("sig0","psi")))))
 	else {
 		message("psi not estimable because diversity is constant through time.")
-		return(list(logL=-res$value,sig0=res$par[1],vcv=matrix(solve(res$hessian[1,1]),1,1,dimnames=list(c("sig0"),c("sig0"))),convergence=(res$convergence==0)))
+		return(list(logL=res$objective,sig0=sig0,vcv=matrix(-1/H[1,1],1,1,dimnames=list(c("sig0"),c("sig0")))))
 	}
 }

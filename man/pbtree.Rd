@@ -2,7 +2,7 @@
 \alias{pbtree}
 \title{Simulate pure-birth stochastic tree or trees}
 \usage{
-pbtree(b=1,n=NULL,t=NULL,scale=NULL,nsim=1)
+pbtree(b=1,n=NULL,t=NULL,scale=NULL,nsim=1,ape=TRUE)
 }
 \arguments{
   \item{b}{birth rate or speciation rate.}
@@ -10,9 +10,10 @@ pbtree(b=1,n=NULL,t=NULL,scale=NULL,nsim=1)
   \item{t}{time stopping criterion (not yet implemented).}
   \item{scale}{if set, rescales tree to have total length \code{scale}.}
   \item{nsim}{number of simulated trees to return.}
+  \item{ape}{return nodes in a 'ape' compatible ordering.}
 }
 \description{
-  This function simulates stochastic pure-birth (Yule) trees.
+  This function simulates stochastic pure-birth (Yule) trees. Note that if \code{ape=FALSE}, then the function will run faster, and the tree is theoretically compatible with the ape \code{'phylo'} standard; however some downstream errors with functions such as \code{link{bind.tree}} have been observed.
 }
 \value{
   a tree or list of trees.

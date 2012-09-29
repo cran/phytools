@@ -3,13 +3,8 @@
 # written by Liam Revell 2011, ref. Revell (2009; Evolution)
 
 phyl.resid<-function(tree,x,Y,method="BM"){
-
-	# check 'ape'
-	if(!require(ape)) stop("function requires 'ape' package. please install.")
-
 	# check tree
 	if(class(tree)!="phylo") stop("tree must be an object of class 'phylo.'")
-
 	# check and sort data
 	# X
 	X<-cbind(1,x)
@@ -58,13 +53,5 @@ likelihood.lambda<-function(lambda,y,X,C){
 	return(logL)
 }
 
-# lambda transformation of C
-lambda.transform<-function(lambda,C){
-	V<-diag(diag(C))
-	C<-C-V
-	n<-nrow(C)
-	C.lambda<-(V+lambda*C)
-	return(C.lambda)
-}
 
 

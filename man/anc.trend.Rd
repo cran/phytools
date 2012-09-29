@@ -28,7 +28,8 @@ anc.trend(phy,x,maxit=2000)
   \code{\link{ace}}, \code{\link{anc.Bayes}}, \code{\link{anc.ML}}, \code{\link{optim}}
 }
 \examples{
-tree<-rtree(50)
+set.seed(10)
+tree<-rtree(30)
 x<-fastBM(tree,mu=2) # simulate using fastBM with a trend (m!=0)
 anc.trend(tree,x) # fit model & estimate ancestral states
 }
