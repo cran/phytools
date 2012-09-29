@@ -2,6 +2,8 @@
 # written by Liam J. Revell 2011
 
 estDiversity<-function(tree,x){
+	# check for & load "ape"	
+	if(!require(ape)) stop("must first install 'ape' package.") # require ape	
 	# some minor error checking
 	if(class(tree)!="phylo") stop("tree object must be of class 'phylo.'")
 	# first get the node heights
@@ -29,21 +31,26 @@ estDiversity<-function(tree,x){
 	d<-rowSums(D)
 }
 
-# returns the heights of each node
+# reroot tree along an edge
 # written by Liam J. Revell 2011
 
-nodeHeights<-function(tree){
-	# compute node heights
-	root<-length(tree$tip)+1
-	X<-matrix(NA,nrow(tree$edge),2)
-	for(i in 1:nrow(tree$edge)){
-		if(tree$edge[i,1]==root){
-			X[i,1]<-0.0
-			X[i,2]<-tree$edge.length[i]
-		} else {
-			X[i,1]<-X[match(tree$edge[i,1],tree$edge[,2]),2]
-			X[i,2]<-X[i,1]+tree$edge.length[i]
-		}
+reroot<-function(tree,node.number,position){
+	if(node.number>length(tree$tip)){
+		# first, re-root the tree at node.number
+		tr<-root(tree,node=node.number,resolve.root=T)
+		# now re-allocate branch length to the two edges descending from the new root node
+		b<-sum(tr$edge.length[tr$edge==(length(tree$tip)+1)])
+		tr$edge.length[tr$edge==(length(tree$tip)+1)]<-c(position,b-position)
+	} else {
+		# first, root the tree at the parent of node.number
+		tr1<-root(tree,node=tree$edge[match(node.number,tree$edge[,2]),1])
+		# now drop tip
+		tr1<-drop.tip(tr1,tree$tip.label[node.number])
+		# create phylo object
+		tr2<-list(edge=matrix(c(3L,1L,3L,2L),2,2,byrow=T),tip.label=c(tree$tip.label[node.number],"NA"),edge.length=c(tree$edge.length[match(node.number,tree$edge[,2])]-position,position),Nnode=1)
+		class(tr2)<-"phylo"
+		tr<-bind.tree(tr2,tr1,where=which(tr2$tip.label=="NA"))
 	}
-	return(X)
+	return(tr)
 }
+

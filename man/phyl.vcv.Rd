@@ -1,6 +1,6 @@
 \name{phyl.vcv}
 \alias{phyl.vcv}
-\title{Compute phylogenetic VCV matrix for a tree & dataset}
+\title{Compute evolutionary VCV matrix for a tree & dataset}
 \usage{
 phyl.vcv(X,C,lambda)
 }

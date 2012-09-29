@@ -1,6 +1,6 @@
 \name{write.simmap}
 \alias{write.simmap}
-\title{Simulate stochastic character map on a phylogenetic tree}
+\title{Write a stochastic character mapped tree to file}
 \usage{
 write.simmap(tree,file=NULL,append=FALSE,map.order=NULL)
 }

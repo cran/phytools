@@ -1,7 +1,7 @@
 # function to simulate a pure-birth phylogenetic tree or trees
-# written by Liam J. Revell 2011
+# written by Liam J. Revell 2011/2012
 
-pbtree<-function(b=1,n=NULL,t=NULL,scale=NULL,nsim=1){
+pbtree<-function(b=1,n=NULL,t=NULL,scale=NULL,nsim=1,ape=TRUE){
 	if(nsim>1){
 		trees<-replicate(nsim,pbtree(b,n,t,scale),simplify=FALSE)
 		class(trees)<-"multiPhylo"
@@ -38,6 +38,7 @@ pbtree<-function(b=1,n=NULL,t=NULL,scale=NULL,nsim=1){
 				h<-max(nodeHeights(tree))
 				tree$edge.length<-scale*tree$edge.length/h
 			}
+			if(ape) tree<-read.tree(text=write.tree(tree))
 			return(tree)
 		}
 	}

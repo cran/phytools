@@ -1,5 +1,5 @@
 # function does phylogenetic canonical correlation analysis (Revell & Harrison 2008)
-# written by Liam Revell 2011
+# written by Liam Revell 2011/2012
 
 phyl.cca<-function(tree,X,Y,lambda=1.0,fixed=TRUE){
 	# misc
@@ -8,16 +8,32 @@ phyl.cca<-function(tree,X,Y,lambda=1.0,fixed=TRUE){
 	mY<-ncol(Y)
 	# compute C
 	C<-vcv.phylo(tree)
-	# reorder Y & C by X
-	C<-C[rownames(X),rownames(X)]
-	Y<-Y[rownames(X),]
-	# set or optimize lambda
-	if(fixed) C<-lambda.transform(lambda,C)
-	else {
-		temp<-optimize(f=likelihood,interval=c(0,1),X=cbind(X,Y),C=C,maximum=TRUE)
-		lambda<-temp$maximum
-		C<-lambda.transform(lambda,C)
+	# if X & Y are data frames, convert to matrix
+	if(is.data.frame(X)) X<-as.matrix(X)
+	if(is.data.frame(Y)) Y<-as.matrix(Y)
+	# check to see if X & Y have rownames
+	if(is.null(rownames(X))){
+		message("X is missing rownames; assuming same order as tree$tip.label")
+		if(nrow(X)!=length(tree$tip)) warning("X does not have the correct number of rows")
+		else rownames(X)<-tree$tip.label
 	}
+	if(is.null(rownames(Y))){
+		message("Y is missing rownames; assuming same order as tree$tip.label")
+		if(nrow(Y)!=length(tree$tip)) warning("Y does not have the correct number of rows")
+		else rownames(Y)<-tree$tip.label
+	}
+	# reorder Y & C by tree$tip.label
+	C<-C[tree$tip.label,tree$tip.label] # I think this is superfluous
+	X<-X[tree$tip.label,]
+	Y<-Y[tree$tip.label,]
+	# set or optimize lambda
+	if(fixed) logL<-likMlambda(lambda,cbind(X,Y),C)
+	else {
+		temp<-optimize(f=likMlambda,interval=c(0,maxLambda(tree)),X=cbind(X,Y),C=C,maximum=TRUE)
+		logL<-temp$objective
+		lambda<-temp$maximum
+	}
+	C<-lambda.transform(lambda,C)
 	# invert C
 	invC<-solve(C)
 	# compute means
@@ -72,46 +88,9 @@ phyl.cca<-function(tree,X,Y,lambda=1.0,fixed=TRUE){
 	colnames(U)<-temp
 	colnames(V)<-temp
 	# return as list
+	lambda<-c(lambda,logL); names(lambda)<-c("lambda","logL")
 	return(list(cor=ccs,xcoef=xcoef,ycoef=ycoef,xscores=U,yscores=V,lambda=lambda,chisq=chiSq,p=pvalues))
 }
 
-# function to compute phylogenetic VCV using joint Pagel's lambda
-# written by Liam Revell 2011
-phyl.vcv<-function(X,C,lambda){
-	C<-lambda.transform(lambda,C)
-	invC<-solve(C)
-	a<-matrix(colSums(invC%*%X)/sum(invC),ncol(X),1)
-	A<-matrix(rep(a,nrow(X)),nrow(X),ncol(X),byrow=T)
-	V<-t(X-A)%*%invC%*%(X-A)/(nrow(C)-1)
-	return(list(C=C,R=V,alpha=a))
-}
-
-# lambda transformation of C
-# written by Liam Revell 2011
-lambda.transform<-function(lambda,C){
-	if(lambda==1) return(C)
-	else {
-		V<-diag(diag(C))
-		C<-C-V
-		C.lambda<-(V+lambda*C)
-		return(C.lambda)
-	}
-}
-
-# likelihood function
-# written by Liam Revell 2011
-likelihood<-function(theta,X,C){
-	# compute R, conditioned on lambda
-	temp<-phyl.vcv(X,C,theta);
-	C<-temp$C; R<-temp$R; a<-temp$alpha
-	# prep
-	n<-nrow(X); m<-ncol(X); D<-matrix(0,n*m,m)
-	for(i in 1:(n*m)) for(j in 1:m) if((j-1)*n<i&&i<=j*n) D[i,j]=1.0
-	y<-as.matrix(as.vector(X))
-	# compute the log-likelihood
-	kronRC<-kronecker(R,C)
-	logL<--t(y-D%*%a)%*%solve(kronRC,y-D%*%a)/2-n*m*log(2*pi)/2-log(det(kronRC))/2
-	return(logL)
-}
 	
 	

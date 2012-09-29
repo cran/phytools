@@ -19,6 +19,6 @@ phytools: Phylogenetic Tools for comparative biology (and other things)
   Maintainer: Liam J. Revell <liam.revell@umb.edu>
 }
 \references{
-    Revell, L. J. (In press) phytools: An R package for phylogenetic comparative biology (and other things). Methods Ecol. Evol. doi:10.1111/j.2041-210X.2011.00169.x
+    Revell, L. J. (2012) phytools: An R package for phylogenetic comparative biology (and other things). Methods Ecol. Evol. \emph{3}, 217-223. doi:10.1111/j.2041-210X.2011.00169.x
 }
 \keyword{package}
