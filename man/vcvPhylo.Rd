@@ -2,7 +2,7 @@
 \alias{vcvPhylo}
 \title{Calculates cophenetic (i.e., phylogenetic VCV) matrix}
 \usage{
-vcvPhylo(tree,anc.nodes=T)
+vcvPhylo(tree, anc.nodes=TRUE)
 }
 \arguments{
   \item{tree}{object of class \code{"phylo"}.}

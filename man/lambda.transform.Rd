@@ -2,7 +2,7 @@
 \alias{lambda.transform}
 \title{Lambda transformation of matrix}
 \usage{
-lambda.transform(lambda,C)
+lambda.transform(lambda, C)
 }
 \arguments{
   \item{lambda}{scalar, usually on the interval 0,1.}

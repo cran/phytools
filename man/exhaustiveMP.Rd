@@ -2,7 +2,7 @@
 \alias{exhaustiveMP}
 \title{Exhaustive and branch & bound MP optimization}
 \usage{
-exhaustiveMP(data,tree=NULL,method="branch.and.bound")
+exhaustiveMP(data, tree=NULL, method="branch.and.bound")
 }
 \arguments{
   \item{data}{is a \code{\link{phyDat}} (Schliep 2011) object containing DNA or other data.}

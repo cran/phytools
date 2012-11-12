@@ -2,7 +2,7 @@
 \alias{phyl.vcv}
 \title{Compute evolutionary VCV matrix for a tree & dataset}
 \usage{
-phyl.vcv(X,C,lambda)
+phyl.vcv(X, C, lambda)
 }
 \arguments{
   \item{lambda}{value for lambda transformation.}

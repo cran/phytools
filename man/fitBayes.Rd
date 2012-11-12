@@ -2,7 +2,7 @@
 \alias{fitBayes}
 \title{Evolutionary model fitting with intraspecific variability using Bayesian MCMC}
 \usage{
-fitBayes(tree,x,ngen=10000,model="BM",method="reduced",control=list())
+fitBayes(tree, x, ngen=10000, model="BM", method="reduced", control=list())
 }
 \arguments{
   \item{tree}{an object of class \code{"phylo"}.}

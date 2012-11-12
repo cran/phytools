@@ -2,7 +2,7 @@
 \alias{make.era.map}
 \title{Create "era" map on a phylogenetic tree}
 \usage{
-make.era.map(tree,limits)
+make.era.map(tree, limits)
 }
 \arguments{
   \item{tree}{a phylogenetic tree as an object of class \code{"phylo"}.}

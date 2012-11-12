@@ -2,7 +2,7 @@
 \alias{fitDiversityModel}
 \title{Fit diversity-dependent phenotypic evolution model}
 \usage{
-fitDiversityModel(tree,x,d=NULL,showTree=TRUE,tol=1e-6)
+fitDiversityModel(tree, x, d=NULL, showTree=TRUE, tol=1e-6)
 }
 \arguments{
   \item{tree}{is a phylogenetic tree in \code{"phylo"} format.}

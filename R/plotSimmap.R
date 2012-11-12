@@ -1,7 +1,7 @@
 # function plots a stochastic character mapped tree
 # written by Liam Revell 2011
 
-plotSimmap<-function(tree,colors=NULL,fsize=1.0,ftype="reg",lwd=2,pts=TRUE,node.numbers=FALSE){
+plotSimmap<-function(tree,colors=NULL,fsize=1.0,ftype="reg",lwd=2,pts=TRUE,node.numbers=FALSE,mar=NULL,add=FALSE,offset=NULL){
 	if(class(tree)=="multiPhylo"){
 		par(ask=TRUE)
 		for(i in 1:length(tree)) plotSimmap(tree[[i]],colors=colors,fsize=fsize,ftype=ftype,lwd=lwd,pts=pts,node.numbers=node.numbers)
@@ -47,15 +47,16 @@ plotSimmap<-function(tree,colors=NULL,fsize=1.0,ftype="reg",lwd=2,pts=TRUE,node.
 			}
 		}
 		# open plot
-		par(mar=c(0.1,0.1,0.1,0.1))
-		plot.new()
+		if(is.null(mar)) par(mar=c(0.1,0.1,0.1,0.1))
+		else par(mar=mar)
+		if(!add) plot.new()
 		if(fsize*max(strwidth(cw$tip.label))<1.0){
 			c<-(1-fsize*max(strwidth(cw$tip.label)))/max(node.height)
 			cw$edge.length<-c*cw$edge.length
 			cw$maps<-lapply(cw$maps,function(x) x<-c*x)
 			node.height<-c*node.height
 		} else message("Font size too large to properly rescale tree to window.")
-		plot.window(xlim=c(0,max(node.height)+fsize*max(strwidth(cw$tip.label))),ylim=c(1,max(Y)))
+		if(!add) plot.window(xlim=c(0,max(node.height)+fsize*max(strwidth(cw$tip.label))),ylim=c(1,max(Y)))
 		for(i in 1:m) lines(node.height[which(cw$edge[,1]==nodes[i]),1],Y[cw$edge[which(cw$edge[,1]==nodes[i]),2]],col=colors[names(cw$maps[[match(nodes[i],cw$edge[,1])]])[1]],lwd=lwd)
 		for(i in 1:nrow(cw$edge)){
 			x<-node.height[i,1]
@@ -76,7 +77,8 @@ plotSimmap<-function(tree,colors=NULL,fsize=1.0,ftype="reg",lwd=2,pts=TRUE,node.
 				}
 			}
 		}
-		for(i in 1:n) if(ftype) text(node.height[which(cw$edge[,2]==i),2],Y[i],cw$tip.label[i],pos=4,offset=0.2*lwd/3+0.2/3,cex=fsize,font=ftype)
+		if(is.null(offset)) offset<-0.2*lwd/3+0.2/3
+		for(i in 1:n) if(ftype) text(node.height[which(cw$edge[,2]==i),2],Y[i],cw$tip.label[i],pos=4,offset=offset,cex=fsize,font=ftype)
 	}
 	# reset margin
 	par(mar=c(5,4,4,2)+0.1)

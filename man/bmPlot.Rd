@@ -2,7 +2,7 @@
 \alias{bmPlot}
 \title{Simulates and visualizes discrete-time Brownian evolution on a phylogeny}
 \usage{
-bmPlot(tree,type="BM",anc=0,sig2=1/1000,ngen=1000,...)
+bmPlot(tree, type="BM", anc=0, sig2=1/1000, ngen=1000, ...)
 }
 \arguments{
   \item{tree}{a phylogenetic tree in \code{"phylo"} format.}

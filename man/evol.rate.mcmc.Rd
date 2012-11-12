@@ -2,7 +2,7 @@
 \alias{evol.rate.mcmc}
 \title{Bayesian MCMC method for identifying exceptional phenotypic diversification in a phylogeny}
 \usage{
-evol.rate.mcmc(tree,x,ngen=10000,control=list())
+evol.rate.mcmc(tree, x, ngen=10000, control=list())
 }
 \arguments{
   \item{tree}{a phylogenetic tree in \code{"phylo"} format.}

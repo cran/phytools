@@ -2,7 +2,7 @@
 \alias{rescaleSimmap}
 \title{Rescale SIMMAP style tree}
 \usage{
-	rescaleSimmap(tree,totalDepth=1.0)
+	rescaleSimmap(tree, totalDepth=1.0)
 }
 \arguments{
 	\item{tree}{a phylogenetic tree in modified \code{"phylo"} format with a discrete character mapping (e.g., see \code{\link{read.simmap}} or \code{\link{make.simmap}}).}

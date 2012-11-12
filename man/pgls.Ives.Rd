@@ -2,7 +2,7 @@
 \alias{pgls.Ives}
 \title{Phylogenetic regression with intraspecific sampling error}
 \usage{
-pgls.Ives(tree,X,y,Vx,Vy,Cxy)
+pgls.Ives(tree, X, y, Vx, Vy, Cxy, lower=c(1e-8,1e-8))
 }
 \arguments{
 	\item{tree}{a phylogenetic tree in \code{"phylo"} format.}
@@ -11,6 +11,7 @@ pgls.Ives(tree,X,y,Vx,Vy,Cxy)
 	\item{Vx}{sampling variances for \code{X}.}
 	\item{Vy}{sampling variances for \code{y}.}
 	\item{Cxy}{sampling covariances between \code{X} and \code{y}.}
+	\item{lower}{vector specifying the lower bounds for estimation for \code{sig2x} and \code{sig2y}, respectively. (Must be >0.)}
 }
 \description{
 	This function fits the phylogenetic regression model with within-species sampling error following Ives et al. (2007).
@@ -25,6 +26,8 @@ pgls.Ives(tree,X,y,Vx,Vy,Cxy)
 	\item{sig2y}{fitted BM rate for \code{y}.}
 	\item{a}{fitted ancestral states for \code{X} and \code{y}.}
 	\item{logL}{log-likelihood.}
+	\item{convergence}{a value for convergence. \code{convergence=0} is good; see \code{\link{optim}} for more details.}
+	\item{message}{a message for convergence.}
 }
 \references{
 	Ives, A. R., P. E. Midford, and T. Garland Jr. 2007. Within-species measurement error in phylogenetic comparative methods. \emph{Systematic Biology}, \bold{56},

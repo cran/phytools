@@ -2,7 +2,7 @@
 \alias{evolvcv.lite}
 \title{Likelihood test for a shift in the evolutionary correlation between traits}
 \usage{
-evolvcv.lite(tree,X,maxit=2000,tol=1e-10)
+evolvcv.lite(tree, X, maxit=2000, tol=1e-10)
 }
 \arguments{
   \item{tree}{a phylogenetic tree in modified \code{"phylo"} format (see \code{\link{read.simmap}}).}

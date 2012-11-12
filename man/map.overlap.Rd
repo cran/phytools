@@ -2,7 +2,7 @@
 \alias{map.overlap}
 \title{Proportional overlap between two mapped character histories on a tree}
 \usage{
-map.overlap(tree1,tree2,tol=1e-6)
+map.overlap(tree1, tree2, tol=1e-6)
 }
 \arguments{
   \item{tree1}{a modified \code{"phylo"} object (see \code{\link{read.simmap}}.}

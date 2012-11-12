@@ -2,7 +2,7 @@
 \alias{fastMRCA}
 \title{Get the MRCA of a pair of tip taxa}
 \usage{
-fastMRCA(tree,sp1,sp2)
+fastMRCA(tree, sp1, sp2)
 }
 \arguments{
   \item{tree}{a phylogenetic tree as an object of class \code{"phylo"}.}

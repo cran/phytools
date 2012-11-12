@@ -2,7 +2,7 @@
 \alias{mrp.supertree}
 \title{Matrix representation parsimony supertree estimation}
 \usage{
-mrp.supertree(phy,weights=NULL)
+mrp.supertree(phy, weights=NULL)
 }
 \arguments{
   \item{phy}{an object of class \code{"multiPhylo"} (i.e., a list of trees).}

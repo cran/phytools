@@ -2,7 +2,7 @@
 \alias{brownie.lite}
 \title{Likelihood test for rate variation}
 \usage{
-brownie.lite(tree,x,maxit=2000,test="chisq",nsim=100,se=NULL)
+brownie.lite(tree, x, maxit=2000, test="chisq", nsim=100, se=NULL)
 }
 \arguments{
   \item{tree}{a phylogenetic tree in modified \code{"phylo"} format (see \code{\link{read.simmap}} and \code{\link{make.simmap}}).}

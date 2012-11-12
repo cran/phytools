@@ -2,7 +2,7 @@
 \alias{phylANOVA}
 \title{Phylogenetic ANOVA and post-hoc tests}
 \usage{
-phylANOVA(tree,x,y,nsim=1000,posthoc=TRUE,p.adj="holm")
+phylANOVA(tree, x, y, nsim=1000, posthoc=TRUE, p.adj="holm")
 }
 \arguments{
   \item{tree}{a phylogenetic tree in \code{"phylo"} format.}

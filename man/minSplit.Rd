@@ -2,7 +2,7 @@
 \alias{minSplit}
 \title{Finding the minimum (median) split in the posterior sample}
 \usage{
-minSplit(tree,split.list,method="sum",printD=FALSE)
+minSplit(tree, split.list, method="sum", printD=FALSE)
 }
 \arguments{
   \item{tree}{a phylogenetic tree in \code{"phylo"} format.}

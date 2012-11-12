@@ -2,7 +2,7 @@
 \alias{phyl.RMA}
 \title{Phylogenetic reduced major axis (RMA) regression}
 \usage{
-phyl.RMA(x,y,tree,method="BM",lambda=NULL,fixed=FALSE,h0=1.0)
+phyl.RMA(x, y, tree, method="BM", lambda=NULL, fixed=FALSE, h0=1.0)
 }
 \arguments{
   \item{x}{vector with names.}

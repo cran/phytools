@@ -1,7 +1,7 @@
 # implements method of Ives et al. 2007 for PGLS regression with sampling error
 # written by Liam J. Revell 2012
 
-pgls.Ives<-function(tree,X,y,Vx,Vy,Cxy){
+pgls.Ives<-function(tree,X,y,Vx,Vy,Cxy,lower=c(1e-8,1e-8)){
 	
 	# likelihood function
 	lik<-function(theta,C,x,y,Mx,My,Mxy){
@@ -33,8 +33,8 @@ pgls.Ives<-function(tree,X,y,Vx,Vy,Cxy){
 	a<-runif(n=2,min=-1,max=1)*c(mean(X),mean(y))
 
 	# optimize regression model
-	r<-optim(c(sig2x,sig2y,b,a),lik,C=C,x=X,y=y,Mx=Vx,My=Vy,Mxy=Cxy,method="L-BFGS-B",lower=c(0.0001,0.0001,-Inf,-Inf,-Inf),control=list(factr=1e10))
+	r<-optim(c(sig2x,sig2y,b,a),lik,C=C,x=X,y=y,Mx=Vx,My=Vy,Mxy=Cxy,method="L-BFGS-B",lower=c(lower,-Inf,-Inf,-Inf),control=list(factr=1e10))
 
 	# return r
-	return(list(beta=c(r$par[5]-r$par[3]*r$par[4],r$par[3]),sig2x=r$par[1],sig2y=r$par[2],a=r$par[4:5],logL=-r$value))
+	return(list(beta=c(r$par[5]-r$par[3]*r$par[4],r$par[3]),sig2x=r$par[1],sig2y=r$par[2],a=r$par[4:5],logL=-r$value,convergence=r$convergence,message=r$message))
 }

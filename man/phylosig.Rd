@@ -2,7 +2,8 @@
 \alias{phylosig}
 \title{Compute phylogenetic signal with two methods}
 \usage{
-phylosig(tree,x,method="K",test=FALSE,nsim=1000,se=NULL,start=NULL,control=list())
+phylosig(tree, x, method="K", test=FALSE, nsim=1000, se=NULL, start=NULL,
+     control=list())
 }
 \arguments{
   \item{tree}{a phylogenetic tree in \code{"phylo"} format.}

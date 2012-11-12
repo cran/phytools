@@ -2,7 +2,7 @@
 \alias{getDescendants}
 \title{Get descendant node numbers}
 \usage{
-getDescendants(tree,node,curr=NULL)
+getDescendants(tree, node, curr=NULL)
 }
 \arguments{
   \item{tree}{a phylogenetic tree as an object of class \code{"phylo"}.}

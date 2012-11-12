@@ -2,7 +2,7 @@
 \alias{sampleFrom}
 \title{Sample from a set of distributions}
 \usage{
-sampleFrom(xbar=0,xvar=1,n=1,randn=NULL,type="norm")
+sampleFrom(xbar=0, xvar=1, n=1, randn=NULL, type="norm")
 }
 \arguments{
   \item{xbar}{a named vector of means.}

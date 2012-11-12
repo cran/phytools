@@ -8,7 +8,7 @@ phylomorphospace3d<-function(tree,X,A=NULL,label=TRUE,control=list()){
 	con[(namc<-names(control))]<-control
 	if(con$simple.axes) con$box<-con$axes<-FALSE
 	con$ftype<-which(c("off","reg","b","i","bi")==con$ftype)-1
-	if(is.null(A)) A<-apply(X,2,function(x,tree) anc.ML(tree,x)$ace,tree=tree)
+	if(is.null(A)) A<-apply(X,2,function(x,tree) fastAnc(tree,x),tree=tree)
 	else A<-A[as.character(1:tree$Nnode+length(tree$tip)),]
 	x<-y<-z<-matrix(NA,nrow(tree$edge),2)
 	X<-X[tree$tip.label,]

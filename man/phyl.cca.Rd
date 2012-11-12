@@ -2,7 +2,7 @@
 \alias{phyl.cca}
 \title{Phylogenetic canonical correlation analysis}
 \usage{
-phyl.cca(tree,X,Y,lambda=1.0,fixed=TRUE)
+phyl.cca(tree, X, Y, lambda=1.0, fixed=TRUE)
 }
 \arguments{
   \item{tree}{a phylogenetic tree in \code{"phylo"} format.}

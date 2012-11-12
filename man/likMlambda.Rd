@@ -2,7 +2,7 @@
 \alias{likMlambda}
 \title{Likelihood for joint lambda}
 \usage{
-likMlambda(lambda,X,C)
+likMlambda(lambda, X, C)
 }
 \arguments{
   \item{lambda}{scalar, usually on the interval 0,1.}

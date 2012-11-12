@@ -9,7 +9,7 @@ phenogram<-function(tree,x,fsize=1.0,ftype="reg",colors=NULL,axes=list()){
 	if(!ftype) fsize=0 
 	H<-nodeHeights(tree)
 	if(length(x)<(length(tree$tip)+tree$Nnode))
-		x<-c(x,anc.ML(tree,x)$ace)
+		x<-c(x,fastAnc(tree,x))
 	else
 		x<-c(x[tree$tip.label],x[as.character(length(tree$tip)+1:tree$Nnode)])
 	x[1:length(tree$tip)]<-x[tree$tip.label]

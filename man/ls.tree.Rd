@@ -2,7 +2,7 @@
 \alias{ls.tree}
 \title{Least squares branch lengths for a given tree}
 \usage{
-ls.tree(tree,D)
+ls.tree(tree, D)
 }
 \arguments{
   \item{tree}{phylogeny.}

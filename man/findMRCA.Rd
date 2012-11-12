@@ -2,7 +2,7 @@
 \alias{findMRCA}
 \title{Get the MRCA of a set of taxa}
 \usage{
-findMRCA(tree,tips=NULL)
+findMRCA(tree, tips=NULL)
 }
 \arguments{
   \item{tree}{a phylogenetic tree as an object of class \code{"phylo"}.}

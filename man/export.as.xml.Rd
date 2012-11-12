@@ -2,7 +2,7 @@
 \alias{export.as.xml}
 \title{Export trees & data in XML format}
 \usage{
-export.as.xml(file,trees,X)
+export.as.xml(file, trees, X)
 }
 \arguments{
 	\item{file}{filename for export.}
