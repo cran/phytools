@@ -2,7 +2,7 @@
 \alias{phyl.pca}
 \title{Phylogenetic principal components analysis}
 \usage{
-phyl.pca(tree,Y,method="BM",mode="cov")
+phyl.pca(tree, Y, method="BM", mode="cov")
 }
 \arguments{
   \item{tree}{a phylogenetic tree in \code{"phylo"} format.}

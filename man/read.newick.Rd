@@ -2,7 +2,7 @@
 \alias{read.newick}
 \title{Read Newick style tree}
 \usage{
-read.newick(file="",text)
+read.newick(file="", text)
 }
 \arguments{
   \item{file}{name of text file with single Newick style tree.}

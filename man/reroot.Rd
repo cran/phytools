@@ -2,7 +2,7 @@
 \alias{reroot}
 \title{Re-root a tree along an edge}
 \usage{
-reroot(tree,node.number,position)
+reroot(tree, node.number, position)
 }
 \arguments{
   \item{tree}{a phylogenetic tree in \code{"phylo"} format.}

@@ -2,7 +2,7 @@
 \alias{anc.Bayes}
 \title{Bayesian ancestral character estimation}
 \usage{
-anc.Bayes(tree,x,ngen=10000,control=list())
+anc.Bayes(tree, x, ngen=10000, control=list())
 }
 \arguments{
   \item{tree}{an object of class \code{"phylo"}.}

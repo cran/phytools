@@ -1,5 +1,6 @@
 # This function creates a phylomorsphace plot of Sidlauskas (2006)
-# Written by Liam J. Revell 2010 (updated 3-8-2011)
+# Written by Liam J. Revell 2010/2011/2012
+
 phylomorphospace<-function(tree,X,A=NULL,label=TRUE,control=list()){
 
 	# some minor error checking
@@ -9,8 +10,9 @@ phylomorphospace<-function(tree,X,A=NULL,label=TRUE,control=list()){
 
 	# check to see if A should be estimated
 	if(is.null(A)){
+		# load dependencies
 		A<-matrix(NA,tree$Nnode,2,dimnames=list(as.character(length(tree$tip.label)+1:tree$Nnode),colnames(X)))
-		for(i in 1:2) A[,i]<-ace(X[,i],tree)$ace
+		for(i in 1:2) A[,i]<-fastAnc(tree,X[,i])
 	}
 
 	# control list

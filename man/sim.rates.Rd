@@ -2,7 +2,7 @@
 \alias{sim.rates}
 \title{Brownian simulation with multiple evolutionary rates}
 \usage{
-sim.rates(mtree,sig2,anc=0,nsim=1,internal=F,plot=F)
+sim.rates(mtree, sig2, anc=0, nsim=1, internal=F, plot=F)
 }
 \arguments{
   \item{mtree}{is a stochastic map format phylogenetic tree in modified \code{"phylo"} format (e.g., see \code{\link{make.simmap}}).}

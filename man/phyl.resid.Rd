@@ -2,7 +2,7 @@
 \alias{phyl.resid}
 \title{Phylogenetic size-correction via GLS regression}
 \usage{
-phyl.resid(tree,x,Y,method="BM")
+phyl.resid(tree, x, Y, method="BM")
 }
 \arguments{
   \item{tree}{a phylogenetic tree in \code{"phylo"} format.}

@@ -2,7 +2,7 @@
 \alias{starTree}
 \title{Create star phylogeny}
 \usage{
-starTree(species,branch.lengths=NULL)
+starTree(species, branch.lengths=NULL)
 }
 \arguments{
   \item{species}{a list of species.}

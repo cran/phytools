@@ -2,7 +2,7 @@
 \alias{sim.history}
 \title{Simulate stochastic character history under some model}
 \usage{
-sim.history(tree,Q,anc=NULL,nsim=1)
+sim.history(tree, Q, anc=NULL, nsim=1)
 }
 \arguments{
   \item{tree}{a phylogenetic tree as an object of class \code{"phylo"}.}

@@ -2,7 +2,7 @@
 \alias{pbtree}
 \title{Simulate pure-birth stochastic tree or trees}
 \usage{
-pbtree(b=1,n=NULL,t=NULL,scale=NULL,nsim=1,ape=TRUE)
+pbtree(b=1, n=NULL, t=NULL, scale=NULL, nsim=1, ape=TRUE)
 }
 \arguments{
   \item{b}{birth rate or speciation rate.}

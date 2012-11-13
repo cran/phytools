@@ -3,14 +3,21 @@
 # "extinction" in which all branches leading to extinct taxa (or prior to the MRCA of extant species) are plotted with red dashed lines;
 # "traitgram3d" which creates a 3D graph projecting the tree into two-dimensional morphospace (with time as the third axis)
 # "droptip" creates a two panel plot with the tips to be pruned marked (panel 1) and then removed, and returns the pruned tree
+# "xkcd" creates an xkcd-comic style phylogeny
+# "densitymap" maps the posterior density of a binary stochastic character mapping
+# "contmap" maps reconstructed trait evolution for a continuous character on the tree
 # written by Liam J. Revell 2012
 
-fancyTree<-function(tree,type=c("extinction","traitgram3d","droptip"),...,control=list()){
-	if(class(tree)!="phylo") stop("tree should be an object of class 'phylo'")
-	type<-matchType(type,c("extinction","traitgram3d","droptip"))
+fancyTree<-function(tree,type=c("extinction","traitgram3d","droptip","xkcd","densitymap","contmap"),...,control=list()){
+	type<-matchType(type,c("extinction","traitgram3d","droptip","xkcd","densitymap"))
+	if(class(tree)!="phylo"&&type%in%c("extinction","traitgram3d","droptip","xkcd")) stop("tree should be an object of class 'phylo'")
+	else if(class(tree)!="multiPhylo"&&type=="densitymap") stop("for type='densitymap' tree should be an object of class 'multiPhylo'")
 	if(type=="extinction") extinctionTree(tree)
 	else if(type=="traitgram3d") traitgram3d(tree,...,control=control)
 	else if(type=="droptip") return(droptipTree(tree,...))
+	else if(type=="xkcd") plotXkcdTree(tree,...)
+	else if(type=="densitymap") plotDensityMap(tree,...)
+	else if(type=="contmap") plotContMap(tree,...)
 	else stop(paste("do not recognize type = \"",type,"\"",sep=""))
 }
 
@@ -91,4 +98,78 @@ droptipTree<-function(tree,...){
 	plot.phylo(dtree,edge.width=2,no.margin=TRUE,root.edge=TRUE)
 	return(dtree)
 }
+
+# plotXkcdTree internal function
+# written by Liam J. Revell 2012
+
+plotXkcdTree<-function(tree,...){
+	if(hasArg(file)) file<-list(...)$file
+	else file<-NULL
+	if(hasArg(gsPath)) gsPath<-list(...)$gsPath
+	else gsPath<-NULL
+	if(hasArg(fsize)) fsize<-list(...)$fsize
+	else fsize<-2
+	if(hasArg(lwd)) lwd<-list(...)$lwd
+	else lwd<-7
+	if(hasArg(color)) color<-list(...)$color
+	else color<-"blue"
+	if(hasArg(dim)) dim<-list(...)$dim
+	else dim<-c(8.5,11)
+	if(hasArg(jitter)) jitter<-list(...)$jitter
+	else jitter<-0.001
+	if(hasArg(waver)) waver<-list(...)$waver
+	else waver<-c(0.1,0.1)
+	if(hasArg(tilt)) tilt<-list(...)$tilt
+	else tilt<-0
+	if(hasArg(right)) right<-list(...)$right
+	else right<-TRUE
+	xkcdTree(tree,file,gsPath,fsize,lwd,color,dim,jitter,waver,tilt,right)
+}
+
+# plotDensityMap internal function
+# written by Liam J. Revell 2012
+
+plotDensityMap<-function(trees,...){
+	if(hasArg(res)) res<-list(...)$res
+	else res<-100
+	if(hasArg(fsize)) fsize<-list(...)$fsize
+	else fsize<-NULL
+	if(hasArg(ftype)) ftype<-list(...)$ftype
+	else ftype<-NULL
+	if(hasArg(lwd)) lwd<-list(...)$lwd
+	else lwd<-3
+	if(hasArg(check)) check<-list(...)$check
+	else check<-FALSE
+	if(hasArg(legend)) legend<-list(...)$legend
+	else legend<-NULL
+	if(hasArg(outline)) outline<-list(...)$outline
+	else outline<-FALSE
+	densityMap(trees,res,fsize,check,legend,outline)
+}
+
+# plotContMap internal function
+# written by Liam J. Revell 2012
+
+plotContMap<-function(tree,...){
+	if(hasArg(x)) x<-list(...)$x
+	else stop("need to provide vector 'x' of phenotypic trait values")
+	if(hasArg(res)) res<-list(...)$res
+	else res<-100
+	if(hasArg(fsize)) fsize<-list(...)$fsize
+	else fsize<-NULL
+	if(hasArg(ftype)) ftype<-list(...)$ftype
+	else ftype<-NULL
+	if(hasArg(lwd)) lwd<-list(...)$lwd
+	else lwd<-4
+	if(hasArg(legend)) legend<-list(...)$legend
+	else legend<-NULL
+	if(hasArg(lims)) lims<-list(...)$lims
+	else lims<-NULL
+	if(hasArg(outline)) outline<-list(...)$outline
+	else outline<-TRUE
+	if(hasArg(sig)) sig<-list(...)$sig
+	else sig<-3
+	contMap(tree,x,res,fsize,ftype,lwd,legend,lims,outline,sig)
+}
+
 

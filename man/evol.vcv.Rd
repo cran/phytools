@@ -2,7 +2,7 @@
 \alias{evol.vcv}
 \title{Likelihood test for variation in the evolutionary VCV matrix}
 \usage{
-evol.vcv(scm.tre,dat,maxit=2000,vars=FALSE)
+evol.vcv(scm.tre, dat, maxit=2000, vars=FALSE)
 }
 \arguments{
   \item{scm.tre}{a phylogenetic tree in modified \code{"phylo"} format (see \code{\link{read.simmap}}).}

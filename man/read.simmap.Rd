@@ -2,7 +2,7 @@
 \alias{read.simmap}
 \title{Read SIMMAP style trees from file}
 \usage{
-read.simmap(file="",text,format="phylip",rev.order=TRUE,version=1)
+read.simmap(file="", text, format="phylip", rev.order=TRUE, version=1)
 }
 \arguments{
   \item{file}{name of text file with one or multiple SIMMAP v1.0 or v1.5 style trees.}
@@ -32,7 +32,8 @@ read.simmap(file="",text,format="phylip",rev.order=TRUE,version=1)
   \code{\link{brownie.lite}}, \code{\link{evol.vcv}}, \code{\link{read.tree}}, \code{\link{read.nexus}}
 }
 \examples{
-X<-"((A:{aqua,0.3:terr,0.4:aqua,0.3},B:{aqua,1.0}):{aqua,1.0},(C:{aqua,0.25:terr,0.75},D:{aqua,1.0}):{aqua,1.0});"
+X<-
+"((A:{aqua,0.3:terr,0.4:aqua,0.3},B:{aqua,1.0}):{aqua,1.0},(C:{aqua,0.25:terr,0.75},D:{aqua,1.0}):{aqua,1.0});"
 phy<-read.simmap(text=X)
 }
 \keyword{phylogenetics}

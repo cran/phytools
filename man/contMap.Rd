@@ -1,0 +1,37 @@
+\name{contMap}
+\alias{contMap}
+\title{Map continuous trait evolution on the tree}
+\usage{
+	contMap(tree, x, res=100, fsize=NULL, ftype=NULL, lwd=4, legend=NULL,
+     lims=NULL, outline=TRUE, sig=3)
+}
+\arguments{
+ 	\item{tree}{object of class \code{"phylo"}.}
+	\item{x}{vector of phenotypic trait values for species. \code{names(x)} should contain the species names and match \code{tree$tip.label}.}
+	\item{res}{resolution for gradient plotting. Larger numbers indicate a finer (smoother) gradient.}
+	\item{fsize}{relative font size - can be a vector with the second element giving the font size for the legend.}
+	\item{ftype}{font type - see options in \code{\link{plotSimmap}}. As with \code{fsize}, can be a vector with the second element giving font type for the legend.}
+	\item{lwd}{line width for branches.}
+	\item{legend}{if \code{FALSE} no legend is plotted; if a numeric value, it gives the length of the legend in units of branch length. Default is 0.5 times the total tree length.}
+	\item{lims}{range for the color map. By default, this will be \code{c(min(x),max(x))}, and should always include this range.}
+	\item{outline}{logical value indicating whether or not to outline the branches of the tree in black.}
+	\item{sig}{the number of decimal places to show on the legend limits.}
+}
+\description{
+	Function plots a tree with a mapped continuous character. The mapping is accomplished by estimating states at internal nodes using ML with \code{link{fastAnc}}, and the interpolating the states along each edge using equation [2] of Felsenstein (1985).
+}
+\value{
+	plots a tree.
+}
+\references{
+	Revell, L. J. \emph{Submitted.} Two new graphical methods for mapping trait evolution on phylogenies. 
+
+	Felsenstein, J. 1985. Phylogenies and the comparative method. \emph{American Naturalist}, \bold{125}, 1-15. 
+}
+\author{Liam Revell \email{liam.revell@umb.edu}}
+\seealso{
+	\code{\link{densityMap}}, \code{\link{fastAnc}}, \code{\link{plotSimmap}}
+}
+\keyword{phylogenetics}
+\keyword{plotting}
+\keyword{comparative method}

@@ -2,7 +2,7 @@
 \alias{paintSubTree}
 \title{Paint sub-trees with a discrete character}
 \usage{
-paintSubTree(tree,node,state,anc.state="1",stem=FALSE)
+paintSubTree(tree, node, state, anc.state="1", stem=FALSE)
 }
 \arguments{
   \item{tree}{a phylogenetic tree as an object of class \code{"phylo"} or a modified object with mapped character traits.}

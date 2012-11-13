@@ -1,7 +1,7 @@
 # function computes phylogenetic variance-covariance matrix, including for internal nodes
 # written by Liam J. Revell 2011
 
-vcvPhylo<-function(tree,anc.nodes=T){
+vcvPhylo<-function(tree,anc.nodes=TRUE){
 	n<-length(tree$tip.label)
 	h<-nodeHeights(tree)[order(tree$edge[,2]),2]
 	h<-c(h[1:n],0,h[(n+1):length(h)])

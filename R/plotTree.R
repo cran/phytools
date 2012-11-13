@@ -1,15 +1,33 @@
 # function plots a tree; in the new version this is just a wrapper for plotSimmap
 # written by Liam Revell 2012
 
-plotTree<-function(tree,color=NULL,fsize=1.0,ftype="reg",lwd=2,pts=TRUE,node.numbers=FALSE){
+plotTree<-function(tree,...){
+	if(hasArg(color)) color<-list(...)$color
+	else color<-NULL
+	if(hasArg(fsize)) fsize<-list(...)$fsize
+	else fsize<-1.0
+	if(hasArg(ftype)) ftype<-list(...)$ftype
+	else ftype<-"reg"
+	if(hasArg(lwd)) lwd<-list(...)$lwd
+	else lwd<-2
+	if(hasArg(pts)) pts<-list(...)$pts
+	else pts<-FALSE
+	if(hasArg(node.numbers)) node.numbers<-list(...)$node.numbers
+	else node.numbers<-FALSE
+	if(hasArg(mar)) mar<-list(...)$mar
+	else mar<-NULL
+	if(hasArg(add)) add<-list(...)$add
+	else add<-FALSE
+	if(hasArg(offset)) offset<-list(...)$offset
+	else offset<-NULL
 	if(class(tree)=="multiPhylo"){
 		par(ask=TRUE)
 		if(!is.null(color)) names(color)<-"1"
-		for(i in 1:length(tree)) plotTree(tree[[i]],color=color,fsize=fsize,ftype=ftype,lwd=lwd,pts=pts,node.numbers=node.numbers)
+		for(i in 1:length(tree)) plotTree(tree[[i]],color=color,fsize=fsize,ftype=ftype,lwd=lwd,pts=pts,node.numbers=node.numbers,mar=mar,add=add,offset=offset)
 	} else {
 		tree$maps<-as.list(tree$edge.length)
 		for(i in 1:length(tree$maps)) names(tree$maps[[i]])<-c("1")
 		if(!is.null(color)) names(color)<-"1"
-		plotSimmap(tree,colors=color,fsize=fsize,ftype=ftype,lwd=lwd,pts=pts,node.numbers=node.numbers)
+		plotSimmap(tree,colors=color,fsize=fsize,ftype=ftype,lwd=lwd,pts=pts,node.numbers=node.numbers,mar=mar,add=add,offset=offset)
 	}
 }

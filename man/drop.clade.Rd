@@ -2,7 +2,7 @@
 \alias{drop.clade}
 \title{Drop clade from a tree}
 \usage{
-drop.clade(tree,tip)
+drop.clade(tree, tip)
 }
 \arguments{
   \item{tree}{phylogeny.}

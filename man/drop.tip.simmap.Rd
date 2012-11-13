@@ -2,7 +2,7 @@
 \alias{drop.tip.simmap}
 \title{Drop tip from SIMMAP format tree}
 \usage{
-drop.tip.simmap(tree,tip)
+drop.tip.simmap(tree, tip)
 }
 \arguments{
   \item{tree}{a phylogenetic tree in modified \code{"phylo"} format (see \code{\link{read.simmap}}).}

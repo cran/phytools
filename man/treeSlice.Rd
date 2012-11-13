@@ -2,7 +2,7 @@
 \alias{treeSlice}
 \title{Slices the tree at a particular point and returns all subtrees}
 \usage{
-treeSlice(tree,slice,trivial=FALSE)
+treeSlice(tree, slice, trivial=FALSE)
 }
 \arguments{
   \item{tree}{is a phylogenetic tree in \code{"phylo"} format.}

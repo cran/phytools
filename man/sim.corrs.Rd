@@ -2,7 +2,7 @@
 \alias{sim.corrs}
 \title{Multivariate Brownian simulation with multiple correlations and rates}
 \usage{
-sim.corrs(tree,vcv,anc=NULL,internal=FALSE)
+sim.corrs(tree, vcv, anc=NULL, internal=FALSE)
 }
 \arguments{
   \item{tree}{is a phylogenetic tree in 'phylo' format; or a modified 'phylo' tree with a mapped discrete character.}

@@ -2,7 +2,7 @@
 \alias{threshBayes}
 \title{Threshold model using Bayesian MCMC}
 \usage{
-threshBayes(tree,X,types=NULL,ngen=1000,control=list())
+threshBayes(tree, X, types=NULL, ngen=1000, control=list())
 }
 \arguments{
   \item{tree}{an object of class \code{"phylo"}.}

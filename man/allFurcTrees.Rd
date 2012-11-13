@@ -2,7 +2,7 @@
 \alias{allFurcTrees}
 \title{Generate all bi- and multifurcating unrooted trees}
 \usage{
-allFurcTrees(n,tip.label=NULL,to.plot=TRUE)
+allFurcTrees(n, tip.label=NULL, to.plot=TRUE)
 }
 \arguments{
   \item{n}{an integer giving the desired number of species.}

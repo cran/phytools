@@ -2,7 +2,7 @@
 \alias{ltt}
 \title{Creates lineage-through-time plot (including extinct lineages)}
 \usage{
-ltt(tree,plot=TRUE,drop.extinct=FALSE,log.lineages=TRUE,gamma=TRUE)
+ltt(tree, plot=TRUE, drop.extinct=FALSE, log.lineages=TRUE, gamma=TRUE)
 }
 \arguments{
   \item{tree}{is a phylogenetic tree in \code{"phylo"} format, or an object of class \code{"multiPhylo"} containing a list of phylogenetic trees.}

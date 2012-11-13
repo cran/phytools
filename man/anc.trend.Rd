@@ -2,7 +2,7 @@
 \alias{anc.trend}
 \title{Ancestral character estimation with a trend}
 \usage{
-anc.trend(phy,x,maxit=2000)
+anc.trend(phy, x, maxit=2000)
 }
 \arguments{
   \item{phy}{an object of class \code{"phylo"}.}

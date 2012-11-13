@@ -3,8 +3,8 @@
 \alias{getExtinct}
 \title{Returns a list of the extant or extinct lineages in a tree containing non-contemporaneous tips}
 \usage{
-getExtant(tree,tol=1e-8)
-getExtinct(tree,tol=1e-8)
+getExtant(tree, tol=1e-8)
+getExtinct(tree, tol=1e-8)
 }
 \arguments{
   \item{tree}{is a phylogenetic tree in \code{"phylo"} format with some tips that are non-contemporaneous (i.e., end before the present).}

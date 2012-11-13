@@ -2,7 +2,7 @@
 \alias{brownieREML}
 \title{REML version of brownie.lite}
 \usage{
-brownieREML(tree,x,maxit=2000)
+brownieREML(tree, x, maxit=2000)
 }
 \arguments{
   \item{tree}{a phylogenetic tree in modified \code{"phylo"} format (see \code{\link{read.simmap}} and \code{\link{make.simmap}}).}

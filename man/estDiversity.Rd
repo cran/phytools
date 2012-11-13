@@ -2,7 +2,7 @@
 \alias{estDiversity}
 \title{Estimate diversity at each node of the tree}
 \usage{
-estDiversity(tree,x)
+estDiversity(tree, x)
 }
 \arguments{
   \item{tree}{is a phylogenetic tree in \code{"phylo"} format.}

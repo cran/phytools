@@ -2,7 +2,7 @@
 \alias{reorderSimmap}
 \title{Reorder edges of a simmap tree}
 \usage{
-reorderSimmap(tree,order="cladewise")
+reorderSimmap(tree, order="cladewise")
 }
 \arguments{
   \item{tree}{a modified object of class \code{"phylo"}.}

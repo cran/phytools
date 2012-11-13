@@ -2,7 +2,7 @@
 \alias{add.everywhere}
 \title{Add tip to all edges in a tree}
 \usage{
-add.everywhere(tree,tip.name)
+add.everywhere(tree, tip.name)
 }
 \arguments{
   \item{tree}{an object of class \code{"phylo"}.}

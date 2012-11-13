@@ -83,3 +83,22 @@ maxLambda<-function(tree){
 		return(max(H[,2])/max(H[,1]))
 	} else return(1)
 }
+
+# function to match nodes between trees
+# written by Liam J. Revell 2012
+
+matchNodes<-function(tr1,tr2){
+	desc.tr1<-lapply(1:tr1$Nnode+length(tr1$tip),function(x) extract.clade(tr1,x)$tip.label)
+	names(desc.tr1)<-1:tr1$Nnode+length(tr1$tip)
+	desc.tr2<-lapply(1:tr2$Nnode+length(tr2$tip),function(x) extract.clade(tr2,x)$tip.label)
+	names(desc.tr2)<-1:tr2$Nnode+length(tr2$tip)
+	Nodes<-matrix(NA,length(desc.tr1),2,dimnames=list(NULL,c("tr1","tr2")))
+	for(i in 1:length(desc.tr1)){
+		Nodes[i,1]<-as.numeric(names(desc.tr1)[i])
+		for(j in 1:length(desc.tr2))
+			if(all(desc.tr1[[i]]%in%desc.tr2[[j]])&&all(desc.tr2[[j]]%in%desc.tr1[[i]]))
+				Nodes[i,2]<-as.numeric(names(desc.tr2)[j])
+	}
+	return(Nodes)
+}
+

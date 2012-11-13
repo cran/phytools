@@ -2,7 +2,7 @@
 \alias{paste.tree}
 \title{Paste two trees together}
 \usage{
-paste.tree(tr1,tr2)
+paste.tree(tr1, tr2)
 }
 \arguments{
   \item{tr1}{receptor tree.}

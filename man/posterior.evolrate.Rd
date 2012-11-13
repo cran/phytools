@@ -2,7 +2,7 @@
 \alias{posterior.evolrate}
 \title{Analysis of the posterior sample from evol.rate.mcmc}
 \usage{
-posterior.evolrate(tree,ave.shift,mcmc,tips,showTree=FALSE)
+posterior.evolrate(tree, ave.shift, mcmc, tips, showTree=FALSE)
 }
 \arguments{
   \item{tree}{a phylogenetic tree in \code{"phylo"} format.}

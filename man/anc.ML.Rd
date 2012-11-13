@@ -2,7 +2,7 @@
 \alias{anc.ML}
 \title{Ancestral character estimation using likelihood}
 \usage{
-anc.ML(tree,x,maxit=2000)
+anc.ML(tree, x, maxit=2000)
 }
 \arguments{
   \item{tree}{an object of class \code{"phylo"}.}

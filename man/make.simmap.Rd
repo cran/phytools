@@ -2,7 +2,7 @@
 \alias{make.simmap}
 \title{Simulate stochastic character map on a phylogenetic tree}
 \usage{
-make.simmap(tree,x,model="SYM",nsim=1)
+make.simmap(tree, x, model="SYM", nsim=1)
 }
 \arguments{
   \item{tree}{a phylogenetic tree as an object of class \code{"phylo"}.}

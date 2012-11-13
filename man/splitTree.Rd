@@ -2,7 +2,7 @@
 \alias{splitTree}
 \title{Split tree at a point}
 \usage{
-splitTree(tree,split)
+splitTree(tree, split)
 }
 \arguments{
   \item{tree}{phylogenetic tree.}
