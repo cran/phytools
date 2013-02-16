@@ -6,7 +6,7 @@
 # "xkcd" creates an xkcd-comic style phylogeny
 # "densitymap" maps the posterior density of a binary stochastic character mapping
 # "contmap" maps reconstructed trait evolution for a continuous character on the tree
-# written by Liam J. Revell 2012
+# written by Liam J. Revell 2012, 2013
 
 fancyTree<-function(tree,type=c("extinction","traitgram3d","droptip","xkcd","densitymap","contmap"),...,control=list()){
 	type<-matchType(type,c("extinction","traitgram3d","droptip","xkcd","densitymap"))
@@ -21,16 +21,6 @@ fancyTree<-function(tree,type=c("extinction","traitgram3d","droptip","xkcd","den
 	else stop(paste("do not recognize type = \"",type,"\"",sep=""))
 }
 
-# match type
-# written by Liam J. Revell 2012
-
-matchType<-function(type,types){
-	for(i in 1:length(types))
-		if(all(strsplit(type,split="")[[1]]==strsplit(types[i],split="")[[1]][1:length(strsplit(type,split="")[[1]])]))
-			type=types[i]
-	return(type)
-}
-
 # extinctionTree internal function
 # written by Liam J. Revell 2012
 
@@ -41,11 +31,11 @@ extinctionTree<-function(tree){
 	ca<-findMRCA(tree,extant)
 	root.node<-length(tree$tip)+1
 	if(ca!=root.node){
-		z<-setdiff(Descendants(tree,root.node,type="all"),Descendants(tree,ca,type="all"))
+		z<-setdiff(getDescendants(tree,root.node),getDescendants(tree,ca))
 		edges[as.character(z)]<-1
 	}
-	z<-Descendants(tree,ca,type="all")
-	y<-Descendants(tree,z)
+	z<-getDescendants(tree,ca)
+	y<-lapply(z,getDescendants,tree=tree)
 	for(i in 1:length(z)) if(!any(tree$tip.label[y[[i]]]%in%extant)) edges[as.character(z[i])]<-1
 	plot.phylo(tree,edge.color=edges+1,edge.lty=edges+1,edge.width=2,no.margin=TRUE)
 }
@@ -86,11 +76,17 @@ droptipTree<-function(tree,...){
 	ca<-findMRCA(tree,keep)
 	root.node<-length(tree$tip)+1
 	if(ca!=root.node){
-		z<-setdiff(Descendants(tree,root.node,type="all"),Descendants(tree,ca,type="all"))
+		z<-setdiff(getDescendants(tree,root.node),getDescendants(tree,ca))
 		edges[as.character(z)]<-1
 	}
-	z<-Descendants(tree,ca,type="all")
-	y<-Descendants(tree,z)
+	z<-getDescendants(tree,ca)
+	foo<-function(x,tree){
+		n<-length(tree$tip.label)
+		y<-getDescendants(tree,x)
+		y<-y[y<=n]
+		return(y)
+	}
+	y<-lapply(z,foo,tree=tree)
 	for(i in 1:length(z)) if(!any(tree$tip.label[y[[i]]]%in%keep)) edges[as.character(z[i])]<-1
 	par(mfrow=c(2,1))
 	plot.phylo(tree,edge.color=edges+1,edge.lty=edges+1,edge.width=2,no.margin=TRUE)

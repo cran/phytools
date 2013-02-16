@@ -1,7 +1,7 @@
 # implements method of Ives et al. 2007 for PGLS regression with sampling error
-# written by Liam J. Revell 2012
+# written by Liam J. Revell 2012, 2013
 
-pgls.Ives<-function(tree,X,y,Vx,Vy,Cxy,lower=c(1e-8,1e-8)){
+pgls.Ives<-function(tree,X,y,Vx=NULL,Vy=NULL,Cxy=NULL,lower=c(1e-8,1e-8)){
 	
 	# likelihood function
 	lik<-function(theta,C,x,y,Mx,My,Mxy){
@@ -17,6 +17,50 @@ pgls.Ives<-function(tree,X,y,Vx,Vy,Cxy,lower=c(1e-8,1e-8)){
 		L<--2*n/2*log(2*pi)-(1/2)*determinant(Psi,logarithm=TRUE)$modulus[1]-(1/2)*t(z-D%*%a)%*%solve(Psi)%*%(z-D%*%a)
 		return(-L)
 	}
+
+	# check data input format
+	Xbar<-ybar<-NULL
+	if((length(X)>length(unique(names(X))))&&is.null(Vx)){
+		a<-aggregate(X,by=list(names(X)),FUN=mean)
+		Xbar<-setNames(a[,2],a[,1])
+		a<-aggregate(X,by=list(names(X)),FUN=var)
+		Vx<-setNames(a[,2],a[,1])
+		nx<-summary(as.factor(names(X)))[names(Vx)]
+		Vx<-Vx/nx
+		if(any(is.na(Vx))){
+			warning("Some species contain only one sample. Substituting mean variance.",call.=FALSE)
+			Vx[which(is.na(Vx))]<-mean(Vx*nx,na.rm=TRUE)
+		}
+		rm(a,nx)
+	}
+	if((length(y)>length(unique(names(y))))&&is.null(Vy)){
+		a<-aggregate(y,by=list(names(y)),FUN=mean)
+		ybar<-setNames(a[,2],a[,1])
+		a<-aggregate(y,by=list(names(y)),FUN=var)
+		Vy<-setNames(a[,2],a[,1])
+		ny<-summary(as.factor(names(y)))[names(Vy)]
+		Vy<-Vy/ny
+		if(any(is.na(Vy))){
+			warning("Some species contain only one sample. Substituting mean variance.",call.=FALSE)
+			Vy[which(is.na(Vy))]<-mean(Vy*ny,na.rm=TRUE)
+		}
+		rm(a,ny)
+	}
+	if(is.null(Cxy)){
+		a<-aggregate(X,by=list(names(X)),FUN=mean); a<-setNames(a[,2],a[,1])
+		b<-aggregate(y,by=list(names(y)),FUN=mean); b<-setNames(b[,2],b[,1])
+		c<-(X-a[names(X)])*(y-b[names(y)])
+		d<-aggregate(c,by=list(names(c)),FUN=sum); d<-setNames(d[,2],d[,1])
+		nxy<-summary(as.factor(names(y)))[names(d)]
+		Cxy<-d/(nxy-1)/nxy
+		if(any(is.na(Cxy))){
+			warning("Some species contain only one sample. Substituting mean variance.",call.=FALSE)
+			Cxy[which(is.na(Cxy))]<-mean(Cxy*nxy,na.rm=TRUE)
+		}
+		rm(a,b,c,nxy)
+	}
+	if(!is.null(Xbar)) X<-Xbar
+	if(!is.null(ybar)) y<-ybar
 
 	# perform calculation & organization
 	C<-vcv.phylo(tree)

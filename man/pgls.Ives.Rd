@@ -2,15 +2,15 @@
 \alias{pgls.Ives}
 \title{Phylogenetic regression with intraspecific sampling error}
 \usage{
-pgls.Ives(tree, X, y, Vx, Vy, Cxy, lower=c(1e-8,1e-8))
+pgls.Ives(tree, X, y, Vx=NULL, Vy=NULL, Cxy=NULL, lower=c(1e-8,1e-8))
 }
 \arguments{
 	\item{tree}{a phylogenetic tree in \code{"phylo"} format.}
-	\item{X}{a named vector containing a \emph{single} independent variable (multiple independent variables to be added).}
-	\item{y}{vector the dependent variable.}
-	\item{Vx}{sampling variances for \code{X}.}
-	\item{Vy}{sampling variances for \code{y}.}
-	\item{Cxy}{sampling covariances between \code{X} and \code{y}.}
+	\item{X}{a named vector containing a \emph{single} independent variable (multiple independent variables to be added). \code{X} can contain the species means, or a single long vector containing the sample of values for each species. In the latter case the \code{names(X)} will be repeating - all samples from the same species should have the same name.}
+	\item{y}{vector the dependent variable. Can be species means or individual values, as for \code{X}.}
+	\item{Vx}{sampling variances for \code{X}. If \code{NULL}, then the within-species variance is computed from the data assuming that individual samples, not species means, have been provided in \code{X}.}
+	\item{Vy}{sampling variances for \code{y}. If \code{NULL}, then the within-species variance is computed from the data assuming that individual samples, not species means, have been provided in \code{y}.}
+	\item{Cxy}{sampling covariances between \code{X} and \code{y}. This will also be computed from the data if \code{Cxy==NULL}. Note than in this case - but not for the calculation of \code{Vx} and \code{Vy}, the same number of observations and the same ordering must be provided for \code{X} and \code{y}. If this is not the case, then it is assumed that different individuals have been sampled for \code{X} and \code{y} and thus \code{Cxy} is assumed to be zero for all species.}
 	\item{lower}{vector specifying the lower bounds for estimation for \code{sig2x} and \code{sig2y}, respectively. (Must be >0.)}
 }
 \description{

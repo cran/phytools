@@ -1,5 +1,5 @@
 # function
-# written by Liam J. Revell 2011, 2012
+# written by Liam J. Revell 2011, 2012, 2013
 
 mcmcLambda<-function(tree,x,ngen=10000,control=list()){
 
@@ -135,10 +135,3 @@ mcmcLambda<-function(tree,x,ngen=10000,control=list()){
 	return(X)
 }
 
-# computes maximum value of lambda
-# written by Liam Revell 2011
-
-maxLambda<-function(tree){
-	H<-nodeHeights(tree)
-	max(H[,2])/max(H[,1])
-}

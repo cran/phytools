@@ -1,14 +1,14 @@
 # sim.corrs
-# written by Liam J. Revell 2012
+# written by Liam J. Revell 2012, 2013
 
 sim.corrs<-function(tree,vcv,anc=NULL,internal=FALSE){
 	if(class(tree)!="phylo") stop("tree should be an object of class 'phylo'")
 	if(!is.list(vcv)){
 		p<-nrow(vcv)
 		if(is.null(anc)) anc<-rep(0,p)
-		chol.vcv<-chol(vcv)
+		cholvcv<-chol(vcv)
 		X<-matrix(rnorm(p*nrow(tree$edge),sd=rep(sqrt(tree$edge.length),p)),nrow(tree$edge),p)
-		X<-X%*%chol.vcv
+		X<-X%*%cholvcv
 	} else {
 		p<-nrow(vcv[[1]])
 		if(is.null(anc)) anc<-rep(0,p)
@@ -17,11 +17,11 @@ sim.corrs<-function(tree,vcv,anc=NULL,internal=FALSE){
 			message("names absent from vcv: assuming same order as $mapped.edge")
 		}
 		vcv<-vcv[colnames(tree$mapped.edge)]
-		chol.vcv<-lapply(vcv,chol)
+		cholvcv<-lapply(vcv,chol)
 		X<-matrix(0,nrow(tree$edge),p)
 		for(i in 1:length(vcv)){
 			Y<-matrix(rnorm(p*nrow(tree$edge),sd=rep(sqrt(tree$mapped.edge[,i]),p)),nrow(tree$edge),p)
-			X<-X+Y%*%chol.vcv[[i]]
+			X<-X+Y%*%cholvcv[[i]]
 		}
 	}
 	Y<-array(0,dim=c(nrow(tree$edge),ncol(tree$edge),p))

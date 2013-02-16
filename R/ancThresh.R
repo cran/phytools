@@ -1,60 +1,34 @@
 # function performs ancestral character estimation under the threshold model
-# written by Liam J. Revell 2012
+# written by Liam J. Revell 2012,2013
 
-ancThresh<-function(tree,x,ngen=1000,sequence=NULL,method="mcmc",control=list()){
-
+ancThresh<-function(tree,x,ngen=1000,sequence=NULL,method="mcmc",control=list(),...){
+	
 	# check method
 	if(method!="mcmc") stop(paste(c("do not recognize method =",method,",quitting")))
 
-	# likelihood function for the liabilities
-	lik<-function(l,a,V,invV,detV){
-		y<-c(l,a[2:length(a)])-a[1]
-		logL<--y%*%invV%*%y/2-nrow(V)*log(2*pi)/2-detV/2
-		return(logL)
+	# check x
+	if(is.data.frame(x)) x<-as.matrix(x)
+	if(is.matrix(x)){
+		X<-x[tree$tip.label,]
+		if(is.null(sequence)){
+			message("**** NOTE: no sequence provided, column order in x")
+ 			seq<-colnames(X)
+		} else seq<-sequence
+	} else if(is.vector(x)){
+		x<-x[tree$tip.label]
+		if(is.null(sequence)){
+			message("**** NOTE: no sequence provided, using alphabetical or numerical order")
+ 			seq<-sort(levels(as.factor(x)))
+		} else seq<-sequence
+		X<-to.matrix(x,seq)
 	}
+	# row scale X
+	X<-X/apply(X,1,sum)
+	X<-X[,seq] # order columns by seq
 
-	# function for the log-prior (presently returns 0, i.e. flat prior)
-	logPrior<-function(a,t){
-		pp<-sum(log(diag(con$pr.anc[names(a),a])))+
-			if(length(t)>2) sum(dexp(t[2:(length(t)-1)],rate=con$pr.th,log=TRUE)) else 0				
-		return(pp)		
-	}
-
-	# returns a state based on position relative to thresholds
-	threshState<-function(x,thresholds){
-		t<-c(-Inf,thresholds,Inf)
-		names(t)[length(t)]<-names(t)[length(t)-1] 
-		i<-1; while(x>t[i]) i<-i+1
-		return(names(t)[i])
-	}
-
-	# check if the liabilities match the predicted
-	allMatch<-function(x,l,thresholds){
-		result<-all(sapply(l,threshState,thresholds=thresholds)==x)
-		if(!is.na(result)) return(result)
-		else return(FALSE)
-	}
-
-	# bounds parameter by bouncing
-	bounce<-function(start,step,bounds){
-		x<-start+step
-		while(x>bounds[2]||x<bounds[1]){
-			if(x>bounds[2]) x<-2*bounds[2]-x
-			if(x<bounds[1]) x<-2*bounds[1]-x
-		}
-		return(x)
-	}
-
-	# get the sequence, or use alphanumeric order
-	if(is.null(sequence)){
-		message("**** NOTE: no sequence provided, using alphabetical or numerical order")
- 		seq<-sort(levels(as.factor(x)))
-	} else seq<-sequence
-
-	# ok, now pull out the unique states in x & set starting thresholds
-	x<-x[tree$tip.label]
+	# ok, now set starting thresholds
 	th<-c(1:length(seq))-1; names(th)<-seq
-	if(is.factor(x)){ temp<-names(x); as.character(x)->x; names(x)<-temp } 	
+	x<-to.vector(X)
 	l<-sapply(x,function(x) runif(n=1,min=th[x]-1,max=th[x])) # set plausible starting liability
 
 	# for MCMC
@@ -82,7 +56,8 @@ ancThresh<-function(tree,x,ngen=1000,sequence=NULL,method="mcmc",control=list())
 		burnin=round(0.2*ngen),
 		plot=TRUE,
 		print=TRUE,
-		piecol=NULL)
+		piecol=NULL,
+		tipcol="input")
 	con[(namc<-names(control))]<-control
 	con<-con[!sapply(con,is.null)]
 
@@ -96,9 +71,12 @@ ancThresh<-function(tree,x,ngen=1000,sequence=NULL,method="mcmc",control=list())
 
 	# compute some matrices & values
 	V<-vcvPhylo(tree)
+	# check to make sure that V will be non-singular
+	if(any(tree$edge.length<=(10*.Machine$double.eps)))
+		stop("some branch lengths are 0 or nearly zero")
 	invV<-solve(V)
 	detV<-determinant(V,logarithm=TRUE)$modulus[1]
-	lik1<-lik(l,a,V,invV,detV)+log(allMatch(x,l,th))
+	lik1<-likLiab(l,a,V,invV,detV)+log(probMatch(X,l,th,seq))
 	
 	# store
 	A<-matrix(NA,ngen/con$sample+1,tree$Nnode,dimnames=list(NULL,n+1:tree$Nnode))
@@ -111,7 +89,7 @@ ancThresh<-function(tree,x,ngen=1000,sequence=NULL,method="mcmc",control=list())
 	# run MCMC
 	message("MCMC starting....")
 	for(i in 1:ngen){
-		lik1<-lik(l,a,V,invV,detV)+log(allMatch(x,l,th))
+		lik1<-likLiab(l,a,V,invV,detV)+log(probMatch(X,l,th,seq))
 		d<-i%%npar
 		if(ngen>=1000) if(i%%1000==0) if(con$print) message(paste("gen",i))
 		ap<-a; lp<-l; thp<-th
@@ -132,8 +110,8 @@ ancThresh<-function(tree,x,ngen=1000,sequence=NULL,method="mcmc",control=list())
 				thp[ind]<-bounce(th[ind],rnorm(n=1,sd=sqrt(con$propthresh)),c(th[ind-1],th[ind+1]))
 			}
 		}
-		lik2<-lik(lp,ap,V,invV,detV)+log(allMatch(x,lp,thp))
-		p.odds<-min(c(1,exp(lik2+logPrior(sapply(ap,threshState,thresholds=thp),thp)-lik1-logPrior(sapply(a,threshState,thresholds=th),th))))
+		lik2<-likLiab(lp,ap,V,invV,detV)+log(probMatch(X,lp,thp,seq))
+		p.odds<-min(c(1,exp(lik2+logPrior(sapply(ap,threshState,thresholds=thp),thp,con)-lik1-logPrior(sapply(a,threshState,thresholds=th),th,con))))
 
 		if(p.odds>runif(n=1)){
 			a<-ap; l<-lp; th<-thp
@@ -146,66 +124,159 @@ ancThresh<-function(tree,x,ngen=1000,sequence=NULL,method="mcmc",control=list())
 		}
 	}
 	mcmc<-as.data.frame(A)
-	par<-as.data.frame(B)
+	param<-as.data.frame(B)
 	liab<-as.data.frame(C)
 	ace<-matrix(0,tree$Nnode,m,dimnames=list(colnames(A),seq))
+	burnin<-which(param[,"gen"]==con$burnin)
 	for(i in 1:tree$Nnode){
-		burnin<-which(par[,"gen"]==con$burnin)
 		temp<-summary(mcmc[burnin:nrow(mcmc),i])/(nrow(mcmc)-burnin+1)
 		ace[i,names(temp)]<-temp
 	}
-	if(con$plot){
-		plot(tree,no.margin=TRUE,show.tip.label=FALSE)
-		if(is.null(con$piecol)){ 
-			con$piecol<-1:length(th)
-			con$piecol<-con$piecol[seq]
-		}
-		nodelabels(pie=ace,piecol=con$piecol,cex=0.6)
-		P<-matrix(0,n,m,dimnames=list(tree$tip.label,names(th)))
-		for(i in 1:n) P[i,which(colnames(P)==x[i])]<-1
-		tiplabels(pie=P,piecol=con$piecol[seq],cex=0.6)
+	if(con$plot) plotThresh(tree,X,list(ace=ace,mcmc=mcmc,par=param,liab=liab),burnin=con$burnin,piecol=con$piecol,tipcol=con$tipcol,...)
+	return(list(ace=ace,mcmc=mcmc,par=param,liab=liab))
+}
+
+# plots ancestral states from the threshold model
+# written by Liam J. Revell 2012
+
+plotThresh<-function(tree,x,mcmc,burnin=NULL,piecol,tipcol="input",...){
+
+	# plot tree
+	plot(tree,no.margin=TRUE,edge.width=2,...)
+	
+	# pull matrices from mcmc
+	ace<-mcmc$ace
+	liab<-mcmc$liab
+	param<-mcmc$par
+
+	# get burnin
+	if(is.null(burnin)) burnin<-round(0.2*max(param[,"gen"]))
+	burnin<-which(param[,"gen"]==burnin)
+
+	# check x
+	if(is.data.frame(x)) x<-as.matrix(x)
+	if(is.matrix(x)) X<-x[tree$tip.label,]
+	else if(is.vector(x)){
+		x<-x[tree$tip.label]
+		X<-to.matrix(x,names(piecol))
 	}
-	return(list(ace=ace,mcmc=mcmc,par=par,liab=liab))
+	# row scale X
+	X/apply(X,1,sum)->X
+
+	# plot node labels
+	nodelabels(pie=ace,piecol=piecol[colnames(ace)],cex=0.6)
+
+	# plot tip labels
+	if(tipcol=="input") tiplabels(pie=X,piecol=piecol[colnames(X)],cex=0.6)
+	else if(tipcol=="estimated") {
+		XX<-matrix(NA,nrow(liab),length(tree$tip),dimnames=list(rownames(liab),colnames(liab)[1:length(tree$tip)]))
+		for(i in 1:nrow(liab)) XX[i,]<-sapply(liab[i,1:length(tree$tip)],threshState,thresholds=param[i,1:ncol(X)+1])
+		X<-t(apply(XX,2,function(x) summary(factor(x,levels=colnames(X)))))
+		tiplabels(pie=X/rowSums(X),piecol=piecol[colnames(X)],cex=0.6)
+	}
 }
 
 # computes DIC for threshold model
 # written by Liam J. Revell 2012
 
-threshDIC<-function(tree,x,mcmc,burnin){
+threshDIC<-function(tree,x,mcmc,burnin=NULL,sequence=NULL,method="pD"){
 
-	# likelihood function for the liabilities
-	lik<-function(l,a,V,invV,detV){
-		y<-c(l,a[2:length(a)])-a[1]
-		logL<--y%*%invV%*%y/2-nrow(V)*log(2*pi)/2-detV/2
-		return(logL)
+	# check x
+	if(is.data.frame(x)) x<-as.matrix(x)
+	if(is.matrix(x)){
+		X<-x[tree$tip.label,]
+		if(is.null(sequence)){
+			message("**** NOTE: no sequence provided, column order in x")
+ 			seq<-colnames(X)
+		} else seq<-sequence
+	} else if(is.vector(x)){
+		x<-x[tree$tip.label]
+		if(is.null(sequence)){
+			message("**** NOTE: no sequence provided, using alphabetical or numerical order")
+ 			seq<-sort(levels(as.factor(x)))
+		} else seq<-sequence
+		X<-to.matrix(x,seq)
 	}
-
-	# returns a state based on position relative to thresholds
-	threshState<-function(x,thresholds){
-		t<-c(-Inf,thresholds,Inf)
-		names(t)[length(t)]<-names(t)[length(t)-1] 
-		i<-1; while(x>t[i]) i<-i+1
-		return(names(t)[i])
-	}
-
-	# check if the liabilities match the predicted
-	allMatch<-function(x,l,thresholds){
-		result<-all(sapply(l,threshState,thresholds=thresholds)==x)
-		if(!is.na(result)) return(result)
-		else return(FALSE)
-	}
+	# row scale X
+	X<-X/apply(X,1,sum)
+	X<-X[,seq] # order columns by seq
 
 	# convert burnin to starting row
+	if(is.null(burnin)) burnin<-0.2*max(mcmc$par[,"gen"])
 	start<-which(mcmc$par[,"gen"]==burnin)+1
 
 	# compute
-	Dbar<-mean(mcmc$par[start:nrow(mcmc$par),"logLik"])
 	thBar<-colMeans(mcmc$par[start:nrow(mcmc$par),2:(ncol(mcmc$par)-1)])
 	liabBar<-colMeans(mcmc$liab[start:nrow(mcmc$liab),])
-	Dtheta<-lik(liabBar[tree$tip.label],liabBar[as.character(1:tree$Nnode+length(tree$tip))],vcvPhylo(tree),solve(vcvPhylo(tree)),determinant(vcvPhylo(tree),logarithm=TRUE)$modulus[1])+
-			log(allMatch(x[tree$tip.label],liabBar[tree$tip.label],thBar))
-	pD<-Dbar-Dtheta
-	DIC<-pD+Dbar
-	return(as.numeric(DIC))
-
+	Dtheta<--2*(likLiab(liabBar[tree$tip.label],liabBar[as.character(1:tree$Nnode+length(tree$tip))],vcvPhylo(tree),solve(vcvPhylo(tree)),determinant(vcvPhylo(tree),logarithm=TRUE)$modulus[1])+log(probMatch(X[tree$tip.label,],liabBar[tree$tip.label],thBar,seq)))
+	D<--2*mcmc$par[start:nrow(mcmc$par),"logLik"]
+	Dbar<-mean(D)
+	if(method=="pD"){		
+		pD<-Dbar-Dtheta
+		DIC<-pD+Dbar
+		result<-setNames(c(Dbar,Dtheta,pD,DIC),c("Dbar","Dhat","pD","DIC"))
+	} else if(method=="pV"){
+		pV<-var(D)/2
+		DIC<-pV+Dbar
+		result<-setNames(c(Dbar,Dtheta,pV,DIC),c("Dbar","Dhat","pV","DIC"))
+	}
+	return(result)
 }
+
+# internal functions for ancThresh, plotThresh, and threshDIC
+
+# returns a state based on position relative to thresholds
+threshState<-function(x,thresholds){
+	t<-c(-Inf,thresholds,Inf)
+	names(t)[length(t)]<-names(t)[length(t)-1] 
+	i<-1; while(x>t[i]) i<-i+1
+	return(names(t)[i])
+}
+
+# likelihood function for the liabilities
+likLiab<-function(l,a,V,invV,detV){
+	y<-c(l,a[2:length(a)])-a[1]
+	logL<--y%*%invV%*%y/2-nrow(V)*log(2*pi)/2-detV/2
+	return(logL)
+}
+
+# function for the log-prior
+logPrior<-function(a,t,control){
+	pp<-sum(log(diag(control$pr.anc[names(a),a])))+
+		if(length(t)>2) sum(dexp(t[2:(length(t)-1)],rate=control$pr.th,log=TRUE)) else 0				
+	return(pp)		
+}
+
+# check if the liability predictions match observed data
+allMatch<-function(x,l,thresholds){
+	result<-all(sapply(l,threshState,thresholds=thresholds)==x)
+	if(!is.na(result)) return(result)
+	else return(FALSE)
+}
+
+# check if the liability predictions match observed data & return a probability
+# (this allows states to be uncertain)
+probMatch<-function(X,l,thresholds,sequence){
+	Y<-to.matrix(sapply(l,threshState,thresholds=thresholds),sequence)
+	return(prod(rowSums(X*Y)))
+}
+
+# bounds parameter by bouncing
+bounce<-function(start,step,bounds){
+	x<-start+step
+	while(x>bounds[2]||x<bounds[1]){
+		if(x>bounds[2]) x<-2*bounds[2]-x
+		if(x<bounds[1]) x<-2*bounds[1]-x
+	}
+	return(x)
+}
+
+# convert vector of x to binary matrix
+to.matrix<-function(x,seq){
+	X<-matrix(0,length(x),length(seq),dimnames=list(names(x),seq))
+	for(i in 1:length(seq)) X[x==seq[i],i]<-1
+	return(X)
+}
+
+# convert binary matrix to vector
+to.vector<-function(X) apply(X,1,rstate)

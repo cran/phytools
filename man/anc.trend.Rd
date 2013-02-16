@@ -2,10 +2,10 @@
 \alias{anc.trend}
 \title{Ancestral character estimation with a trend}
 \usage{
-anc.trend(phy, x, maxit=2000)
+anc.trend(tree, x, maxit=2000)
 }
 \arguments{
-  \item{phy}{an object of class \code{"phylo"}.}
+  \item{tree}{an object of class \code{"phylo"}.}
   \item{x}{a vector of tip values for species; \code{names(x)} should be the species names.}
   \item{maxit}{an optional integer value indicating the maximum number of iterations for optimization.}
 }

@@ -1,5 +1,5 @@
 # function plots a stochastic character mapped tree
-# written by Liam Revell 2011
+# written by Liam Revell 2011, 2013
 
 plotSimmap<-function(tree,colors=NULL,fsize=1.0,ftype="reg",lwd=2,pts=TRUE,node.numbers=FALSE,mar=NULL,add=FALSE,offset=NULL){
 	if(class(tree)=="multiPhylo"){
@@ -84,17 +84,6 @@ plotSimmap<-function(tree,colors=NULL,fsize=1.0,ftype="reg",lwd=2,pts=TRUE,node.
 	par(mar=c(5,4,4,2)+0.1)
 }
 	
-# function reorders simmap tree
-# written Liam Revell 2011
-	
-reorderSimmap<-function(tree,order="cladewise"){
-	ntree<-reorder(tree,order)
-	o<-whichorder(ntree$edge[,2],tree$edge[,2])
-	ntree$mapped.edge<-tree$mapped.edge[o,]
-	ntree$maps<-tree$maps[o]
-	return(ntree)
-}
-
 # function whichorder
 # written by Liam Revell 2011
 

@@ -4,7 +4,7 @@
 
 phylANOVA<-function(tree,x,y,nsim=1000,posthoc=TRUE,p.adj="holm"){
 	if(class(tree)!="phylo") stop("tree should be an object of class 'phylo.'")
-	sig2<-mean(pic(y,tree)^2) # compute BM rate for y
+	sig2<-mean(pic(y,multi2di(tree))^2) # compute BM rate for y
 	x<-as.factor(x) # change x to factor
 	m<-length(levels(x))
 	F.obs<-anova(lm(y~x))[1,4] # F on empirical data

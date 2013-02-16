@@ -1,5 +1,5 @@
 # function does Bayes ancestral character estimation
-# written by Liam J. Revell 2011
+# written by Liam J. Revell 2011,2013
 
 anc.Bayes<-function(tree,x,ngen=10000,control=list()){
 
@@ -32,6 +32,9 @@ anc.Bayes<-function(tree,x,ngen=10000,control=list()){
 
 	# compute C
 	C<-vcvPhylo(tree)
+	# check to make sure that C will be non-singular
+	if(any(tree$edge.length<=(10*.Machine$double.eps)))
+		stop("some branch lengths are 0 or nearly zero")
 	invC<-solve(C)
 	detC<-determinant(C,logarithm=TRUE)$modulus[1]
 

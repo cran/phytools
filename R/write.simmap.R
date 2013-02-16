@@ -1,5 +1,5 @@
 # function writes a modified "phylo" object to a simmap Newick string
-# written by Liam Revell 2011
+# written by Liam Revell 2011, 2013
 
 write.simmap<-function(tree,file=NULL,append=FALSE,map.order=NULL){
 	if(class(tree)!="phylo") stop("tree is not an object of class 'phylo.'")
@@ -68,13 +68,3 @@ write.simmap<-function(tree,file=NULL,append=FALSE,map.order=NULL){
 	else write(string,file=file,append=append)
 }
 
-# function reorders simmap tree
-# written Liam Revell 2011
-
-reorderSimmap<-function(tree,order="cladewise"){
-	ntree<-reorder(tree,order)
-	o<-whichorder(ntree$edge[,2],tree$edge[,2])
-	ntree$mapped.edge<-tree$mapped.edge[o,]
-	ntree$maps<-tree$maps[o]
-	return(ntree)
-}

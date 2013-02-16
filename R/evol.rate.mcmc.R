@@ -1,10 +1,10 @@
 # these functions uses a Bayesian MCMC approach to estimate heterogeneity in the evolutionary rate for a
 # continuous character (Revell, Mahler, Peres-Neto, & Redelings. In revision.)
-# code written by Liam J. Revell 2010 (updated 2011)
+# code written by Liam J. Revell 2010, 2011, 2013
 
 # function for Bayesian MCMC
 # written by Liam Revell 2010/2011
-evol.rate.mcmc<-function(tree,x,ngen=10000,control=list()){
+evol.rate.mcmc<-function(tree,x,ngen=10000,control=list()){	
 	# some minor error checking
 	if(class(tree)!="phylo") stop("tree object must be of class 'phylo.'")
 	if(is.matrix(x)) x<-x[,1]
@@ -397,25 +397,5 @@ splitTree<-function(tree,split){
 	return(trees)
 }
 
-# function pastes subtree onto tip
-# written by Liam Revell 2011
-paste.tree<-function(tr1,tr2){
-	if(length(tr2$tip)>1){ 
-		temp<-tr2$root.edge; tr2$root.edge<-NULL
-		tr1$edge.length[match(which(tr1$tip.label=="NA"),tr1$edge[,2])]<-tr1$edge.length[match(which(tr1$tip.label=="NA"),tr1$edge[,2])]+temp
-	}
-	tr.bound<-bind.tree(tr1,tr2,where=which(tr1$tip.label=="NA"))	
-	return(tr.bound)
-}
-
-# function drops entire clade
-# written by Liam Revell 2011
-drop.clade<-function(tree,tip){
-	tree<-drop.tip(tree,tip,trim.internal=FALSE)
-	while(sum(tree$tip.label=="NA")>1){
-		tree<-drop.tip(tree,"NA",trim.internal=FALSE)
-	}
-	return(tree)
-}
 
 

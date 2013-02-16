@@ -1,5 +1,5 @@
 # function for phylogenetic paired t-test (Lindenfors et al. 2010)
-# written by Liam Revell 2011
+# written by Liam Revell 2011, 2013
 
 phyl.pairedttest<-function(tree,x1,x2=NULL,se1=NULL,se2=NULL,lambda=1.0,h0=0.0,fixed=FALSE){
 	# check tree

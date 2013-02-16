@@ -27,16 +27,18 @@ fancyTree(tree, type=c("extinction","traitgram3d","droptip","xkcd","densitymap",
 	tree<-rlineage(1,0.5,4)
 	fancyTree(tree,type="extinction")
 
-	# plot 3D traitgram
-	tree<-pbtree(n=50,scale=10)
-	Y<-sim.corrs(tree,vcv=matrix(c(1,0.75,0.75,1),2,2))
-	# fancyTree(tree,type="traitgram3d",X=Y,control=list(spin=FALSE))
+	\dontrun{
+		# plot 3D traitgram
+		tree<-pbtree(n=50,scale=10)
+		Y<-sim.corrs(tree,vcv=matrix(c(1,0.75,0.75,1),2,2))
+		fancyTree(tree,type="traitgram3d",X=Y,control=list(spin=FALSE))
 	
-	# plot with internal nodes from simulation
-	Y<-sim.corrs(tree,vcv=matrix(c(1,0.75,0.75,1),2,2),internal=TRUE)
-	B<-Y[length(tree$tip)+1:tree$Nnode,]; Y<-Y[1:length(tree$tip),]
-	fancyTree(tree,type="traitgram3d",X=Y,A=B,control=list(simple.axes=TRUE,spin=FALSE))
-
+		# plot with internal nodes from simulation
+		Y<-sim.corrs(tree,vcv=matrix(c(1,0.75,0.75,1),2,2),internal=TRUE)
+		B<-Y[length(tree$tip)+1:tree$Nnode,]; Y<-Y[1:length(tree$tip),]
+		fancyTree(tree,type="traitgram3d",X=Y,A=B,control=list(simple.axes=TRUE,spin=FALSE))
+	}
+	
 	# plot with dropped tips
 	tree<-pbtree(n=30)
 	tips<-sample(tree$tip.label)[1:10]

@@ -1,5 +1,5 @@
 # function creates a stochastic character mapped tree as a modified "phylo" object
-# written by Liam Revell 2011
+# written by Liam Revell 2011, 2013
 
 make.simmap<-function(tree,x,model="SYM",nsim=1){
 	# reorder to cladewise
@@ -58,23 +58,3 @@ make.simmap<-function(tree,x,model="SYM",nsim=1){
 	return(mtrees)
 }
 
-# function returns random state with probability given by y
-# written by Liam Revell 2011
-
-rstate<-function(y){
-	if(length(y)==1) return(names(y)[1])
-	else {
-		cumy<-y; for(i in 2:length(y)) cumy[i]<-cumy[i-1]+y[i]
-		r<-runif(n=1); state=names(y)[1]
-		j=1; while(r>cumy[j]){ state=names(y)[j+1]; j<-j+1 } 
-		return(state)
-	}
-}
-
-# wraps around MatrixExp
-# written by Liam Revell 2011
-
-expm<-function(Y){
-	Z<-MatrixExp(Y); dimnames(Z)<-dimnames(Y)
-	return(Z)
-}

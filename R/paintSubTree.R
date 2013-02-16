@@ -1,5 +1,5 @@
 # function paints a subtree
-# written by Liam Revell 2012
+# written by Liam Revell 2012, 2013
 
 paintSubTree<-function(tree,node,state,anc.state="1",stem=FALSE){
 	if(stem==0&&node<=length(tree$tip)) stop("stem must be TRUE for node<=N")
@@ -52,19 +52,6 @@ paintSubTree<-function(tree,node,state,anc.state="1",stem=FALSE){
 	tree$mapped.edge<-mapped.edge
 	tree$maps<-maps
 	return(tree)
-}
-
-# gets descendant node numbers
-# written by Liam Revell 2012
-
-getDescendants<-function(tree,node,curr=NULL){
-	if(is.null(curr)) curr<-vector()
-	daughters<-tree$edge[which(tree$edge[,1]==node),2]
-	curr<-c(curr,daughters)
-	w<-which(daughters>=length(tree$tip))
-	if(length(w)>0) for(i in 1:length(w)) 
-		curr<-getDescendants(tree,daughters[w[i]],curr)
-	return(curr)
 }
 
 # function

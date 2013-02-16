@@ -1,5 +1,5 @@
 # function is simplified version of evol.vcv
-# written by Liam J. Revell 2011/2012
+# written by Liam J. Revell 2011, 2012, 2013
 
 evolvcv.lite<-function(tree,X,maxit=2000,tol=1e-10){
 
@@ -111,18 +111,3 @@ evolvcv.lite<-function(tree,X,maxit=2000,tol=1e-10){
 
 }
 
-# function
-# written by Liam J. Revell
-
-multiC<-function(tree){
-	n<-length(tree$tip); m<-ncol(tree$mapped.edge)
-	# compute separate C for each state
-	mC<-list()
-	for(i in 1:m){
-		mtree<-list(edge=tree$edge,Nnode=tree$Nnode,tip.label=tree$tip.label,edge.length=tree$mapped.edge[,i])
-		class(mtree)<-"phylo"
-		mC[[i]]<-vcv.phylo(mtree)
-	}
-	names(mC)<-colnames(tree$mapped.edge)
-	return(mC)
-}
