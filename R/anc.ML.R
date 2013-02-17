@@ -1,11 +1,11 @@
 # lightweight version of ace(...,method="ML") for continuous traits
-# written by Liam J. Revell 2011
+# written by Liam J. Revell 2011,2013
 
 anc.ML<-function(tree,x,maxit=2000){
 
-	# check for branches of length zero
-	if(any(tree$edge.length==0))
-		stop("edges of length=0 prohibited; use di2multi to zero length collapse internal edges")
+	# check to make sure that C will be non-singular
+	if(any(tree$edge.length<=(10*.Machine$double.eps)))
+		stop("some branch lengths are 0 or nearly zero")
 
 	# function returns the log-likelihood
 	likelihood<-function(par,C,invC,detC,x){
@@ -27,7 +27,7 @@ anc.ML<-function(tree,x,maxit=2000){
 	sig2<-mean(pic(x,multi2di(tree))^2)*runif(n=1,max=2)
 
 	# optimize
-	res<-optim(c(sig2,a,y),fn=likelihood,C=C,invC=invC,detC=detC,x=x,method="L-BFGS-B",lower=c(100*.Machine$double.eps,rep(-Inf,tree$Nnode)),control=list(maxit=maxit))
+	res<-optim(c(sig2,a,y),fn=likelihood,C=C,invC=invC,detC=detC,x=x,method="L-BFGS-B",lower=c(10*.Machine$double.eps,rep(-Inf,tree$Nnode)),control=list(maxit=maxit))
 	
 	# return result
 	states<-res$par[2:length(res$par)]

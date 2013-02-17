@@ -1,5 +1,5 @@
 # This function creates a phylomorsphace plot of Sidlauskas (2006)
-# Written by Liam J. Revell 2010/2011/2012
+# Written by Liam J. Revell 2010, 2011, 2012, 2013
 
 phylomorphospace<-function(tree,X,A=NULL,label=TRUE,control=list()){
 
@@ -28,7 +28,7 @@ phylomorphospace<-function(tree,X,A=NULL,label=TRUE,control=list()){
 	rownames(X)<-1:length(tree$tip)
 	
 	# check for node labels; create if necessary
-	attach(tree); if(!exists("node.label")) tree$node.label<-as.character(length(tree$tip.label)+1:tree$Nnode); detach(tree)
+	if(is.null(tree$node.label)) tree$node.label<-as.character(length(tree$tip.label)+1:tree$Nnode)
 	tree$node.label<-as.character(tree$node.label)
 	A<-A[tree$node.label,]
 	rownames(A)<-length(tree$tip)+1:tree$Nnode

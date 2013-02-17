@@ -1,9 +1,7 @@
 # simulates with multiple evolutionary rates in different parts of the tree
-# written by Liam J. Revell 2011
+# written by Liam J. Revell 2011, 2013
 
 sim.rates<-function(mtree,sig2,anc=0,nsim=1,internal=F,plot=F){
-	# check dependencies
-	if(!require(phytools)) stop("install phytools")
 	if(class(mtree)!="phylo") stop("mtree should be an object of class 'phylo'")
 	if(is.null(mtree$mapped.edge)){
 		message("mtree does not contain a mapped discrete character history, using fastBM")

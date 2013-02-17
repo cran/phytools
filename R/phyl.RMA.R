@@ -5,40 +5,28 @@ phyl.RMA<-function(x,y,tree,method="BM",lambda=NULL,fixed=FALSE,h0=1.0){
 	x<-x[tree$tip.label]; y<-y[tree$tip.label]
 	# bind the x & y into columns
 	X<-cbind(x,y)
-	# likelihood function
-	likelihood<-function(theta,X,phy){
-		C<-vcv(phy)
-		C<-lambda.transform(C,theta)
-		# compute R, conditioned on lambda
-		temp<-phyl.vcv(X,vcv(phy),theta);
-		R<-temp$R; a<-temp$alpha; rm(temp)
-		# prep
-		n<-nrow(X); m<-ncol(X); D<-matrix(0,n*m,m)
-		for(i in 1:(n*m)) for(j in 1:m) if((j-1)*n<i&&i<=j*n) D[i,j]=1.0
-		one<-matrix(1,n,1)
-		y<-as.matrix(as.vector(X))
-		# compute the log-likelihood	
-		logL<--t(y-D%*%t(a))%*%solve(kronecker(R,C))%*%(y-D%*%t(a))/2-n*m*log(2*pi)/2-determinant(kronecker(R,C),logarithm=TRUE)$modulus[1]/2
-		return(logL)
-	}
 	if(method=="lambda")
 		if(fixed==FALSE)
-			result<-optimize(f=likelihood,interval=c(0,1),X=X,phy=tree,maximum=TRUE)
+			result<-optimize(f=likMlambda,interval=c(0,1),X=X,C=vcv(tree),maximum=TRUE)
 		else
-			result<-list(objective=likelihood(lambda,X,tree),maximum=lambda)
+			result<-list(objective=likMlambda(lambda,X,vcv(tree)),maximum=lambda)
 	else if(method=="BM")
-		result<-list(objective=likelihood(1.0,X,tree),maximum=1.0)
+		result<-list(objective=likMlambda(1.0,X,vcv(tree)),maximum=1.0)
 	else
 		stop("do not recognize method")	
 	est.lambda<-result$maximum # estimated lambda
 	C<-vcv(tree)
-	C<-lambda.transform(C,est.lambda)
+	C<-lambda.transform(est.lambda,C)
 	temp<-phyl.vcv(X,vcv(tree),lambda=est.lambda)
-	beta1<-sqrt(temp$R[2,2]/temp$R[1,1])
+	beta1<-sign(temp$R[1,2])*sqrt(temp$R[2,2]/temp$R[1,1])
 	beta0<-temp$a[2]-beta1*temp$a[1]
 	r<-y-(beta0+beta1*x)
 	r2<-temp$R[1,2]^2/(temp$R[1,1]*temp$R[2,2])
-	T<-abs(log(beta1)-log(h0))/sqrt((1-r2)/(length(tree$tip)-2))
+	if(sign(beta1)!=sign(h0)){
+		warning("b & h0 have different signs; hypothesis test invalid")
+		T<-0
+	} else
+		T<-abs(log(abs(beta1))-log(abs(h0)))/sqrt((1-r2)/(length(tree$tip)-2))
 	df<-2+(length(tree$tip)-2)/(1+0.5*r2)
 	P<-2*pt(T,df=df,lower.tail=FALSE)
 	test<-c(r2,T,df,P); names(test)<-c("r2","T","df","P")

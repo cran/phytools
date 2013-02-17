@@ -71,21 +71,6 @@ lik.single<-function(theta,y,C,se){
 	return(-logL)
 }
 
-# function computes vcv for each state, and stores in array
-# written by Liam J. Revell 2011/2012
-
-multiC<-function(tree){
-	n<-length(tree$tip); m<-ncol(tree$mapped.edge)
-	# compute separate C for each state
-	mC<-list()
-	for(i in 1:m){
-		mtree<-list(edge=tree$edge,Nnode=tree$Nnode,tip.label=tree$tip.label,edge.length=tree$mapped.edge[,i])
-		class(mtree)<-"phylo"
-		mC[[i]]<-vcv.phylo(mtree)
-	}
-	return(mC)
-}
-
 # function computes the likelihood for multiple rates
 # written by Liam J. Revell 2012
 
@@ -99,24 +84,4 @@ lik.multiple<-function(theta,y,C,se=NULL){
 	logL<--t(y-a)%*%solve(V+E)%*%(y-a)/2-n*log(2*pi)/2-determinant(V+E)$modulus[1]/2
 	return(-logL)
 }
-
-# function
-# written by Liam J. Revell 2011
-
-matchDatatoTree<-function(tree,x,name){
-	if(is.matrix(x)) x<-x[,1]
-	if(is.null(names(x))){
-		if(length(x)==length(tree$tip)){
-			print(paste(name,"has no names; assuming x is in the same order as tree$tip.label"))
-			names(x)<-tree$tip.label
-		} else
-			stop(paste(name,"has no names and is a different length than tree$tip.label"))
-	}
-	if(any(is.na(match(names(x),tree$tip.label)))){
-		print(paste("some species in",name,"are missing from tree, dropping missing taxa from",name))
-		x<-x[intersect(tree$tip.label,names(x))]
-	}
-	return(x)
-}
-
 

@@ -1,7 +1,7 @@
 # function does branch & bound or exhaustive MP tree search
 # uses "phangorn (Schliep 2011) & "ape" (Paradis & Strimmer 2004)
 # data is a phyDat object; method can be "branch.and.bound" or "exhaustive"
-# written by Liam J. Revell 2011
+# written by Liam J. Revell 2011, 2013
 
 exhaustiveMP<-function(data,tree=NULL,method="branch.and.bound"){
 	if(method=="branch.and.bound"){
@@ -31,8 +31,19 @@ exhaustiveMP<-function(data,tree=NULL,method="branch.and.bound"){
 branch.and.bound<-function(data,tree){
 	# first, compute the parsimony score on the input tree
 	bound<-parsimony(tree,data)
-	# now pick three species at random to start
-	new<-list(stree(n=3,tip.label=sample(tree$tip.label,3)))
+	# now pick three species to start
+################## this is new and I don't know if it helps
+	if(is.null(tree$edge.length)){
+		print("starting with 3 species chosen at random")
+		new<-list(stree(n=3,tip.label=sample(tree$tip.label,3)))
+	} else {
+		print("starting with 3 species chosen to maximize distance") 
+		mdSp<-names(sort(colSums(cophenetic(tree)),decreasing=TRUE))[1:3]
+		mdSp<-c("Tarsier","Chimp","J.Macaque")
+		print(mdSp)
+		new<-list(stree(n=3,tip.label=mdSp)) 
+	}
+################## ends here
 	class(new)<-"multiPhylo"
 	added<-new[[1]]$tip.label; remaining<-setdiff(tree$tip.label,added)
 	# branch & bound
@@ -43,7 +54,7 @@ branch.and.bound<-function(data,tree){
 		for(i in 1:length(old)){			
 			temp<-add.everywhere(old[[i]],new.tip)
 			score<-parsimony(temp,data)
-			new<-unlist(list(new,temp[score<=bound]),recursive=FALSE); class(new)<-"multiPhylo"
+			new<-c(new,temp[score<=bound])
 			pscores<-c(pscores,score[score<=bound])
 		}
 		added<-c(added,new.tip)
@@ -54,25 +65,6 @@ branch.and.bound<-function(data,tree){
 	trees<-new[pscores==min(pscores)]
 	for(i in 1:length(trees)) attr(trees[[i]],"pscore")<-min(pscores)
 	return(trees) # return all mp trees
-}
-
-# function takes a tree and adds a tip in all possible places
-# written by Liam J. Revell 2011
-
-add.everywhere<-function(tree,tip.name){
-	if(class(tree)!="phylo") stop("tree should be an object of class 'phylo.'")
-	tree<-unroot(tree) # unroot tree
-	tree$edge.length<-rep(1,nrow(tree$edge)) # set all edge lengths to 1.0
-	# create new tip
-	new.tip<-list(edge=matrix(c(2L,1L),1,2),tip.label=tip.name,edge.length=1,Nnode=1L)
-	class(new.tip)<-"phylo"
-	# add the new tip to all edges of the tree
-	trees<-list(); class(trees)<-"multiPhylo"
-	for(i in 1:nrow(tree$edge)){
-		trees[[i]]<-bind.tree(tree,new.tip,where=tree$edge[i,2],position=0.5)
-		trees[[i]]$edge.length<-NULL
-	}
-	return(trees)
 }
 
 # function does exhaustive tree search

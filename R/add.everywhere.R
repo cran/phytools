@@ -1,6 +1,6 @@
 # function takes a tree and adds a tip in all possible places
 # returns the set of unrooted trees without branch lengths
-# written by Liam J. Revell 2011
+# written by Liam J. Revell 2011, 2013
 
 add.everywhere<-function(tree,tip.name){
 	if(class(tree)!="phylo") stop("tree should be an object of class 'phylo.'")

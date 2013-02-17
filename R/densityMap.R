@@ -58,7 +58,7 @@ densityMap<-function(trees,res=100,fsize=NULL,ftype=NULL,lwd=3,check=FALSE,legen
 			par(col="black")
 			plotSimmap(tree,cols,pts=FALSE,lwd=lwd,fsize=fsize[1],mar=c(0,0.1,0.1,0.1),add=TRUE,ftype=ftype[1])
 		} else
-			plotSimmap(tree,cols,pts=FALSE,lwd=3,fsize=fsize[1],mar=c(0,0.1,0.1,0.1),ftype=ftype[1])
+			plotSimmap(tree,cols,pts=FALSE,lwd=lwd,fsize=fsize[1],mar=c(0,0.1,0.1,0.1),ftype=ftype[1])
 		X<-cbind(0:1000/1001,1:1001/1001)*(legend/max(H))*(1-fsize[1]*max(strwidth(tree$tip.label)))
 		Y<-cbind(rep(0,1001),rep(0,1001))
 		par(mar=c(0.1,0.1,0,0.1),xpd=NA)

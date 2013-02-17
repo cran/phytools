@@ -1,5 +1,5 @@
 # function performs least-squares phylogeny inference by nni
-# written by Liam J. Revell 2011
+# written by Liam J. Revell 2011, 2013
 
 optim.phylo.ls<-function(D,stree=NULL,set.neg.to.zero=TRUE,fixed=FALSE,tol=1e-10,collapse=TRUE){
 

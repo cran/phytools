@@ -1,5 +1,5 @@
 # function to re-root a phylogeny along an edge
-# written by Liam Revell 2011
+# written by Liam Revell 2011, 2013
 
 reroot<-function(tree,node.number,position){
 	# some minor error checking

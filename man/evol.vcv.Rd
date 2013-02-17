@@ -30,7 +30,7 @@ evol.vcv(scm.tre, dat, maxit=2000, vars=FALSE)
   \item{convergence}{logical value indicating whether or not the optimization has converged.}
 }
 \references{
-  Revell, L. J., and D. C. Collar. 2009. Phylogenetic analysis of the evolutionary correlation using likelihood. \emph{Evolution}, \bold{63}, 1090-1100.
+  Revell, L. J., and D. C. Collar (2009) Phylogenetic analysis of the evolutionary correlation using likelihood. \emph{Evolution}, \bold{63}, 1090-1100.
 }
 \author{Liam Revell \email{liam.revell@umb.edu}}
 \seealso{

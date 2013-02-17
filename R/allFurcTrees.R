@@ -1,5 +1,5 @@
 # function returns all unrooted multi & bifurcating tree topologies
-# written by Liam Revell 2011
+# written by Liam Revell 2011, 2013
 
 allFurcTrees<-function(n,tip.label=NULL,to.plot=TRUE){
 	# check to see if tip labels have been provided
