@@ -18,7 +18,7 @@
 	\item{sig}{the number of decimal places to show on the legend limits.}
 }
 \description{
-	Function plots a tree with a mapped continuous character. The mapping is accomplished by estimating states at internal nodes using ML with \code{link{fastAnc}}, and the interpolating the states along each edge using equation [2] of Felsenstein (1985).
+	Function plots a tree with a mapped continuous character. The mapping is accomplished by estimating states at internal nodes using ML with \code{\link{fastAnc}}, and the interpolating the states along each edge using equation [2] of Felsenstein (1985).
 }
 \value{
 	plots a tree.

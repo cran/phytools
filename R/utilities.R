@@ -1,5 +1,101 @@
 # some utility functions
-# written by Liam J. Revell 2011/2012/2013
+# written by Liam J. Revell 2011, 2012, 2013
+
+# function counts transitions from a mapped history
+# written by Liam J. Revell 2013
+countSimmap<-function(tree,states=NULL,message=TRUE){
+	if(class(tree)=="multiPhylo"){
+		ff<-function(zz){
+ 			XX<-countSimmap(zz,states,message)
+			setNames(c(XX$N,as.vector(t(XX$Tr))),c("N",
+			sapply(rownames(XX$Tr),paste,colnames(XX$Tr),sep=",")))
+		}
+		XX<-t(sapply(tree,ff))	
+		if(!message) return(XX)
+		else return(list(Tr=XX,message=
+			c("Column N is the total number of character changes on the tree",
+			"Other columns give transitions x,y from x->y")))
+	} else if(class(tree)=="phylo") {
+		n<-sum(sapply(tree$maps,length))-nrow(tree$edge)
+		if(is.null(states)) states<-colnames(tree$mapped.edge)
+		m<-length(states)	
+		TT<-matrix(NA,m,m,dimnames=list(states,states))
+		gg<-function(map,a,b){
+			if(length(map)==1) zz<-0
+			else {
+				zz<-0; i<-2
+				while(i<=length(map)){
+					if(names(map)[i]==b&&names(map)[i-1]==a) zz<-zz+1
+				i<-i+1
+				}
+			} 
+			return(zz)
+		}
+		for(i in 1:m) for(j in 1:m)
+			if(i==j) TT[i,j]<-0
+			else TT[i,j]<-sum(sapply(tree$maps,gg,a=states[i],b=states[j]))
+		if(!message) return(list(N=n,Tr=TT))
+		else return(list(N=n,Tr=TT,message=c(
+			"N is the total number of character changes on the tree",
+			"Tr gives the number of transitions from row state->column state")))
+	}
+}
+
+# function returns random state with probability given by y
+# written by Liam J. Revell 2013 (replaces earlier version)
+rstate<-function(y){
+	if(length(y)==1) return(names(y)[1])
+	else return(names(which(rmultinom(1,1,y/sum(y))[,1]==1)))
+}
+
+# function to match nodes between trees
+# written by Liam J. Revell 2012, 2013
+matchNodes<-function(tr1,tr2,method=c("descendants","distances"),...){
+	method<-method[1]
+	method<-matchType(method,c("descendants","distances"))
+	if(method=="descendants"){
+		desc.tr1<-lapply(1:tr1$Nnode+length(tr1$tip),function(x) extract.clade(tr1,x)$tip.label)
+		names(desc.tr1)<-1:tr1$Nnode+length(tr1$tip)
+		desc.tr2<-lapply(1:tr2$Nnode+length(tr2$tip),function(x) extract.clade(tr2,x)$tip.label)
+		names(desc.tr2)<-1:tr2$Nnode+length(tr2$tip)
+		Nodes<-matrix(NA,length(desc.tr1),2,dimnames=list(NULL,c("tr1","tr2")))
+		for(i in 1:length(desc.tr1)){
+			Nodes[i,1]<-as.numeric(names(desc.tr1)[i])
+			for(j in 1:length(desc.tr2))
+				if(all(desc.tr1[[i]]%in%desc.tr2[[j]])&&all(desc.tr2[[j]]%in%desc.tr1[[i]]))
+					Nodes[i,2]<-as.numeric(names(desc.tr2)[j])
+		}
+	} else if(method=="distances"){
+		if(hasArg(tol)) tol<-list(...)$tol
+		else tol<-1e-6
+		if(hasArg(corr)) corr<-list(...)$corr
+		else corr<-FALSE
+		if(corr) tr1$edge.length<-tr1$edge.length/max(nodeHeights(tr1))
+		if(corr) tr2$edge.length<-tr2$edge.length/max(nodeHeights(tr2))
+		D1<-dist.nodes(tr1)[1:length(tr1$tip),1:tr1$Nnode+length(tr1$tip)]
+		D2<-dist.nodes(tr2)[1:length(tr2$tip),1:tr2$Nnode+length(tr2$tip)]
+		rownames(D1)<-tr1$tip.label
+		rownames(D2)<-tr2$tip.label
+		common.tips<-intersect(tr1$tip.label,tr2$tip.label)
+		D1<-D1[common.tips,]
+		D2<-D2[common.tips,]
+		Nodes<-matrix(NA,tr1$Nnode,2,dimnames=list(NULL,c("tr1","tr2")))
+		for(i in 1:tr1$Nnode){
+			if(corr) z<-apply(D2,2,function(X,y) cor(X,y),y=D1[,i])
+			else z<-apply(D2,2,function(X,y) 1-sum(abs(X-y)),y=D1[,i])
+			Nodes[i,1]<-as.numeric(colnames(D1)[i])
+			if(any(z>=(1-tol))){
+				a<-as.numeric(names(which(z>=(1-tol))))
+				if(length(a)==1) Nodes[i,2]<-a
+				else {
+					Nodes[i,2]<-a[1]
+					warning("polytomy detected; some node matches may be arbitrary")
+				}
+			}
+		}
+	}
+	return(Nodes)
+}
 
 # function rounds the branch lengths of the tree & applies rounding to simmap tree
 # written by Liam J. Revell 2012
@@ -133,46 +229,6 @@ maxLambda<-function(tree){
 	} else return(1)
 }
 
-# function to match nodes between trees
-# written by Liam J. Revell 2012
-matchNodes<-function(tr1,tr2,method=c("descendants","distances")){
-	if(method[1]=="descendants"){
-		desc.tr1<-lapply(1:tr1$Nnode+length(tr1$tip),function(x) extract.clade(tr1,x)$tip.label)
-		names(desc.tr1)<-1:tr1$Nnode+length(tr1$tip)
-		desc.tr2<-lapply(1:tr2$Nnode+length(tr2$tip),function(x) extract.clade(tr2,x)$tip.label)
-		names(desc.tr2)<-1:tr2$Nnode+length(tr2$tip)
-		Nodes<-matrix(NA,length(desc.tr1),2,dimnames=list(NULL,c("tr1","tr2")))
-		for(i in 1:length(desc.tr1)){
-			Nodes[i,1]<-as.numeric(names(desc.tr1)[i])
-			for(j in 1:length(desc.tr2))
-				if(all(desc.tr1[[i]]%in%desc.tr2[[j]])&&all(desc.tr2[[j]]%in%desc.tr1[[i]]))
-					Nodes[i,2]<-as.numeric(names(desc.tr2)[j])
-		}
-	} else if(method[1]=="distances"){
-		tol<-1e-12
-		tr1$edge.length<-tr1$edge.length/max(nodeHeights(tr1))
-		tr2$edge.length<-tr2$edge.length/max(nodeHeights(tr2))
-		D1<-dist.nodes(tr1)[1:length(tr1$tip),1:tr1$Nnode+length(tr1$tip)]
-		D2<-dist.nodes(tr2)[1:length(tr2$tip),1:tr2$Nnode+length(tr2$tip)]
-		rownames(D1)<-tr1$tip.label
-		rownames(D2)<-tr2$tip.label; D2<-D2[rownames(D1),]
-		Nodes<-matrix(NA,tr1$Nnode,2,dimnames=list(NULL,c("tr1","tr2")))
-		for(i in 1:tr1$Nnode){
-			z<-apply(D2,2,function(X,y) cor(X,y),y=D1[,i])
-			Nodes[i,1]<-as.numeric(colnames(D1)[i])
-			if(any(z>=(1-tol))){
-				a<-as.numeric(names(which(z>=(1-tol))))
-				if(length(a)==1) Nodes[i,2]<-a
-				else {
-					Nodes[i,2]<-a[1]
-					warning("polytomy detected; some node matches may be arbitrary")
-				}
-			}
-		}
-	}
-	return(Nodes)
-}
-
 # function reorders the columns of mapped.edge from a set of simmap trees
 # written by Liam J. Revell 2013
 orderMappedEdge<-function(trees,ordering=NULL){
@@ -280,22 +336,8 @@ matchType<-function(type,types){
 	return(type)
 }
 
-# function returns random state with probability given by y
-# written by Liam Revell 2011
-
-rstate<-function(y){
-	if(length(y)==1) return(names(y)[1])
-	else {
-		cumy<-y; for(i in 2:length(y)) cumy[i]<-cumy[i-1]+y[i]
-		r<-runif(n=1); state=names(y)[1]
-		j=1; while(r>cumy[j]){ state=names(y)[j+1]; j<-j+1 } 
-		return(state)
-	}
-}
-
 # wraps around MatrixExp
 # written by Liam Revell 2011
-
 expm<-function(Y){
 	Z<-MatrixExp(Y); dimnames(Z)<-dimnames(Y)
 	return(Z)
@@ -310,3 +352,22 @@ reorderSimmap<-function(tree,order="cladewise"){
 	ntree$maps<-tree$maps[o]
 	return(ntree)
 }
+
+# function 'untangles' (or attempts to untangle) a tree with crossing branches
+# written by Liam J. Revell 2013
+untangle<-function(tree,method=c("reorder","read.tree")){
+	method<-method[1]
+	if(!is.null(tree$maps)) simmap<-TRUE
+	else simmap<-FALSE
+	if(method=="reorder"){
+		if(simmap) tree<-reorderSimmap(reorderSimmap(tree,"pruningwise"))
+		else tree<-reorder(reorder(tree,"pruningwise"))
+	} else if(method=="read.tree"){
+		if(simmap){
+			stop("Option 'read.tree' does not presently work for SIMMAP style trees")
+			# tree<-read.simmap(text=write.simmap(tree))
+		} else tree<-read.tree(text=write.tree(tree))
+	}
+	return(tree)
+}
+
