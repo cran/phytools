@@ -19,7 +19,7 @@ xkcdTree(tree, file=NULL, gsPath=NULL, fsize=2, lwd=7, color="blue",
 	\item{right}{logical indicating whether to plot the tree with rightward orientation (if \code{TRUE}) or upwards.}
 }
 \description{
-	Function plots a tree in the style of xkcd.com.
+	Function plots a tree in the style of \url{http://xkcd.com} (for instance, \url{http://xkcd.com/867/}).
 }
 \details{
 	Uses package "extrafont" and font "xkcd.ttf". Before using, install package "extrafont" and add font "xkcd.ttf". Hopefully, if you have not done that, a sensible error will still be returned.

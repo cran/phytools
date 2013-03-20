@@ -26,7 +26,7 @@ evol.vcv(scm.tre, dat, maxit=2000, vars=FALSE)
   \item{vars.multiple}{optionally, an array containing the variances of the parameter estimates in \code{R.multiple}.}
   \item{logL.multiple}{log-likelihood of the multi-matrix model.}
   \item{k2}{number of parameters estimated in this model.}
-  \item{P.chisq}{P-value of the X^2 test on the likelihood ratio.}
+  \item{P.chisq}{P-value of the \eqn{\chi^2} test on the likelihood ratio.}
   \item{convergence}{logical value indicating whether or not the optimization has converged.}
 }
 \references{

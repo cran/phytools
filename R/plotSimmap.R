@@ -1,7 +1,7 @@
 # function plots a stochastic character mapped tree
 # written by Liam Revell 2011, 2013
 
-plotSimmap<-function(tree,colors=NULL,fsize=1.0,ftype="reg",lwd=2,pts=TRUE,node.numbers=FALSE,mar=NULL,add=FALSE,offset=NULL){
+plotSimmap<-function(tree,colors=NULL,fsize=1.0,ftype="reg",lwd=2,pts=TRUE,node.numbers=FALSE,mar=NULL,add=FALSE,offset=NULL,direction="rightwards"){
 	if(class(tree)=="multiPhylo"){
 		par(ask=TRUE)
 		for(i in 1:length(tree)) plotSimmap(tree[[i]],colors=colors,fsize=fsize,ftype=ftype,lwd=lwd,pts=pts,node.numbers=node.numbers)
@@ -56,7 +56,10 @@ plotSimmap<-function(tree,colors=NULL,fsize=1.0,ftype="reg",lwd=2,pts=TRUE,node.
 			cw$maps<-lapply(cw$maps,function(x) x<-c*x)
 			node.height<-c*node.height
 		} else message("Font size too large to properly rescale tree to window.")
-		if(!add) plot.window(xlim=c(0,max(node.height)+fsize*max(strwidth(cw$tip.label))),ylim=c(1,max(Y)))
+		if(!add){
+			if(direction=="leftwards") plot.window(xlim=c(max(node.height)+fsize*max(strwidth(cw$tip.label)),0),ylim=c(1,max(Y)))
+			else plot.window(xlim=c(0,max(node.height)+fsize*max(strwidth(cw$tip.label))),ylim=c(1,max(Y)))
+		}
 		for(i in 1:m) lines(node.height[which(cw$edge[,1]==nodes[i]),1],Y[cw$edge[which(cw$edge[,1]==nodes[i]),2]],col=colors[names(cw$maps[[match(nodes[i],cw$edge[,1])]])[1]],lwd=lwd)
 		for(i in 1:nrow(cw$edge)){
 			x<-node.height[i,1]
@@ -67,18 +70,19 @@ plotSimmap<-function(tree,colors=NULL,fsize=1.0,ftype="reg",lwd=2,pts=TRUE,node.
 			}
 		}
 		if(node.numbers){
-			symbols(0,mean(Y[cw$edge[cw$edge[,1]==(length(cw$tip)+1),2]]),rectangles=matrix(c(1.2*fsize*strwidth(as.character(length(cw$tip)+1)),1.4*fsize*strheight(as.character(length(cw$tip)+1))),1,2),inches=F,bg="white",add=T)
+			symbols(0,mean(Y[cw$edge[cw$edge[,1]==(length(cw$tip)+1),2]]),rectangles=matrix(c(1.2*fsize*strwidth(as.character(length(cw$tip)+1)),1.4*fsize*strheight(as.character(length(cw$tip)+1))),1,2),inches=FALSE,bg="white",add=TRUE)
 			text(0,mean(Y[cw$edge[cw$edge[,1]==(length(cw$tip)+1),2]]),length(cw$tip)+1,cex=fsize)
 			for(i in 1:nrow(cw$edge)){
 				x<-node.height[i,2]
 				if(cw$edge[i,2]>length(tree$tip)){
-					symbols(x,Y[cw$edge[i,2]],rectangles=matrix(c(1.2*fsize*strwidth(as.character(cw$edge[i,2])),1.4*fsize*strheight(as.character(cw$edge[i,2]))),1,2),inches=F,bg="white",add=T)
+					symbols(x,Y[cw$edge[i,2]],rectangles=matrix(c(1.2*fsize*strwidth(as.character(cw$edge[i,2])),1.4*fsize*strheight(as.character(cw$edge[i,2]))),1,2),inches=FALSE,bg="white",add=TRUE)
 					text(x,Y[cw$edge[i,2]],cw$edge[i,2],cex=fsize)
 				}
 			}
 		}
 		if(is.null(offset)) offset<-0.2*lwd/3+0.2/3
-		for(i in 1:n) if(ftype) text(node.height[which(cw$edge[,2]==i),2],Y[i],cw$tip.label[i],pos=4,offset=offset,cex=fsize,font=ftype)
+		pos<-if(direction=="leftwards") 2 else 4
+		for(i in 1:n) if(ftype) text(node.height[which(cw$edge[,2]==i),2],Y[i],cw$tip.label[i],pos=pos,offset=offset,cex=fsize,font=ftype)
 	}
 	# reset margin
 	par(mar=c(5,4,4,2)+0.1)

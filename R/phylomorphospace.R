@@ -1,7 +1,7 @@
 # This function creates a phylomorsphace plot of Sidlauskas (2006)
 # Written by Liam J. Revell 2010, 2011, 2012, 2013
 
-phylomorphospace<-function(tree,X,A=NULL,label=TRUE,control=list()){
+phylomorphospace<-function(tree,X,A=NULL,label=TRUE,control=list(),...){
 
 	# some minor error checking
 	if(class(tree)!="phylo") stop("tree object must be of class 'phylo.'")
@@ -20,8 +20,24 @@ phylomorphospace<-function(tree,X,A=NULL,label=TRUE,control=list()){
 	con[(namc<-names(control))]<-control
 	con$col.edge<-as.matrix(con$col.edge); con$col.node<-as.matrix(con$col.node)
 
+	# set xlim & ylim
+	if(hasArg(xlim)) xlim<-list(...)$xlim
+	else xlim<-range(c(X[,1],A[,1]))
+	if(hasArg(ylim)) ylim<-list(...)$ylim
+	else ylim<-range(c(X[,2],A[,2]))
+
+	# set xlab & ylab
+	if(hasArg(xlab)) xlab<-list(...)$xlab
+	else xlab<-colnames(X)[1]
+	if(hasArg(ylab)) ylab<-list(...)$ylab
+	else ylab<-colnames(X)[2]
+
+	# set font size for tip labels
+	if(hasArg(fsize)) fsize<-0.75*list(...)$fsize
+	else fsize<-0.75
+
 	# plot root state
-	plot(x=A[1,1],y=A[1,2],xlim=range(c(X[,1],A[,1])),ylim=range(c(X[,2],A[,2])),xlab=colnames(X)[1],ylab=colnames(X)[2])
+	plot(x=A[1,1],y=A[1,2],xlim=xlim,ylim=ylim,xlab=xlab,ylab=ylab)
 	
 	# put X in tree order
 	X<-X[tree$tip.label,]
@@ -41,7 +57,7 @@ phylomorphospace<-function(tree,X,A=NULL,label=TRUE,control=list()){
 		lines(x=c(X[as.character(tree$edge[i,1]),1],X[as.character(tree$edge[i,2]),1]),y=c(X[as.character(tree$edge[i,1]),2],X[as.character(tree$edge[i,2]),2]),col=con$col.edge[as.character(tree$edge[i,2]),1])
 		points(x=X[as.character(tree$edge[i,1]),1],y=X[as.character(tree$edge[i,1]),2],col=con$col.node[as.character(tree$edge[i,1]),1],pch=16,cex=1.0)
 		if(tree$edge[i,2]<=length(tree$tip.label)&&label)
-			textxy(X=X[as.character(tree$edge[i,2]),1],Y=X[as.character(tree$edge[i,2]),2],labs=tree$tip.label[tree$edge[i,2]],cx=0.75)	
+			textxy(X=X[as.character(tree$edge[i,2]),1],Y=X[as.character(tree$edge[i,2]),2],labs=tree$tip.label[tree$edge[i,2]],cx=fsize)	
 	}
 
 	# plot larger points for the tips

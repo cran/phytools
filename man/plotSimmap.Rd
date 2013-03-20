@@ -3,7 +3,7 @@
 \title{Plot stochastic character mapped tree}
 \usage{
 	plotSimmap(tree, colors=NULL, fsize=1.0, ftype="reg", lwd=2, pts=TRUE, 
-     node.numbers=FALSE, mar=NULL, add=FALSE, offset=NULL)
+     node.numbers=FALSE, mar=NULL, add=FALSE, offset=NULL, direction="rightwards")
 }
 \arguments{
  	\item{tree}{a modified object of class "phylo" or "multiPhylo" containing a stochastic mapping or set of mappings (e.g., see \code{\link{read.simmap}} & \code{\link{make.simmap}}).}
@@ -16,6 +16,7 @@
 	\item{mar}{vector containing the margins for the plot to be passed to \code{\link{par}}. If not specified, the default margins are [0.1,0.1,0.1,0.1].}
 	\item{add}{a logical value indicating whether or not to add the plotted tree to the current plot (\code{TRUE}) or create a new plot (\code{FALSE}, the default).}
 	\item{offset}{offset for the tip labels. Primarily to be used internally by \code{\link{densityMap}}.}
+	\item{direction}{plotting direction. Options are \code{"rightwards"} (the default) and \code{"leftwards"}. Note that for some reason that is not totally clear, \code{node.numbers=TRUE} does not work for \code{direction="leftwards"}.}
 }
 \description{
 	Function plots one or multiple stochastic character mapped trees.
@@ -36,11 +37,11 @@
 	\code{\link{densityMap}}, \code{\link{make.simmap}}, \code{\link{read.simmap}} 
 }
 \examples{
-X<-
-"((A:{aqua,0.3:terr,0.4:aqua,0.3},B:{aqua,1.0}):{aqua,1.0},(C:{aqua,0.25:terr,0.75},D:{aqua,1.0}):{aqua,1.0});"
-phy<-read.simmap(text=X)
-leg<-c("blue","red"); names(leg)<-c("aqua","terr")
-plotSimmap(phy,leg,ftype="i")
+	Q<-matrix(c(-2,1,1,1,-2,1,1,1,-2),3,3)
+	rownames(Q)<-colnames(Q)<-letters[1:3]
+	tree<-sim.history(pbtree(n=100,scale=1),Q)
+	cols<-setNames(c("blue","red","green"),letters[1:3])
+	plotSimmap(tree,cols,ftype="i",fsize=0.7)
 }
 \keyword{phylogenetics}
 \keyword{plotting}

@@ -1,6 +1,6 @@
 \name{orderMappedEdge}
 \alias{orderMappedEdge}
-\title{Matches nodes between two trees}
+\title{Order the columns of mapped.edge to match across trees}
 \usage{
 	orderMappedEdge(trees, ordering=NULL)
 }

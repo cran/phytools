@@ -6,10 +6,11 @@
 # "xkcd" creates an xkcd-comic style phylogeny
 # "densitymap" maps the posterior density of a binary stochastic character mapping
 # "contmap" maps reconstructed trait evolution for a continuous character on the tree
+# "phenogram95" plots a 95% CI phenogram
 # written by Liam J. Revell 2012, 2013
 
-fancyTree<-function(tree,type=c("extinction","traitgram3d","droptip","xkcd","densitymap","contmap"),...,control=list()){
-	type<-matchType(type,c("extinction","traitgram3d","droptip","xkcd","densitymap"))
+fancyTree<-function(tree,type=c("extinction","traitgram3d","droptip","xkcd","densitymap","contmap","phenogram95"),...,control=list()){
+	type<-matchType(type,c("extinction","traitgram3d","droptip","xkcd","densitymap","contmap","phenogram95"))
 	if(class(tree)!="phylo"&&type%in%c("extinction","traitgram3d","droptip","xkcd")) stop("tree should be an object of class 'phylo'")
 	else if(class(tree)!="multiPhylo"&&type=="densitymap") stop("for type='densitymap' tree should be an object of class 'multiPhylo'")
 	if(type=="extinction") extinctionTree(tree)
@@ -18,7 +19,55 @@ fancyTree<-function(tree,type=c("extinction","traitgram3d","droptip","xkcd","den
 	else if(type=="xkcd") plotXkcdTree(tree,...)
 	else if(type=="densitymap") plotDensityMap(tree,...)
 	else if(type=="contmap") plotContMap(tree,...)
+	else if(type=="phenogram95") phenogram95(tree,...)
 	else stop(paste("do not recognize type = \"",type,"\"",sep=""))
+}
+
+# phenogram95 internal function
+# written by Liam J. Revell 2013
+
+phenogram95<-function(tree,...){
+	if(hasArg(x)) x<-list(...)$x
+	else stop("no phenotypic data provided")
+	if(hasArg(spread.labels)) spread.labels<-list(...)$spread.labels
+	else spread.labels<-TRUE
+	if(hasArg(link)) link<-list(...)$link
+	else link<-0.05*max(nodeHeights(tree))
+	if(hasArg(offset)) offset<-list(...)$offset
+	else offset<-0
+	# get ancestral states
+	A<-fastAnc(tree,x,CI=TRUE)
+	# compute transparencies	
+	trans<-as.character(floor(0:50/2))
+	trans[as.numeric(trans)<10]<-paste("0", trans[as.numeric(trans)<10],sep="")
+	# now get the arguments for phenogram
+	args<-list(...)
+	args$tree<-tree
+	args$lwd<-1
+	args$link<-0.05*max(nodeHeights(tree))
+	args$offset<-0
+	for(i in 0:50){
+  		p<-i/length(trans)
+		args$add<-i>1
+		args$spread.labels<-if(i==1) spread.labels else FALSE
+		args$link<-if(i==1) link else 0
+		args$offset<-if(i==1) offset else offset+link
+		args$x<-c(x,(1-p)*A$CI95[,1]+p*A$ace)
+		args$colors<-paste("#0000ff",trans[i+1],sep="")
+		do.call(phenogram,args)
+		args$x<-c(x,(1-p)*A$CI95[,2]+p*A$ace)
+		args$add<-TRUE
+		args$spread.labels<-FALSE
+		args$link<-0
+		args$offset<-offset+link
+		do.call(phenogram,args)
+	}
+	args$x<-c(x,A$ace)
+	args$add<-TRUE
+	args$colors<-"white"
+	args$lwd<-2
+	args$offset<-offset+link
+	do.call(phenogram,args)
 }
 
 # extinctionTree internal function
