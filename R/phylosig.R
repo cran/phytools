@@ -116,7 +116,7 @@ phylosig<-function(tree,x,method="K",test=FALSE,nsim=1000,se=NULL,start=NULL,con
 				return(list(lambda=res$maximum,logL=res$objective[1,1])) # return lambda and log-likelihood
 			else {
 				logL0<-likelihoodLambda(theta=0,C=C,y=x) # compute likelihood of lambda=0
-				P<-1-as.numeric(pchisq(2*(res$objective[1,1]-logL0),df=1)) # P-value
+				P<-as.numeric(pchisq(2*(res$objective[1,1]-logL0),df=1,lower.tail=FALSE)) # P-value
 				return(list(lambda=res$maximum,logL=res$objective[1,1],logL0=logL0[1,1],P=P)) # return lambda, logL, and P-value
 			}
 		} else {
@@ -128,7 +128,7 @@ phylosig<-function(tree,x,method="K",test=FALSE,nsim=1000,se=NULL,start=NULL,con
 				return(list(lambda=res$par[2],sig2=res$par[1],logL=-res$value,convergence=res$convergence,message=res$message))
 			else {
 				res0<-optim(c(s[1],0),likelihoodLambda.me,C=C,y=x,M=M,method="L-BFGS-B",lower=c(0,0),upper=c(Inf,1e-10),control=control)
-				P<-1-as.numeric(pchisq(2*(res0$value-res$value),df=1))
+				P<-as.numeric(pchisq(2*(res0$value-res$value),df=1,lower.tail=FALSE))
 				return(list(lambda=res$par[2],sig2=res$par[1],logL=-res$value,convergence=res$convergence,message=res$message,logL0=-res0$value,P=P))
 			}
 		}

@@ -1,6 +1,6 @@
 \name{writeNexus}
 \alias{writeNexus}
-\title{Write a stochastic character mapped tree to file}
+\title{Write a tree to file in Nexus format}
 \usage{
 	writeNexus(tree, file="")
 }

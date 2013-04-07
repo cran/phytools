@@ -1,24 +1,27 @@
-# This function creates a phylomorsphace plot of Sidlauskas (2006)
-# Written by Liam J. Revell 2010, 2011, 2012, 2013
+# this funciton creates a phylomorphospace plot (Sidlauskas 2006)
+# written by Liam J. Revell 2010-13
 
 phylomorphospace<-function(tree,X,A=NULL,label=TRUE,control=list(),...){
 
 	# some minor error checking
 	if(class(tree)!="phylo") stop("tree object must be of class 'phylo.'")
 	if(nrow(X)!=length(tree$tip)) stop("X must contain the same number of rows as species in tree.")
-	if(ncol(X)!=2) warning("X has more than 2 columns.  Using only the first 2 columns.")
-
-	# check to see if A should be estimated
-	if(is.null(A)){
-		# load dependencies
-		A<-matrix(NA,tree$Nnode,2,dimnames=list(as.character(length(tree$tip.label)+1:tree$Nnode),colnames(X)))
-		for(i in 1:2) A[,i]<-fastAnc(tree,X[,i])
+	if(is.null(rownames(X))){
+		warning("X is missing row names; assuming order of tip labels.")
+		rownames(X)<-tree$tip.label
+	}
+	if(ncol(X)!=2){ 
+		warning("X has more than 2 columns.  Using only the first 2 columns.")
+		X<-X[,1:2]
 	}
 
+	# get ancestral states
+	if(is.null(A)) A<-apply(X,2,fastAnc,tree=tree)
+
 	# control list
-	con=list(col.edge=matrix(data="black",nrow(tree$edge),1,dimnames=list(as.character(tree$edge[,2]),"color")),col.node=matrix(data="black",nrow(tree$edge)+1,1,dimnames=list(as.character(c(tree$edge[1,1],tree$edge[,2])),"color")))
+	con=list(col.edge=setNames(rep("black",nrow(tree$edge)),as.character(tree$edge[,2])),
+		col.node=setNames(rep("black",max(tree$edge)),as.character(1:max(tree$edge))))
 	con[(namc<-names(control))]<-control
-	con$col.edge<-as.matrix(con$col.edge); con$col.node<-as.matrix(con$col.node)
 
 	# set xlim & ylim
 	if(hasArg(xlim)) xlim<-list(...)$xlim
@@ -35,32 +38,44 @@ phylomorphospace<-function(tree,X,A=NULL,label=TRUE,control=list(),...){
 	# set font size for tip labels
 	if(hasArg(fsize)) fsize<-0.75*list(...)$fsize
 	else fsize<-0.75
-
-	# plot root state
-	plot(x=A[1,1],y=A[1,2],xlim=xlim,ylim=ylim,xlab=xlab,ylab=ylab)
 	
-	# put X in tree order
-	X<-X[tree$tip.label,]
-	rownames(X)<-1:length(tree$tip)
-	
-	# check for node labels; create if necessary
-	if(is.null(tree$node.label)) tree$node.label<-as.character(length(tree$tip.label)+1:tree$Nnode)
-	tree$node.label<-as.character(tree$node.label)
-	A<-A[tree$node.label,]
-	rownames(A)<-length(tree$tip)+1:tree$Nnode
+	# check if colors for stochastic mapping
+	if(hasArg(colors)) colors<-list(...)$colors
+	else if(!is.null(tree$maps)) colors<-setNames(palette()[1:ncol(tree$mapped.edge)],sort(colnames(tree$mapped.edge)))
 
-	# bind X & A
-	X<-rbind(X,A)
+	# set lwd
+	if(hasArg(lwd)) lwd<-list(...)$lwd
+	else lwd<-if(is.null(tree$maps)) 1 else 2
 
-	# loop across the branches of the tree
-	for(i in 1:nrow(tree$edge)){
-		lines(x=c(X[as.character(tree$edge[i,1]),1],X[as.character(tree$edge[i,2]),1]),y=c(X[as.character(tree$edge[i,1]),2],X[as.character(tree$edge[i,2]),2]),col=con$col.edge[as.character(tree$edge[i,2]),1])
-		points(x=X[as.character(tree$edge[i,1]),1],y=X[as.character(tree$edge[i,1]),2],col=con$col.node[as.character(tree$edge[i,1]),1],pch=16,cex=1.0)
-		if(tree$edge[i,2]<=length(tree$tip.label)&&label)
-			textxy(X=X[as.character(tree$edge[i,2]),1],Y=X[as.character(tree$edge[i,2]),2],labs=tree$tip.label[tree$edge[i,2]],cx=fsize)	
+	# do some bookkeeping
+	aa<-setNames(c(X[tree$tip.label,1],A[,1]),c(1:length(tree$tip.label),rownames(A)))
+	bb<-setNames(c(X[tree$tip.label,2],A[,2]),c(1:length(tree$tip.label),rownames(A)))
+	XX<-matrix(aa[as.character(tree$edge)],nrow(tree$edge),2)
+	YY<-matrix(bb[as.character(tree$edge)],nrow(tree$edge),2)
+
+	# plot projection
+	plot(x=A[1,1],y=A[1,2],xlim=xlim,ylim=ylim,xlab=xlab,ylab=ylab,pch=16,cex=1.0)
+	if(is.null(tree$maps)){
+		for(i in 1:nrow(XX)) lines(XX[i,],YY[i,],col=con$col.edge[as.character(tree$edge[i,2])],lwd=lwd)
+	} else {
+		for(i in 1:nrow(XX)){
+			xx<-tree$maps[[i]]/sum(tree$maps[[i]])*(XX[i,2]-XX[i,1])
+			yy<-tree$maps[[i]]/sum(tree$maps[[i]])*(YY[i,2]-YY[i,1])
+			cc<-names(tree$maps[[i]])
+			x<-XX[i,1]; y<-YY[i,1]
+			for(j in 1:length(xx)){
+				lines(c(x,x+xx[j]),c(y,y+yy[j]),col=colors[cc[j]],lwd=lwd)
+				x<-x+xx[j]; y<-y+yy[j]
+			}
+		}
 	}
-
-	# plot larger points for the tips
-	points(X[1:length(tree$tip),1],X[1:length(tree$tip),2],col=con$col.node[rownames(X)[1:length(tree$tip)],1],pch=16,cex=1.3)
-
+	points(c(XX[i,1],XX[tree$edge[,2]>length(tree$tip.label),2]),c(YY[i,1],YY[tree$edge[,2]>length(tree$tip.label),2]),pch=16,cex=1.0)
+	points(XX[tree$edge[,2]<=length(tree$tip.label),2],YY[tree$edge[,2]<=length(tree$tip.label),2],pch=16,cex=1.3)
+	zz<-sapply(1:length(tree$tip.label),function(x,y) which(x==y),y=tree$edge[,2])
+	if(label) textxy(XX[zz,2],YY[zz,2],labs=tree$tip.label,cx=fsize)
 }
+	
+		
+	
+
+	
