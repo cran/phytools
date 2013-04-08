@@ -1,5 +1,5 @@
-c3c3a4b8654c07a0c9341cb863fdfb1c *DESCRIPTION
-1998085448506c39bb77ef766869d9dd *NAMESPACE
+aa931bd3af20eed5a671b1bbc1c74cac *DESCRIPTION
+abfac50623ddab27a6c580829fd8d863 *NAMESPACE
 8f41acffe68735aa7449b5e66a9812b1 *R/add.everywhere.R
 34423edfd64ed1b237c63a0364288bdf *R/add.random.R
 f0df86c98d2fd0c6d76f49ca3172d129 *R/allFurcTrees.R
@@ -30,7 +30,7 @@ bfe9d45e7a126e26d4ea0c10e7851350 *R/fastBM.R
 845b53ce3f60f6ed7d3728a67da0ecfc *R/getExtant.R
 1dd29274a867dc1643a706f932bb1c82 *R/ltt.R
 1a57f7ae8dcf530cbda30b282d513aa0 *R/make.era.map.R
-135668e8f605625f9edeb7bf8dbd31a1 *R/make.simmap.R
+afc6894edbd8990cf3067940ae6b92e1 *R/make.simmap.R
 23b9e915f9fc8b9c46d81c573afbbedc *R/map.overlap.R
 bf6c23b046ed30ee9e9183582aceb070 *R/mcmcBM.R
 659b234e9ff4b00daa511a06f72d53d2 *R/mcmcBM.full.R
@@ -48,9 +48,9 @@ d98d7bec0847aa686ef9b37b044489bb *R/phyl.cca.R
 c9f68d7c48ed3961941c58d5059404e3 *R/phyl.pca.R
 6eb0e229b575c66b578eb9e3de320e4f *R/phyl.resid.R
 c1aaeb796e42be5177ecb36c5a6df15c *R/phylANOVA.R
-fff1a290f8343fbd611167a62d06b479 *R/phylomorphospace.R
+c74de0f211bb863f6d330c48ffc70715 *R/phylomorphospace.R
 ab5521021127b8b4dce1504d8c90748c *R/phylomorphospace3d.R
-2771f0713c2aae54eb30ea78096f738b *R/phylosig.R
+7e17223f27118288d71aeff1f4843c44 *R/phylosig.R
 d6276aef56e46a7fe0be09a057f0ae8f *R/plotBranchbyTrait.R
 921971bdd7fc83fda22610683f4d8097 *R/plotSimmap.R
 c46f92bff5eec9823551a14989893819 *R/plotTree.R
@@ -58,6 +58,7 @@ eb798ee8249519bd2afc6c132f24a065 *R/ratebystate.R
 20d93417514de8d6caf78fe4f71fc33d *R/read.newick.R
 1e407635f553c7f6d95df99024f3199a *R/read.simmap.R
 0c233034935b1d82fdf6f8d029a753bd *R/reroot.R
+9bf2954f9f66d08f2ace41ae546e123a *R/rerootingMethod.R
 c4e18ab88f3a37d448971b81de4fdbfc *R/rescaleSimmap.R
 afe6e31be39046604a479f8180ddb100 *R/sampleFrom.R
 a734b9387333dc2d9a5ece1f8ee06f98 *R/sim.corrs.R
@@ -67,13 +68,13 @@ f21071a47bc22c9c76ef3136ff4fe821 *R/sim.rates.R
 c8bfa07dd3238d97fcaafe5a369e5e89 *R/starTree.R
 ae99c9aeb8f0553d3addf1475ea35562 *R/threshBayes.R
 a38bac98b4681cee859750b8193a9a9b *R/treeSlice.R
-aa7cb09c2972ab737bc6a984da287aa6 *R/utilities.R
+3790c283ab61809e3b55b85ea34d5dbd *R/utilities.R
 c6fdcd385bd2cb7778a9afb90465ef02 *R/vcvPhylo.R
 7282f87b3143db28b7e982e86d90b6e5 *R/write.simmap.R
 8a960b2dfaa3924ae71d485d68ea66b3 *R/writeAncestors.R
 c6d9cb0dbedb17c4cc0d4e16032da623 *R/writeNexus.R
 b882d12a50b9f13670b5c4c3c8277353 *R/xkcdTree.R
-a78ed25ad6214b1722858e7289d3d3b5 *inst/CITATION
+0eb3bef3466bd6d264c669571621c2d1 *inst/CITATION
 f303aa31e40de6ef9764b8be8e1176a9 *man/add.color.bar.Rd
 0c20d95b69a8a7e4749d29cfbc057d9b *man/add.everywhere.Rd
 6f58d2d039540c91cc923fad0adbf17d *man/add.random.Rd
@@ -92,6 +93,7 @@ df10aa4cbbc4ecb9cbfdb27854d3b61b *man/bmPlot.Rd
 d7747f4640b9aad99ca45240cd439c27 *man/contMap.Rd
 95e6fe6b188abe0e5f0277acd97294ec *man/countSimmap.Rd
 6cf026b8da359bfccc5a4fe7d1c4d3df *man/densityMap.Rd
+8768c16dc1bdf307668944cbd3c10d30 *man/describe.simmap.Rd
 9ceabd15dc852774105aa8942c97dd7e *man/drop.clade.Rd
 dbe4cfdd66305d7e4dbcffe487daeed9 *man/drop.tip.simmap.Rd
 51cfbaf12c184c35c09fa750ab04a75a *man/estDiversity.Rd
@@ -112,12 +114,13 @@ a5d05598236c7e40df1c40eb78479b5d *man/fancyTree.Rd
 1fd15be1311a88cea40356951a97dc23 *man/getDescendants.Rd
 bc7ce1d3742a7aca8c2a4d4c11ca4798 *man/getExtant.Rd
 8c77a108d6d851ec836139518633184f *man/getSisters.Rd
+5ac795cf959b273145a852d2aa98a2c4 *man/getStates.Rd
 b7341a010735c5854ea729e68139d728 *man/lambda.transform.Rd
 b05f73d33842796901da99bdaa753dc6 *man/likMlambda.Rd
 f2dcb1f3f579ef58109eddf152d2d44d *man/ls.tree.Rd
 7f3a03c539b6c836e03b8dad1a0061c7 *man/ltt.Rd
 979873156ecfae921d13bd4be0f9d88d *man/make.era.map.Rd
-5d93fbe1d7dc4e27dac8331ea563a25c *man/make.simmap.Rd
+9870261a7fa5b609be56223799c039bd *man/make.simmap.Rd
 134adc93c1a331b21c2d1d7c6d17bc9a *man/map.overlap.Rd
 01272f01dee476f2d6a61790985e4b5e *man/matchNodes.Rd
 af46089bb0662e8beeb52fae220429e8 *man/minSplit.Rd
@@ -140,10 +143,10 @@ c5de415f30c5b38f98406f093eae54fe *man/phyl.pca.Rd
 6ac5b2712551ba8a1efea55c43cd5793 *man/phyl.vcv.Rd
 552e734c0db8048b0587a8f739bfb4dd *man/phylANOVA.Rd
 2e39afb0137ae8c1729ce04491f6ae9f *man/phyloDesign.Rd
-70054986893a669ab2ab03aab37aad3a *man/phylomorphospace.Rd
+1674288aa7f5fe4c7655d62d048605be *man/phylomorphospace.Rd
 1c93169c810e14ff0492dfb3e7a4dcbc *man/phylomorphospace3d.Rd
 b8880941b5282424f8dca153777e9fa1 *man/phylosig.Rd
-acae725d640139d012557a73b846cede *man/phytools-package.Rd
+0a6373513621bc26c8573db69d7bba54 *man/phytools-package.Rd
 c21b236dddbfae5e97cd4f72fe8d22a4 *man/plotBranchbyTrait.Rd
 93f62b9e4ea4c9f78af67ef12c63a8b2 *man/plotSimmap.Rd
 5a5dcfa23e18d176d948bfb8d8eb09d4 *man/plotThresh.Rd
@@ -155,6 +158,7 @@ f1e7fb49afcbb107963bfb564e9b2a42 *man/ratebystate.Rd
 bbf488efac4531a0f06915abd93b69f9 *man/reorderSimmap.Rd
 c672522843985e169c9533777d9c66ff *man/repPhylo.Rd
 7fb814bafcdcfbee8c836a410ee275d0 *man/reroot.Rd
+0a37b1504de3b48902a7d0eb53704792 *man/rerootingMethod.Rd
 9c26f56f5e02cadc67db5104071aea20 *man/rescaleSimmap.Rd
 8d605598ce2d97565f1fa808e068f210 *man/roundBranches.Rd
 a896dede75ef3df6fd8ccbad291d0bd0 *man/rstate.Rd
@@ -174,5 +178,5 @@ d7f0b5596928fd4c310687dc6671714b *man/untangle.Rd
 db214ebc9d2bf08f1a797f0b0adb8df6 *man/vcvPhylo.Rd
 22b83d369bb58103adbd86d8a61b59dd *man/write.simmap.Rd
 b27c3ebe470cc8acb24d1c7543b55f36 *man/writeAncestors.Rd
-afa1b296b869f91e3086e2efecf7a7f8 *man/writeNexus.Rd
+bc608dc192e64b69a38310d616db2074 *man/writeNexus.Rd
 f0a6a44e22743af61d4eae6cbe2cda94 *man/xkcdTree.Rd

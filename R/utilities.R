@@ -1,5 +1,89 @@
 # some utility functions
-# written by Liam J. Revell 2011, 2012, 2013
+# written by Liam J. Revell 2011, 2012, 2013\
+
+# function to get states at internal nodes from simmap style trees
+# written by Liam J. Revell 2013
+getStates<-function(tree,type=c("nodes","tips")){
+	type<-type[1]
+	if(type=="nodes"){
+		y<-setNames(sapply(tree$maps,function(x) names(x)[1]),tree$edge[,1])
+		y<-y[as.character(length(tree$tip)+1:tree$Nnode)]
+	} else if(type=="tips"){
+		y<-setNames(sapply(tree$maps,function(x) names(x)[length(x)]),tree$edge[,2])
+		y<-setNames(y[as.character(1:length(tree$tip.label))],tree$tip.label)
+	}
+	return(y)
+}
+
+# function to summarize the results of stochastic mapping
+# written by Liam J. Revell 2013
+describe.simmap<-function(tree,...){
+	if(hasArg(plot)) plot<-list(...)$plot
+	else plot<-FALSE
+	if(hasArg(check.equal)) check.equal<-list(...)$check.equal
+	else check.equal<-FALSE
+	if(hasArg(message)) message<-list(...)$message
+	else message<-TRUE
+	if(class(tree)=="multiPhylo"){
+		if(check.equal){
+			TT<-sapply(tree,function(x,y) sapply(y,all.equal.phylo,x),y=tree)
+			check<-all(TT)
+			if(!check) warning("some trees not equal")
+		}
+		YY<-sapply(tree,getStates)
+		states<-sort(unique(as.vector(YY)))
+		ZZ<-t(apply(YY,1,function(x,levels,Nsim) summary(factor(x,levels))/Nsim,levels=states,Nsim=length(tree)))
+		XX<-countSimmap(tree,states,FALSE)
+		XX<-XX[,-(which(as.vector(diag(-1,length(states)))==-1)+1)]
+		AA<-t(sapply(tree,function(x) c(colSums(x$mapped.edge),sum(x$edge.length))))
+		colnames(AA)[ncol(AA)]<-"total"
+		BB<-sapply(tree,getStates,type="tips")
+		CC<-t(apply(BB,1,function(x,levels,Nsim) summary(factor(x,levels))/Nsim,levels=states,Nsim=length(tree)))
+		if(message){
+			cat(paste(length(tree),"trees with a mapped discrete character with states:\n",paste(states,collapse=", "),"\n\n"))
+			cat(paste("trees have",colMeans(XX)["N"],"changes between states on average\n\n"))
+			cat(paste("changes are of the following types:\n"))
+			aa<-t(as.matrix(colMeans(XX)[2:ncol(XX)])); rownames(aa)<-"x->y"; print(aa)
+			cat(paste("\nmean total time spent in each state is:\n"))
+			print(matrix(c(colMeans(AA),colMeans(AA[,1:ncol(AA)]/AA[,ncol(AA)])),2,ncol(AA),byrow=TRUE,dimnames=list(c("raw","prop"),c(colnames(AA)))))
+			cat("\n")
+		}
+		if(plot){
+			plot(tree[[1]],edge.width=2,no.margin=TRUE,label.offset=0.015*max(nodeHeights(tree[[1]])),...)
+			nodelabels(pie=ZZ,piecol=1:length(states),cex=0.6)
+			tips<-CC
+			tiplabels(pie=tips,piecol=1:length(states),cex=0.5)
+			L<-list(count=XX,times=AA,tips=tips,ace=ZZ,legend=setNames(states,palette()[1:length(states)]))
+			if(message) invisible(L) else return(L)
+		} else {
+			L<-list(count=XX,times=AA,ace=ZZ)
+			if(message) invisible(L) else return(L)
+		}
+	} else if(class(tree)=="phylo"){
+		XX<-countSimmap(tree,message=FALSE)
+		YY<-getStates(tree)
+		states<-sort(unique(YY))
+		AA<-setNames(c(colSums(tree$mapped.edge),sum(tree$edge.length)),c(colnames(tree$mapped.edge),"total"))
+		AA<-rbind(AA,AA/AA[length(AA)]); rownames(AA)<-c("raw","prop")
+		if(message){
+			cat(paste("1 tree with a mapped discrete character with states:\n",paste(states,collapse=", "),"\n\n"))
+			cat(paste("tree has",XX$N,"changes between states\n\n"))
+			cat(paste("changes are of the following types:\n"))
+			print(XX$Tr)
+			cat(paste("\nmean total time spent in each state is:\n"))
+			print(AA)
+			cat("\n")
+		}
+		if(plot){
+			plotSimmap(tree,colors=setNames(palette()[1:length(states)],states),pts=FALSE)
+			L<-list(N=XX$N,Tr=XX$Tr,times=AA,states=YY,legend=setNames(states,palette()[1:length(states)]))
+			if(message) invisible(L) else return(L)
+		} else { 
+			L<-list(N=XX$N,Tr=XX$Tr,times=AA,states=YY)
+			if(message) invisible(L) else return(L)
+		}
+	}
+}
 
 # function counts transitions from a mapped history
 # written by Liam J. Revell 2013

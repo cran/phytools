@@ -10,7 +10,7 @@
 
 	The complete list of functions can be displayed with \code{library(help = phytools)}.
 
-	More information on \pkg{phytools} can be found at \url{http://www.phytools.org} of \url{http://blog.phytools.org}.
+	More information on \pkg{phytools} can be found at \url{http://www.phytools.org} or \url{http://blog.phytools.org}.
 }
 \author{
 	Liam J. Revell
