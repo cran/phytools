@@ -2,7 +2,7 @@
 \alias{untangle}
 \title{Attempts to untangle crossing branches for plotting}
 \usage{
-	untangle(tree, method=c("reorder", "read.tree"))
+	untangle(tree, method=c("reorder","read.tree"))
 }
 \arguments{
 	\item{tree}{tree as an object of class \code{"phylo"}. Can be a SIMMAP style tree (e.g., \code{\link{read.simmap}}.}

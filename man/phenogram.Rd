@@ -2,7 +2,8 @@
 \alias{phenogram}
 \title{Plot phenogram (traitgram)}
 \usage{
-	phenogram(tree, x, fsize=1.0, ftype="reg", colors=NULL, axes=list(), add=FALSE, ...)
+	phenogram(tree, x, fsize=1.0, ftype="reg", colors=NULL, axes=list(),
+		add=FALSE, ...)
 }
 \arguments{
 	\item{tree}{an object of class "phylo", with or without a mapped discrete character.}

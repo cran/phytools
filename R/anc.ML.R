@@ -1,5 +1,5 @@
 # lightweight version of ace(...,method="ML") for continuous traits
-# written by Liam J. Revell 2011,2013
+# written by Liam J. Revell 2011-2013
 
 anc.ML<-function(tree,x,maxit=2000){
 
@@ -22,9 +22,10 @@ anc.ML<-function(tree,x,maxit=2000){
 	x[rownames(C)[1:length(tree$tip)]]->x
 
 	# assign starting values
-	y<-runif(n=tree$Nnode-1)*(max(x)-min(x))+min(x)
-	a<-runif(n=1)*(max(x)-min(x))+min(x)
-	sig2<-mean(pic(x,multi2di(tree))^2)*runif(n=1,max=2)
+	zz<-fastAnc(tree,x)
+	y<-zz[2:length(zz)]
+	a<-zz[1]
+	sig2<-(c(x,y)-a)%*%invC%*%(c(x,y)-a)/nrow(C)
 
 	# optimize
 	res<-optim(c(sig2,a,y),fn=likelihood,C=C,invC=invC,detC=detC,x=x,method="L-BFGS-B",lower=c(10*.Machine$double.eps,rep(-Inf,tree$Nnode)),control=list(maxit=maxit))

@@ -1,5 +1,23 @@
 # some utility functions
-# written by Liam J. Revell 2011, 2012, 2013\
+# written by Liam J. Revell 2011, 2012, 2013
+
+# function to re-root a phylogeny along an edge
+# written by Liam Revell 2011-2013
+
+reroot<-function(tree,node.number,position){
+	if(class(tree)!="phylo") stop("tree object must be of class 'phylo.'")
+	tt<-splitTree(tree,list(node=node.number,bp=position))
+	p<-tt[[1]]; d<-tt[[2]]
+	p<-root(p,outgroup="NA",resolve.root=T)
+	bb<-which(p$tip.label=="NA")
+	ee<-p$edge.length[which(p$edge[,2]==bb)]
+	p$edge.length[which(p$edge[,2]==bb)]<-0
+	cc<-p$edge[which(p$edge[,2]==bb),1]
+	dd<-setdiff(p$edge[which(p$edge[,1]==cc),2],bb)
+	p$edge.length[which(p$edge[,2]==dd)]<-p$edge.length[which(p$edge[,2]==dd)]+ee
+	tt<-paste.tree(p,d)
+	return(tt)
+}
 
 # function to get states at internal nodes from simmap style trees
 # written by Liam J. Revell 2013

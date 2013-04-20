@@ -4,16 +4,18 @@
 make.simmap<-function(tree,x,model="SYM",nsim=1,...){
 	if(class(tree)=="multiPhylo"){
 		ff<-function(yy,x,model,nsim,...){
-			zz<-make.simmap(yy,x,model,nsim,...); class(zz)<-NULL
+			zz<-make.simmap(yy,x,model,nsim,...)
+			if(nsim>1) class(zz)<-NULL
 			return(zz)
 		}	
-		mtrees<-unlist(sapply(tree,ff,x,model,nsim,...,simplify=FALSE),recursive=FALSE)
+		if(nsim>1) mtrees<-unlist(sapply(tree,ff,x,model,nsim,...,simplify=FALSE),recursive=FALSE)
+		else mtrees<-sapply(tree,ff,x,model,nsim,...,simplify=FALSE)
 		class(mtrees)<-"multiPhylo"
 	} else {
 		if(hasArg(pi)) pi<-list(...)$pi
 		else pi<-"equal"
-		if(hasArg(message)) message<-list(...)$message
-		else message<-TRUE
+		if(hasArg(message)) pm<-list(...)$message
+		else pm<-TRUE
 		if(hasArg(tol)) tol<-list(...)$tol
 		else tol<-1e-8
 		# check
@@ -50,12 +52,13 @@ make.simmap<-function(tree,x,model="SYM",nsim=1,...){
 		if(pi[1]=="equal") pi<-setNames(rep(1/m,m),colnames(L)) # set equal
 		else if(pi[1]=="estimated") pi<-statdist(Q) # set from stationary distribution
 		else pi<-pi/sum(pi) # obtain from input
-		if(message) printmessage(Q,pi)
+		if(pm) printmessage(Q,pi)
 		mtrees<-replicate(nsim,smap(tree,x,N,m,root,L,Q,pi),simplify=FALSE)
 		if(length(mtrees)==1) mtrees<-mtrees[[1]]
 		else class(mtrees)<-"multiPhylo"
-	}
-	if(message) cat("\nDone.\n")
+	}	
+	(if(hasArg(message)) list(...)$message else TRUE)
+	if((if(hasArg(message)) list(...)$message else TRUE)&&class(tree)=="phylo") message("Done.")
 	return(mtrees)
 }
 
@@ -75,7 +78,7 @@ smap<-function(tree,x,N,m,root,L,Q,pi){
 	mtree$mapped.edge<-matrix(0,nrow(tree$edge),m,dimnames=list(paste(tree$edge[,1],",",tree$edge[,2],sep=""),colnames(L)))
 	# now we want to simulate the node states & histories by pre-order traversal
 	NN<-matrix(NA,nrow(tree$edge),2) # our node values
-	NN[which(tree$edge[,1]==root),1]<-rstate(L[1,]*pi/sum(L[1,]*pi)) # assign root
+	NN[which(tree$edge[,1]==root),1]<-rstate(L[as.character(root),]*pi/sum(L[as.character(root),]*pi)) # assign root
 	for(j in 1:nrow(tree$edge)){
 		# conditioned on the start value, assign end value of node (if internal)
 		p<-expm(Q*tree$edge.length[j])[NN[j,1],]*L[as.character(tree$edge[j,2]),]
@@ -154,7 +157,7 @@ apeAce<-function(tree,x,model){
 		nl<-ncol(x)
 		lvls<-colnames(x)
 	} else {
-		x[tree$tip.label]
+		x<-x[tree$tip.label]
   		if(!is.factor(x)) x<-factor(x)
 		nl<-nlevels(x)
 		lvls<-levels(x)

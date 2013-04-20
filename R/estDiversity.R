@@ -1,31 +1,62 @@
 # function computes an estimate of the standing diversity in each category given by x at each node
-# written by Liam J. Revell 2011, 2013
+# written by Liam J. Revell 2011-2013
 
-estDiversity<-function(tree,x){
-	# some minor error checking
+estDiversity<-function(tree,x,method=c("asr","simulation"),model="ER",...){
+	method<-matchType(method[1],c("asr","simulation"))
+	if(hasArg(nsim)) nsim<-list(...)$nsim else nsim=100
 	if(class(tree)!="phylo") stop("tree object must be of class 'phylo.'")
-	# first get the node heights
-	tree<-reorder(tree,"cladewise")
-	node.heights<-nodeHeights(tree)
-	# now reconstruct x on tree
-	anc<-ace(x,tree,type="discrete")$lik.anc
-	rownames(anc)<-1:tree$Nnode+length(tree$tip)
-	# now loop through every node above the root
-	D<-matrix(0,nrow(anc),ncol(anc),dimnames=dimnames(anc))
-	D[1,]<-rep(0,ncol(anc))
-	message("Please wait. . . . Warning - this may take a while!")
-	for(i in 2:nrow(anc)){
-		t<-node.heights[match(rownames(anc)[i],tree$edge[,2]),2]
-		ind<-node.heights[,1]<t&node.heights[,2]>t
-		edges<-matrix(tree$edge[ind,],length(tree$edge[ind,])/2,2)
-		heights<-matrix(node.heights[ind,],nrow(edges),ncol(edges))
-		for(j in 1:nrow(edges)){
-			tr<-reroot(tree,edges[j,2],t-heights[j,1])
-			D[i,]<-D[i,]+ace(x,tr,type="discrete")$lik.anc[1,]
+	if(method=="asr"){
+		tree<-reorder(tree,"cladewise") # reorder tree
+		H<-nodeHeights(tree)
+		if(!(model=="ER"||model=="SYM"||if(is.matrix(model)) isSymmetric(model) else FALSE)){
+			cat("Warning:\n  only symmetric models allowed for method='asr'\n  changing to model='ER'\n")
+			model<-"ER"
 		}
-		D[i,]<-D[i,]*anc[i,]
-		if(i%%10==0) message(paste("Completed",i,"nodes"))
+		aa<-rerootingMethod(tree,x,model=model)$marginal.anc
+		D<-matrix(0,nrow(aa),ncol(aa),dimnames=dimnames(aa))
+		# now loop through every node above the root
+		message("Please wait. . . . Warning - this may take a while!")
+		for(i in 2:nrow(aa)){
+			tt<-H[match(as.numeric(rownames(aa)[i]),tree$edge[,2]),2]
+			ii<-H[,1]<tt&H[,2]>tt
+			ee<-tree$edge[ii,2]
+			hh<-H[ii,1]
+			for(j in 1:length(ee)){
+				tr<-reroot(tree,node.number=ee[j],position=tt-hh[j])
+				D[i,]<-D[i,]+apeAce(tr,x[tr$tip.label],model=model)$lik.anc[1,]
+			}
+			D[i,]<-D[i,]*aa[i,]
+			if(i%%10==0) message(paste("Completed",i,"nodes"))
+		}
+		d<-rowSums(D)
+	} else if(method=="simulation") {
+		mtrees<-make.simmap(tree,x,nsim=nsim,model=model,message=FALSE)
+		st<-sort(unique(x)); nn<-1:tree$Nnode+length(tree$tip)
+		aa<-lapply(mtrees,function(x) describe.simmap(x,message=FALSE)$states)
+		H<-nodeHeights(tree)
+		D<-matrix(0,tree$Nnode,length(st),dimnames=list(nn,st))
+		CC<-lapply(mtrees,function(x) lapply(x$maps,cumsum))
+		# now loop through every node above the root
+		message("Please wait. . . . Warning - this may take a while!")
+		for(i in 2:tree$Nnode){
+			tt<-H[match(nn[i],tree$edge[,2]),2]
+			ii<-H[,1]<tt&H[,2]>tt
+			ee<-tree$edge[ii,2]
+			hh<-H[ii,1]
+			for(j in 1:length(ee)){
+				dd<-setNames(rep(0,length(st)),st)
+				for(k in 1:nsim){
+					jj<-1; while((tt-hh[j])>CC[[k]][[which(tree$edge[,2]==ee[j])]][jj]) jj<-jj+1
+					ss<-names(mtrees[[k]]$maps[[which(tree$edge[,2]==ee[j])]])[jj]
+					dd[ss]<-dd[ss]+ if(ss==aa[[k]][i]) 1/nsim else 0
+				}
+				D[i,]<-D[i,]+dd
+			}
+			D[i,]<-D[i,]
+			if(i%%10==0) message(paste("Completed",i,"nodes"))
+		}
+		d<-rowSums(D)
 	}
-	d<-rowSums(D)
+	return(d)
 }
 

@@ -2,7 +2,7 @@
 \alias{phylomorphospace}
 \title{Creates phylomorphospace plot}
 \usage{
-	phylomorphospace(tree, X, A=NULL, label=TRUE, control=list(),...)
+	phylomorphospace(tree, X, A=NULL, label=TRUE, control=list(), ...)
 }
 \arguments{
 	\item{tree}{a phylogenetic tree in \code{"phylo"} format, or a modified \code{"phylo"} object with a mapped discrete character.}
