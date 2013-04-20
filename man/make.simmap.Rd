@@ -19,10 +19,10 @@
 
 	As of phytools>=0.2-33 \code{x} can be a vector of states or a matrix containing the prior probabilities of tip states in rows. In this case the column names of \code{x} should contain the states, and the row names should contain the tip names.
 
-	Note that there was a small (but potentially significant) bug in how node states were simulated by \code{make.simmap} in versions of phytools<=0.2-26. Between phytools 0.2-26 and 0.2-36 there was also a bug for asymmetric models of character change (e.g., \code{model="ARD"}). Both of these issues should be fixed in the present version.
+	Note that there was a small (but potentially significant) bug in how node states were simulated by \code{make.simmap} in versions of phytools<=0.2-26. Between phytools 0.2-26 and 0.2-36 there was also a bug for asymmetric models of character change (e.g., \code{model="ARD"}). Finally, between phytools 0.2-33 and phytools 0.2-47 there was an error in use of the conditional likelihoods for the root node, which caused the root node of the tree to be sampled incorrectly. All of these issues should be fixed in the present version.
 }
 \value{
- 	a modified phylogenetic tree of class \code{"phylo"} (or a modified \code{"multiPhylo"} object, for \code{nsim} > 1) with the following additional elements:
+ 	A modified phylogenetic tree of class \code{"phylo"} (or a modified \code{"multiPhylo"} object, for \code{nsim} > 1) with the following additional elements:
  	\item{maps}{a list of named vectors containing the times spent in each state on each branch, in the order in which they occur.}
  	\item{mapped.edge}{a matrix containing the total time spent in each state along each edge of the tree.}
 }

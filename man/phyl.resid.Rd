@@ -14,7 +14,7 @@
 	This function fits one or multiple phylogenetic regressions (depending on the number of columns in \code{Y}) and computes the residuals.  Designed for phylogenetic size correction using GLS regression (e.g., Revell 2009; \emph{Evolution}).
 }
 \details{
-	Optionally fits \eqn{\lambda} for each regression model.  Likelihood optimization of \eqn{\lambda} is performed for \code{method="lambda"} using \code{\link{optimize}} on the interval (0,1). This function is redundant with \code{residuals(gls(...,correlation=corPagel(...)))}, but may be easier to use to use for some users.
+	Optionally fits \eqn{\lambda} for each regression model.  Likelihood optimization of \eqn{\lambda} is performed for \code{method="lambda"} using \code{\link{optimize}} on the interval (0,1). This function is redundant with \code{residuals(gls(...,correlation=corPagel(...)))}, but may be easier to use to use for some users, and provides a good way to cross-check your results & make sure that you are using \code{gls} correctly.
 }
 \value{
 	a list with the following components:

@@ -1,20 +1,37 @@
 # function to compute the marginal posterior probabilities for nodes using the rerooting method
 # written by Liam J. Revell 2013
 
-rerootingMethod<-function(tree,x,model=c("ER","SYM")){
+rerootingMethod<-function(tree,x,model=c("ER","SYM"),...){
+	if(hasArg(tips)) tips<-list(...)$tips
+	else tips<-NULL
 	model<-model[1]
 	n<-length(tree$tip.label)
-	XX<-matrix(NA,tree$Nnode,length(unique(x)))
-	rownames(XX)<-1:tree$Nnode+n
-	colnames(XX)<-sort(unique(x))
-	YY<-apeAce(tree,x,model=model)
-	XX[1,]<-YY$lik.anc[1,]
+	# if vector convert to binary matrix
+	if(!is.matrix(x)){ 
+		yy<-to.matrix(x,sort(unique(x)))
+		if(is.null(tips)) tips<-FALSE
+	} else { 
+		if(is.null(tips)) tips<-TRUE
+		yy<-x
+	}
+	yy<-yy[tree$tip.label,]
+	yy<-yy/rowSums(yy)
+	XX<-matrix(NA,tree$Nnode+n,ncol(yy))
+	rownames(XX)<-1:(tree$Nnode+n)
+	colnames(XX)<-colnames(yy)
+	YY<-apeAce(tree,yy,model=model)
+	XX[n+1,]<-YY$lik.anc[1,]
 	Q<-matrix(YY$rates[YY$index.matrix],ncol(XX),ncol(XX),dimnames=list(colnames(XX),colnames(XX)))
 	diag(Q)<--colSums(Q,na.rm=TRUE)
-	for(i in 2:tree$Nnode){
-		tt<-reroot(tree,node.number=i+n,position=tree$edge.length[which(tree$edge[,2]==(i+n))])
-		XX[i,]<-apeAce(tt,x,model=model)$lik.anc[1,]
+	for(i in 1:(tree$Nnode+n)){
+		if(i!=(n+1)){
+			if(i>n||tips){
+				tt<-reroot(tree,node.number=i,position=tree$edge.length[which(tree$edge[,2]==i)])
+				XX[i,]<-apeAce(tt,yy,model=model)$lik.anc[1,]
+			}
+		}
 	}
+	rownames(XX)[1:n]<-tree$tip.label
+	XX<-if(tips) XX else XX[1:tree$Nnode+n,]
 	return(list(loglik=YY$loglik,Q=Q,marginal.anc=XX))
 }
-	

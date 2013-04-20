@@ -10,9 +10,14 @@ plotSimmap<-function(tree,colors=NULL,fsize=1.0,ftype="reg",lwd=2,pts=TRUE,node.
 		ftype<-which(c("off","reg","b","i","bi")==ftype)-1
 		if(!ftype) fsize=0 
 		# check colors
-		if(is.null(colors)){ 
-			colors<-palette()
-			names(colors)<-as.character(1:8)
+		if(is.null(colors)){
+			st<-sort(unique(unlist(sapply(tree$maps,names))))
+			colors<-palette()[1:length(st)]
+			names(colors)<-st
+			if(length(st)>1){
+				cat("no colors provided. using the following legend:\n")
+				print(colors)
+			}
 		}
 		# check tree
 		if(class(tree)!="phylo") stop("tree should be object of class 'phylo.'")

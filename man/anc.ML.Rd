@@ -13,7 +13,7 @@
 	This function estimates the evolutionary parameters and ancestral states for Brownian evolution using likelihood.
 }
 \details{
-	Because this function relies on a high dimensional numerical optimization of the likelihood function, \code{\link{fastAnc}} should probably be preferred for most purposes. If using \code{\link{anc.ML}}, users should be cautious to ensure convergence.
+	Because this function relies on a high dimensional numerical optimization of the likelihood function, \code{\link{fastAnc}} should probably be preferred for most purposes. If using \code{\link{anc.ML}}, users should be cautious to ensure convergence. This has been ameliorated in phytools>=0.2-48 by seeding the ML optimization with the result from \code{\link{fastAnc}}.
 }
 \value{
 	a list with the following components:
