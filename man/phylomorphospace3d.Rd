@@ -2,7 +2,7 @@
 \alias{phylomorphospace3d}
 \title{Creates tree-dimensional phylomorphospace plot}
 \usage{
-	phylomorphospace3d(tree, X, A=NULL, label=TRUE, control=list())
+phylomorphospace3d(tree, X, A=NULL, label=TRUE, control=list())
 }
 \arguments{
 	\item{tree}{a phylogenetic tree in \code{"phylo"} format.}
@@ -16,18 +16,18 @@ spin=TRUE,axes=TRUE,box=TRUE,simple.axes=FALSE,lwd=1,ftype="reg"
 	This function creates a phylomorphospace plot for three characters using the 3D visualization package, 'rgl'.
 }
 \value{
-	this function creates a three dimensional phylomorphospace plot
+	This function creates a three dimensional phylomorphospace plot
 }
 \references{
-	Sidlauskas, B. 2008. Continuous and arrested morphological diversification in sister clades of characiform fishes: A phylomorphospace approach. \emph{Evolution}, \bold{62}, 3135--3156.
+	Sidlauskas, B. (2008) Continuous and arrested morphological diversification in sister clades of characiform fishes: A phylomorphospace approach. \emph{Evolution}, \bold{62}, 3135--3156.
 }
 \author{Liam Revell \email{liam.revell@umb.edu}}
 \examples{
-	tree<-pbtree(n=25)
-	X<-fastBM(tree,nsim=3)
-	\dontrun{
-   	phylomorphospace3d(tree,X,control=list(spin=FALSE))
-	}
+tree<-pbtree(n=25)
+X<-fastBM(tree,nsim=3)
+\dontrun{
+phylomorphospace3d(tree,X,control=list(spin=FALSE))
+}
 }
 \seealso{
 	\code{\link{fancyTree}}, \code{\link{phenogram}}, \code{\link{phylomorphospace}}

@@ -2,7 +2,7 @@
 \alias{add.random}
 \title{Add tips at random to the tree}
 \usage{
-	add.random(tree, n=NULL, tips=NULL, edge.length=NULL, order=c("random","input"))
+add.random(tree, n=NULL, tips=NULL, edge.length=NULL, order=c("random","input"))
 }
 \arguments{
 	\item{tree}{an object of class \code{"phylo"}.}
@@ -18,7 +18,7 @@
 	Note that sometimes the resultant tree plotted with \code{\link{plot.phylo}} or \code{\link{plotSimmap}} may display with branches crossing. If so, the tree can be 'untangled' using \code{\link{untangle}}.
 }
 \value{
-	an object of class \code{"phylo"}.
+	An object of class \code{"phylo"}.
 }
 \author{Liam Revell \email{liam.revell@umb.edu}}
 \seealso{

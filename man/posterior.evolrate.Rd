@@ -2,7 +2,7 @@
 \alias{posterior.evolrate}
 \title{Analysis of the posterior sample from evol.rate.mcmc}
 \usage{
-	posterior.evolrate(tree, ave.shift, mcmc, tips, showTree=FALSE)
+posterior.evolrate(tree, ave.shift, mcmc, tips, showTree=FALSE)
 }
 \arguments{
 	\item{tree}{a phylogenetic tree in \code{"phylo"} format.}
@@ -15,10 +15,10 @@
 	This fucntion takes a phylogenetic tree, an average split position, and a raw MCMC output from \code{evol.rate.mcmc} and returns a posterior sample of evolutionary rates rootward (\eqn{\sigma(1)^2}) and tipward (\eqn{\sigma(2)^2}) from the average split.
 }
 \value{
-	a matrix containing the posterior sample of evolutionary rates and shift-points between rates.
+	A matrix containing the posterior sample of evolutionary rates and shift-points between rates.
 }
 \references{
-	Revell, L. J., D. L. Mahler, P. Peres-Neto, and B. D. Redelings. 2012. A new method for identifying exceptional phenotypic diversification. \emph{Evolution}, \bold{66}, 135-146.
+	Revell, L. J., D. L. Mahler, P. Peres-Neto, and B. D. Redelings (2012) A new method for identifying exceptional phenotypic diversification. \emph{Evolution}, \bold{66}, 135-146.
 }
 \author{Liam Revell \email{liam.revell@umb.edu}}
 \seealso{

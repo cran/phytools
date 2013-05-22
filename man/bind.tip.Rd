@@ -2,7 +2,7 @@
 \alias{bind.tip}
 \title{Attaches a new tip to a tree}
 \usage{
-	bind.tip(tree, tip.label, edge.length=NULL, where=NULL, position=0)
+bind.tip(tree, tip.label, edge.length=NULL, where=NULL, position=0)
 }
 \arguments{
 	\item{tree}{receptor tree.}
@@ -18,7 +18,7 @@
 	Wrapper function for 'ape' \code{\link{bind.tree}}.
 }
 \value{
-  a tree.
+	A tree.
 }
 \author{Liam Revell \email{liam.revell@umb.edu}}
 \keyword{phylogenetics}

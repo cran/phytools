@@ -2,7 +2,7 @@
 \alias{to.matrix}
 \title{Convert a character vector to a binary matrix}
 \usage{
-	to.matrix(x, seq)
+to.matrix(x, seq)
 }
 \arguments{
 	\item{x}{a vector of characters.}

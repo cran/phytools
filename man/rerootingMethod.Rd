@@ -2,7 +2,7 @@
 \alias{rerootingMethod}
 \title{Get marginal ancestral state reconstructions by re-rooting}
 \usage{
-	rerootingMethod(tree, x, model=c("ER","SYM"), ...)
+rerootingMethod(tree, x, model=c("ER","SYM"), ...)
 }
 \arguments{
 	\item{tree}{an object of class \code{"phylo"}.}
@@ -17,7 +17,7 @@
 	This function calls code modified from \code{\link{ace}} in the (Paradis et al. 2004) internally in the calculation of normalized conditional likelihoods.
 }
 \value{
-	a list containing the following elements:
+	A list containing the following elements:
 	\item{loglik}{the log-likelihood.}
 	\item{Q}{the fitted transition matrix between states.}
 	\item{marginal.anc}{the marginal ancestral state reconstructions for each node (and, optionally, each tip).}

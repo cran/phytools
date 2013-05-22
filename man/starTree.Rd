@@ -5,21 +5,21 @@
 starTree(species, branch.lengths=NULL)
 }
 \arguments{
-  \item{species}{a list of species.}
-  \item{branch.lengths}{an optional list of branch lengths in the same order as \code{species}.}
+	\item{species}{a list of species.}
+	\item{branch.lengths}{an optional list of branch lengths in the same order as \code{species}.}
 }
 \description{
-  This function creates a star phylogeny.
+	This function creates a star phylogeny.
 }
 \details{
-  Creates a star phylogeny with (optionally) user specified branch lengths.
+	Creates a star phylogeny with (optionally) user specified branch lengths.
 }
 \value{
-  a phylogenetic tree in \code{"phylo"} format.
+	An object of class \code{"phylo"}.
 }
 \author{Liam Revell \email{liam.revell@umb.edu}}
 \seealso{
-  \code{\link{stree}}
+	\code{\link{stree}}
 }
 \keyword{phylogenetics}
 \keyword{utilities}

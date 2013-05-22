@@ -2,7 +2,7 @@
 \alias{reroot}
 \title{Re-root a tree along an edge}
 \usage{
-	reroot(tree, node.number, position)
+reroot(tree, node.number, position)
 }
 \arguments{
 	\item{tree}{a phylogenetic tree in \code{"phylo"} format.}
@@ -19,11 +19,11 @@
 	A phylogenetic tree in \code{"phylo"} format.
 }
 \references{
-	Paradis, E., J. Claude, and K. Strimmer. 2004. APE: Analyses of phylogenetics and evolution in R language. \emph{Bioinformatics}, \bold{20}, 289--290.
+	Paradis, E., J. Claude, and K. Strimmer (2004) APE: Analyses of phylogenetics and evolution in R language. \emph{Bioinformatics}, \bold{20}, 289--290.
 }
 \author{Liam Revell \email{liam.revell@umb.edu}}
 \seealso{
-	\code{\link{splitTree}}, \code{{paste.tree}}, \code{\link{root}}
+	\code{\link{splitTree}}, \code{\link{paste.tree}}, \code{\link{root}}
 }
 \keyword{phylogenetics}
 \keyword{utilities}

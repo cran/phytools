@@ -2,7 +2,7 @@
 \alias{sim.ratebystate}
 \title{Conduct simulation of state dependent rate variation}
 \usage{
-	sim.ratebystate(tree, sig2x=1, sig2y=1, beta=c(0,1), ...)
+sim.ratebystate(tree, sig2x=1, sig2y=1, beta=c(0,1), ...)
 }
 \arguments{
 	\item{tree}{phylogenetic tree.}

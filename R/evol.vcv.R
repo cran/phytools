@@ -4,7 +4,7 @@
 # (see read.simmap()) and data for 1 or more continuous characters
 # Written by Liam J. Revell 2010, 2011, 2013
 
-evol.vcv<-function(scm.tre,dat,maxit=2000,vars=FALSE){
+evol.vcv<-function(tree,X,maxit=2000,vars=FALSE){
 
 	## internal functions
 
@@ -79,18 +79,18 @@ evol.vcv<-function(scm.tre,dat,maxit=2000,vars=FALSE){
 	## end internal functions
 
 	# bookkeeping
-	X<-as.matrix(dat)
+	X<-as.matrix(X)
 	n<-nrow(X) # number of species
 	m<-ncol(X) # number of traits
-	p<-ncol(scm.tre$mapped.edge) # number of states
+	p<-ncol(tree$mapped.edge) # number of states
 	D<-matrix(0,n*m,m)
 	for(i in 1:(n*m)) for(j in 1:m) if((j-1)*n<i&&i<=j*n) D[i,j]=1.0
 	one<-matrix(1,n,1)
 	y<-as.matrix(as.vector(X))
 
-	# first compute C for the whole scm.tre
-	C<-vcv.phylo(scm.tre)
-	C<-C[rownames(dat),rownames(dat)]
+	# first compute C for the whole tree
+	C<-vcv.phylo(tree)
+	C<-C[rownames(X),rownames(X)]
 
 	# find the ancestral state vector
 	a<-colSums(solve(C))%*%X/sum(solve(C))
@@ -111,13 +111,13 @@ evol.vcv<-function(scm.tre,dat,maxit=2000,vars=FALSE){
 
 	# compute separate C for each state
 	multi.tre<-list(); class(multi.tre)<-"multiPhylo"
-	C<-array(dim=c(nrow(C),ncol(C),ncol(scm.tre$mapped.edge)))
-	for(i in 1:ncol(scm.tre$mapped.edge)){
-		multi.tre[[i]]<-scm.tre
-		multi.tre[[i]]$edge.length<-scm.tre$mapped.edge[,i]
-		multi.tre[[i]]$state<-colnames(scm.tre$mapped.edge)[i]
+	C<-array(dim=c(nrow(C),ncol(C),ncol(tree$mapped.edge)))
+	for(i in 1:ncol(tree$mapped.edge)){
+		multi.tre[[i]]<-tree
+		multi.tre[[i]]$edge.length<-tree$mapped.edge[,i]
+		multi.tre[[i]]$state<-colnames(tree$mapped.edge)[i]
 		temp<-vcv.phylo(multi.tre[[i]])
-		C[,,i]<-temp[rownames(dat),rownames(dat)]
+		C[,,i]<-temp[rownames(X),rownames(X)]
 	}
 
 	# compute the starting parameter values
@@ -131,7 +131,7 @@ evol.vcv<-function(scm.tre,dat,maxit=2000,vars=FALSE){
 	# convert parameter estimates to matrices
 	R.i<-array(dim=c(m,m,p)); states<-vector(mode="character")
 	for(i in 1:p){
-		R.i[,,i]<-matrix(data=t(upper.diag(r$par[((i-1)*m*(m+1)/2+1):(i*(m*(m+1)/2))]))%*%upper.diag(r$par[((i-1)*m*(m+1)/2+1):(i*(m*(m+1)/2))]),m,m,dimnames=list(colnames(dat),colnames(dat)))
+		R.i[,,i]<-matrix(data=t(upper.diag(r$par[((i-1)*m*(m+1)/2+1):(i*(m*(m+1)/2))]))%*%upper.diag(r$par[((i-1)*m*(m+1)/2+1):(i*(m*(m+1)/2))]),m,m,dimnames=list(colnames(X),colnames(X)))
 		states[i]=multi.tre[[i]]$state
 	}
 	dimnames(R.i)<-list(rownames(R),colnames(R),states)
@@ -166,7 +166,7 @@ evol.vcv<-function(scm.tre,dat,maxit=2000,vars=FALSE){
 		r=optim(starting+rnorm(n=length(starting),sd=0.1*mean(starting)),fn=likelihood.cholR,y=y,C=C,D=D,control=list(maxit=maxit))
 		R.i<-array(dim=c(m,m,p)); states<-vector(mode="character")
 		for(i in 1:p){
-			R.i[,,i]<-matrix(data=t(upper.diag(r$par[((i-1)*m*(m+1)/2+1):(i*(m*(m+1)/2))]))%*%upper.diag(r$par[((i-1)*m*(m+1)/2+1):(i*(m*(m+1)/2))]),m,m,dimnames=list(colnames(dat),colnames(dat)))
+			R.i[,,i]<-matrix(data=t(upper.diag(r$par[((i-1)*m*(m+1)/2+1):(i*(m*(m+1)/2))]))%*%upper.diag(r$par[((i-1)*m*(m+1)/2+1):(i*(m*(m+1)/2))]),m,m,dimnames=list(colnames(X),colnames(X)))
 			states[i]=multi.tre[[i]]$state
 		}
 		dimnames(R.i)<-list(rownames(R),colnames(R),states)

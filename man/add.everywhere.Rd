@@ -5,21 +5,18 @@
 add.everywhere(tree, tip.name)
 }
 \arguments{
-  \item{tree}{an object of class \code{"phylo"}.}
-  \item{tip.name}{a string containing the name of the tip to add.}
+	\item{tree}{an object of class \code{"phylo"}.}
+	\item{tip.name}{a string containing the name of the tip to add.}
 }
 \description{
-  This function adds a tip to all branches to the tree and returns a
-  a list of trees as an object of class \code{"multiPhylo"}.
+	This function adds a tip to all branches to the tree and returns a a list of trees as an object of class \code{"multiPhylo"}.
 }
 \value{
-  a list of trees as an object of class \code{"multiPhylo"}.  Since the 
-  tip can be added to any branch, the length of the list is equal to the
-  number of edges in \code{tree}.
+	A list of trees as an object of class \code{"multiPhylo"}.  Since the tip can be added to any branch, the length of the list is equal to the number of edges in \code{tree}.
 }
 \author{Liam Revell \email{liam.revell@umb.edu}}
 \seealso{
-  \code{\link{allFurcTrees}}, \code{\link{exhaustiveMP}}
+	\code{\link{allFurcTrees}}, \code{\link{exhaustiveMP}}
 }
 \keyword{phylogenetics}
 \keyword{utilities}

@@ -1,8 +1,8 @@
 \name{getSisters}
 \alias{getSisters}
-\title{Get the sister node, label, or set of nodes for a node or tip}
+\title{Get the sister node number, label, or set of nodes for a node or tip}
 \usage{
-	getSisters(tree, node, mode=c("number","label"))
+getSisters(tree, node, mode=c("number","label"))
 }
 \arguments{
 	\item{tree}{object of class \code{"phylo"}.}
@@ -13,7 +13,7 @@
 	This function takes a tree and node or tip number of label and returns the number or label of the sister or sisters to that node or tip.
 }
 \value{
-	if \code{mode="number"} this function returns an integer or vector containing the node number of numbers of the sister node or tip. If \code{mode="label"} that this function returns a list containing up to two vectors: one for the node numbers of labels of sister nodes (if available); and the other containing the tip labels of the sister tips.
+	If \code{mode="number"} this function returns an integer or vector containing the node number of numbers of the sister node or tip. If \code{mode="label"} that this function returns a list containing up to two vectors: one for the node numbers of labels of sister nodes (if available); and the other containing the tip labels of the sister tips.
 }
 \author{Liam Revell \email{liam.revell@umb.edu}}
 \keyword{phylogenetics}

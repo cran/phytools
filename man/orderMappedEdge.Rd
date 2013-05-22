@@ -2,7 +2,7 @@
 \alias{orderMappedEdge}
 \title{Order the columns of mapped.edge to match across trees}
 \usage{
-	orderMappedEdge(trees, ordering=NULL)
+orderMappedEdge(trees, ordering=NULL)
 }
 \arguments{
 	\item{trees}{object of class \code{"phylo"} or \code{"multiPhylo"}.}
@@ -12,7 +12,7 @@
 	This function takes a modified object of class \code{"multiPhylo"} with a mapped discrete character (e.g., see \code{\link{read.simmap}} and sorts the columns of each \code{tree$mapped.edge} to have the same state ordering. Also works for a single tree.
 }
 \value{
-	a modified object of class \code{"phylo"} or \code{"multiPhylo"}.
+	A modified object of class \code{"phylo"} or \code{"multiPhylo"}.
 }
 \author{Liam Revell \email{liam.revell@umb.edu}}
 \keyword{phylogenetics}

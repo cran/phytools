@@ -5,9 +5,9 @@
 fastMRCA(tree, sp1, sp2)
 }
 \arguments{
-  \item{tree}{a phylogenetic tree as an object of class \code{"phylo"}.}
-  \item{sp1}{species name.}
-  \item{sp2}{species name.}
+	\item{tree}{a phylogenetic tree as an object of class \code{"phylo"}.}
+	\item{sp1}{species name.}
+	\item{sp2}{species name.}
 }
 \description{
 	This function returns the most recent common ancestor (node number) for a pair of taxa. 
@@ -20,11 +20,11 @@ fastMRCA(tree, sp1, sp2)
 }
 \author{Liam Revell \email{liam.revell@umb.edu}}
 \seealso{
-  \code{\link{Ancestors}}, \code{\link{findMRCA}}, \code{\link{mrca}}
+	\code{\link{Ancestors}}, \code{\link{findMRCA}}, \code{\link{mrca}}
 }
 \examples{
-	tree<-pbtree(n=2000)
-	anc<-fastMRCA(tree,"t1","t15")
+tree<-pbtree(n=2000)
+anc<-fastMRCA(tree,"t1","t15")
 }
 \keyword{phylogenetics}
 \keyword{utilities}

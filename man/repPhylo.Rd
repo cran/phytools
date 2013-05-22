@@ -2,7 +2,7 @@
 \alias{repPhylo}
 \title{Replicate a tree into a list of trees}
 \usage{
-	repPhylo(tree, times)
+repPhylo(tree, times)
 }
 \arguments{
 	\item{tree}{object of class \code{"phylo"}.}
@@ -16,8 +16,8 @@
 }
 \author{Liam Revell \email{liam.revell@umb.edu}}
 \examples{
-	tree<-pbtree(n=100)
-	trees<-repPhylo(tree,100)
+tree<-pbtree(n=100)
+trees<-repPhylo(tree,100)
 }
 \seealso{
 	\code{\link{c.phylo}}, \code{\link{rep}}

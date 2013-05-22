@@ -23,8 +23,10 @@ fastAnc<-function(tree,x,vars=FALSE,CI=FALSE){
 		ancNames<-matchNodes(tree,btree)
 		anc<-anc[as.character(ancNames[,2])]
 		names(anc)<-ancNames[,1]
-		if(vars) v[as.character(ancNames[,2])]
-		names(v)<-ancNames[,1]
+		if(vars||CI){ 
+			v[as.character(ancNames[,2])]
+			names(v)<-ancNames[,1]
+		}
 	}
 	result<-list(ace=anc)
 	if(vars) result$var<-v

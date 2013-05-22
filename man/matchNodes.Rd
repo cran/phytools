@@ -2,7 +2,7 @@
 \alias{matchNodes}
 \title{Matches nodes between two trees}
 \usage{
-	matchNodes(tr1, tr2, method=c("descendants","distances"), ...)
+matchNodes(tr1, tr2, method=c("descendants","distances"), ...)
 }
 \arguments{
 	\item{tr1}{first tree.}
@@ -17,7 +17,7 @@
 	Primarily designed to be used internally by \code{\link{fastAnc}}.
 }
 \value{
-	a matrix in which the first column contains the nodes of \code{tr1} with the second column containing matching nodes in \code{tr2}, with the criterion for matching defined by \code{method}.
+	A matrix in which the first column contains the nodes of \code{tr1} with the second column containing matching nodes in \code{tr2}, with the criterion for matching defined by \code{method}.
 }
 \author{Liam Revell \email{liam.revell@umb.edu}}
 \keyword{phylogenetics}

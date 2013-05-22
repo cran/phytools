@@ -2,7 +2,7 @@
 \alias{describe.simmap}
 \title{Summarizes a stochastic mapped tree or set of trees}
 \usage{
-	describe.simmap(tree, ...)
+describe.simmap(tree, ...)
 }
 \arguments{
 	\item{tree}{a single tree or a set of trees with a mapped discrete character (e.g, see \code{\link{make.simmap}} or \code{\link{read.simmap}}.}
@@ -12,7 +12,7 @@
 	This function summarizes the result of one or more stochastic maps.
 }
 \value{
-	a list with the following elements is returned (invisibly if \code{message=TRUE}):
+	A list with the following elements is returned (invisibly if \code{message=TRUE}):
 	\item{count}{a matrix containing the number and types of transitions for each tree, if \code{class(tree)="multiPhylo"}.}
 	\item{times}{a matrix containg the times spend in each state on each tree.}
 	\item{ace}{the posterior probabilities of each node being in each state, if \code{class(tree)="multiPhylo"}.}

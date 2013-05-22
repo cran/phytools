@@ -23,6 +23,10 @@ phylomorphospace<-function(tree,X,A=NULL,label=TRUE,control=list(),...){
 		col.node=setNames(rep("black",max(tree$edge)),as.character(1:max(tree$edge))))
 	con[(namc<-names(control))]<-control
 
+	# get optional argument
+	if(hasArg(node.by.map)) node.by.map<-list(...)$node.by.map
+	else node.by.map<-FALSE
+
 	# set xlim & ylim
 	if(hasArg(xlim)) xlim<-list(...)$xlim
 	else xlim<-range(c(X[,1],A[,1]))
@@ -54,7 +58,7 @@ phylomorphospace<-function(tree,X,A=NULL,label=TRUE,control=list(),...){
 	YY<-matrix(bb[as.character(tree$edge)],nrow(tree$edge),2)
 
 	# plot projection
-	plot(x=A[1,1],y=A[1,2],xlim=xlim,ylim=ylim,xlab=xlab,ylab=ylab,pch=16,cex=1.0)
+	plot(x=A[1,1],y=A[1,2],xlim=xlim,ylim=ylim,xlab=xlab,ylab=ylab,pch=16,cex=0.1,col="white")
 	if(is.null(tree$maps)){
 		for(i in 1:nrow(XX)) lines(XX[i,],YY[i,],col=con$col.edge[as.character(tree$edge[i,2])],lwd=lwd)
 	} else {
@@ -68,9 +72,16 @@ phylomorphospace<-function(tree,X,A=NULL,label=TRUE,control=list(),...){
 				x<-x+xx[j]; y<-y+yy[j]
 			}
 		}
+		if(node.by.map){
+			zz<-c(getStates(tree,type="tips"),getStates(tree))
+			names(zz)[1:length(tree$tip.label)]<-sapply(names(zz)[1:length(tree$tip.label)],function(x,y) which(y==x),y=tree$tip.label)
+			con$col.node<-setNames(colors[zz],names(zz))
+		}
 	}
-	points(c(XX[i,1],XX[tree$edge[,2]>length(tree$tip.label),2]),c(YY[i,1],YY[tree$edge[,2]>length(tree$tip.label),2]),pch=16,cex=1.0)
-	points(XX[tree$edge[,2]<=length(tree$tip.label),2],YY[tree$edge[,2]<=length(tree$tip.label),2],pch=16,cex=1.3)
+	zz<-c(tree$edge[1,1],tree$edge[tree$edge[,2]>length(tree$tip.label),2])
+	points(c(XX[1,1],XX[tree$edge[,2]>length(tree$tip.label),2]),c(YY[1,1],YY[tree$edge[,2]>length(tree$tip.label),2]),pch=16,cex=1.0,col=con$col.node[as.character(zz)])
+	zz<-tree$edge[tree$edge[,2]<=length(tree$tip.label),2]
+	points(XX[tree$edge[,2]<=length(tree$tip.label),2],YY[tree$edge[,2]<=length(tree$tip.label),2],pch=16,cex=1.3,col=con$col.node[as.character(zz)])
 	zz<-sapply(1:length(tree$tip.label),function(x,y) which(x==y),y=tree$edge[,2])
 	if(label) textxy(XX[zz,2],YY[zz,2],labs=tree$tip.label,cx=fsize)
 }

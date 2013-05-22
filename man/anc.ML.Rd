@@ -2,7 +2,7 @@
 \alias{anc.ML}
 \title{Ancestral character estimation using likelihood}
 \usage{
-	anc.ML(tree, x, maxit=2000)
+anc.ML(tree, x, maxit=2000)
 }
 \arguments{
 	\item{tree}{an object of class \code{"phylo"}.}
@@ -16,7 +16,7 @@
 	Because this function relies on a high dimensional numerical optimization of the likelihood function, \code{\link{fastAnc}} should probably be preferred for most purposes. If using \code{\link{anc.ML}}, users should be cautious to ensure convergence. This has been ameliorated in phytools>=0.2-48 by seeding the ML optimization with the result from \code{\link{fastAnc}}.
 }
 \value{
-	a list with the following components:
+	A list with the following components:
 	\item{sig2}{the variance of the BM process.}
 	\item{ace}{a vector with the ancestral states.}
 	\item{logLik}{the log-likelihood.}
@@ -27,9 +27,9 @@
 	\code{\link{ace}}, \code{\link{anc.Bayes}}, \code{\link{fastAnc}}, \code{\link{optim}}
 }
 \examples{
-	tree<-rtree(50)
-	x<-fastBM(tree) # simulate using fastBM
-	anc.ML(tree,x) # fit model & estimate ancestral states
+tree<-rtree(50)
+x<-fastBM(tree) # simulate using fastBM
+anc.ML(tree,x) # fit model & estimate ancestral states
 }
 \keyword{phylogenetics}
 \keyword{comparative method}

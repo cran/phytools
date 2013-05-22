@@ -2,7 +2,7 @@
 \alias{plotBranchbyTrait}
 \title{Plot branch colors by a quantitative trait or value}
 \usage{
-	plotBranchbyTrait(tree, x, mode=c("edges","tips","nodes"), palette="rainbow", 
+plotBranchbyTrait(tree, x, mode=c("edges","tips","nodes"), palette="rainbow", 
 	legend=TRUE, xlims=NULL, ...)
 }
 \arguments{
@@ -21,7 +21,7 @@
 	Note that the functin will prompt for the position of the legend. For some reason, the position is required \emph{before} the prompting message!
 }
 \value{
-	plots a phylogeny.
+	Plots a phylogeny.
 }
 \author{Liam Revell \email{liam.revell@umb.edu}}
 \keyword{phylogenetics}

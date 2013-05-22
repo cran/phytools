@@ -2,7 +2,7 @@
 \alias{evol.rate.mcmc}
 \title{Bayesian MCMC method for identifying exceptional phenotypic diversification in a phylogeny}
 \usage{
-	evol.rate.mcmc(tree, x, ngen=10000, control=list())
+evol.rate.mcmc(tree, x, ngen=10000, control=list())
 }
 \arguments{
 	\item{tree}{a phylogenetic tree in \code{"phylo"} format.}
@@ -17,12 +17,12 @@
 	Default values of \code{control} are given in Revell et al. (2012).
 }
 \value{
-	a list with the following components:
+	A list with the following components:
 	\item{mcmc}{results from the MCMC run.}
 	\item{tips}{list of stips in rate \eqn{\sigma(1)^2} for each sampled generation of MCMC (to polarize the rate shift).}
 }
 \references{
-	Revell, L. J., D. L. Mahler, P. Peres-Neto, and B. D. Redelings. 2012. A new method for identifying exceptional phenotypic diversification. \emph{Evolution}, \bold{66}, 135-146.
+	Revell, L. J., D. L. Mahler, P. Peres-Neto, and B. D. Redelings. (2012) A new method for identifying exceptional phenotypic diversification. \emph{Evolution}, \bold{66}, 135-146.
 }
 \author{Liam Revell \email{liam.revell@umb.edu}}
 \seealso{

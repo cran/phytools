@@ -16,14 +16,14 @@ export.as.xml(file, trees, X)
 	Can be used to create input file for the program SIMMAP v1.5 (Bollback 2006), also see: \url{http://www.simmap.org}.
 }
 \value{
-	a file.
+	A file.
 }
 \references{
-	Bollback, J. P. 2006. Stochastic character mapping of discrete traits on phylogenies. \emph{BMC Bioinformatics}, \bold{7}, 88.
+	Bollback, J. P. (2006) Stochastic character mapping of discrete traits on phylogenies. \emph{BMC Bioinformatics}, \bold{7}, 88.
 }
 \author{Liam Revell \email{liam.revell@umb.edu}}
 \seealso{
-  \code{\link{make.simmap}}, \code{\link{read.nexus}}, \code{\link{read.simmap}}, \code{\link{write.simmap}}
+	\code{\link{make.simmap}}, \code{\link{read.nexus}}, \code{\link{read.simmap}}, \code{\link{write.simmap}}
 }
 \keyword{phylogenetics}
 \keyword{utilities}

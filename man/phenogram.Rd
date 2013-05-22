@@ -2,8 +2,8 @@
 \alias{phenogram}
 \title{Plot phenogram (traitgram)}
 \usage{
-	phenogram(tree, x, fsize=1.0, ftype="reg", colors=NULL, axes=list(),
-		add=FALSE, ...)
+phenogram(tree, x, fsize=1.0, ftype="reg", colors=NULL, axes=list(),
+	add=FALSE, ...)
 }
 \arguments{
 	\item{tree}{an object of class "phylo", with or without a mapped discrete character.}
@@ -22,22 +22,22 @@
 	For \code{spread.labels=TRUE} numerical optimization is performed to optimize the distribution of the labels vertically, where the solution depends on the vector \code{spread.cost} containing the cost of overlap (first) and the cost of deviation from the vertical position of the tip. Because this is done via numerical optimization, plotting may hang briefly while the best solution is found (especially for large trees).
 }
 \value{
-	plots a traitgram, optionally with a mapped discrete character.
+	Plots a traitgram, optionally with a mapped discrete character.
 }
 \author{Liam Revell \email{liam.revell@umb.edu}}
 \examples{
-	tree<-pbtree(n=20,scale=2)
-	x<-fastBM(tree)
-	phenogram(tree,x)
-	# or, simulate a discrete character history
-	tree<-sim.history(tree,Q=matrix(c(-1,1,1,-1),2,2),anc="1")
-	# simulate in which the rate depends on the state
-	x<-sim.rates(tree,c(1,10))
-	phenogram(tree,x)
-	# now use spread.labels
-	tree<-pbtree(n=40)
-	x<-fastBM(tree)
-	phenogram(tree,x,spread.labels=TRUE,spread.cost=c(1,0))
+tree<-pbtree(n=20,scale=2)
+x<-fastBM(tree)
+phenogram(tree,x)
+# or, simulate a discrete character history
+tree<-sim.history(tree,Q=matrix(c(-1,1,1,-1),2,2),anc="1")
+# simulate in which the rate depends on the state
+x<-sim.rates(tree,c(1,10))
+phenogram(tree,x)
+# now use spread.labels
+tree<-pbtree(n=40)
+x<-fastBM(tree)
+phenogram(tree,x,spread.labels=TRUE,spread.cost=c(1,0))
 }
 \keyword{phylogenetics}
 \keyword{plotting}

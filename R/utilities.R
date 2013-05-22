@@ -1,36 +1,100 @@
 # some utility functions
 # written by Liam J. Revell 2011, 2012, 2013
 
-# function to re-root a phylogeny along an edge
-# written by Liam Revell 2011-2013
-
-reroot<-function(tree,node.number,position){
-	if(class(tree)!="phylo") stop("tree object must be of class 'phylo.'")
-	tt<-splitTree(tree,list(node=node.number,bp=position))
-	p<-tt[[1]]; d<-tt[[2]]
-	p<-root(p,outgroup="NA",resolve.root=T)
-	bb<-which(p$tip.label=="NA")
-	ee<-p$edge.length[which(p$edge[,2]==bb)]
-	p$edge.length[which(p$edge[,2]==bb)]<-0
-	cc<-p$edge[which(p$edge[,2]==bb),1]
-	dd<-setdiff(p$edge[which(p$edge[,1]==cc),2],bb)
-	p$edge.length[which(p$edge[,2]==dd)]<-p$edge.length[which(p$edge[,2]==dd)]+ee
-	tt<-paste.tree(p,d)
-	return(tt)
+# function works like extract.clade in ape but will preserve a discrete character mapping
+# written by Liam J. Revell 2013
+extract.clade.simmap<-function(tree,node){
+	x<-getDescendants(tree,node)
+	x<-x[x<=length(tree$tip.label)]
+	drop.tip.simmap(tree,tree$tip.label[-x])
 }
 
-# function to get states at internal nodes from simmap style trees
+# function gets all subtrees that cannot be further subdivided into two clades of >= clade.size
 # written by Liam J. Revell 2013
-getStates<-function(tree,type=c("nodes","tips")){
-	type<-type[1]
-	if(type=="nodes"){
-		y<-setNames(sapply(tree$maps,function(x) names(x)[1]),tree$edge[,1])
-		y<-y[as.character(length(tree$tip)+1:tree$Nnode)]
-	} else if(type=="tips"){
-		y<-setNames(sapply(tree$maps,function(x) names(x)[length(x)]),tree$edge[,2])
-		y<-setNames(y[as.character(1:length(tree$tip.label))],tree$tip.label)
+getCladesofSize<-function(tree,clade.size=2){
+	n<-length(tree$tip.label)
+	nn<-1:(tree$Nnode+n)
+	ndesc<-function(tree,node){
+		x<-getDescendants(tree,node)
+		sum(x<=length(tree$tip.label))
 	}
-	return(y)
+	dd<-setNames(sapply(nn,ndesc,tree=tree),nn)
+	aa<-n+1 # root
+	nodes<-vector()
+	while(length(aa)){
+		bb<-lapply(aa,function(x,tree) tree$edge[which(tree$edge[,1]==x),2],tree=tree)
+		cc<-lapply(bb,function(x) dd[as.character(x)])
+		gg<-sapply(cc,function(x,cs) any(x<cs),cs=clade.size)
+		nodes<-c(nodes,aa[gg])
+		aa<-unlist(bb[!gg])
+	}
+	trees<-lapply(nodes,extract.clade,phy=tree)
+	class(trees)<-"multiPhylo"
+	return(trees)
+}
+
+# function to merge mapped states
+# written by Liam J. Revell 2013
+mergeMappedStates<-function(tree,old.states,new.state){
+	if(class(tree)=="multiPhylo"){
+		tree<-unclass(tree)
+		tree<-lapply(tree,mergeMappedStates,old.states=old.states,new.state=new.state)
+		class(tree)<-"multiPhylo"
+	} else {
+		maps<-tree$maps
+		rr<-function(map,oo,nn){ 
+			for(i in 1:length(map)) if(names(map)[i]%in%oo) names(map)[i]<-nn
+			map
+		}
+		mm<-function(map){
+			if(length(map)>1){
+				new.map<-vector()
+				j<-1
+				new.map[j]<-map[1]
+				names(new.map)[j]<-names(map)[1]
+				for(i in 2:length(map)){
+					if(names(map)[i]==names(map)[i-1]){ 
+						new.map[j]<-map[i]+new.map[j]
+						names(new.map)[j]<-names(map)[i]
+					} else {
+						j<-j+1
+						new.map[j]<-map[i]
+						names(new.map)[j]<-names(map)[i]
+					}
+				}
+				map<-new.map
+			}
+			map
+		}
+		maps<-lapply(maps,rr,oo=old.states,nn=new.state)
+		maps<-lapply(maps,mm)
+		mapped.edge<-tree$mapped.edge
+		mapped.edge<-cbind(rowSums(mapped.edge[,colnames(mapped.edge)%in%old.states]),
+			mapped.edge[,setdiff(colnames(mapped.edge),old.states)])
+		colnames(mapped.edge)<-c(new.state,setdiff(colnames(tree$mapped.edge),old.states))
+		tree$maps<-maps
+		tree$mapped.edge<-mapped.edge
+	}
+	return(tree)
+}
+
+# function to rescale simmap style trees
+# written by Liam J. Revell 2012-2013
+rescaleSimmap<-function(tree,totalDepth=1.0){
+	if(class(tree)=="multiPhylo"){
+		trees<-unclass(tree)
+		trees<-lapply(trees,rescaleSimmap,totalDepth)
+		class(trees)<-"multiPhylo"
+		return(trees)
+	} else if(class(tree)=="phylo"){
+		h<-max(nodeHeights(tree))
+		s<-totalDepth/h
+		tree$edge.length<-tree$edge.length*s
+		maps<-lapply(tree$maps,"*",s)
+		tree$maps<-maps
+		tree$mapped.edge<-tree$mapped.edge*s
+		return(tree)
+	} else message("tree should be an object of class \"phylo\" or \"multiPhylo\"")
 }
 
 # function to summarize the results of stochastic mapping
@@ -48,14 +112,14 @@ describe.simmap<-function(tree,...){
 			check<-all(TT)
 			if(!check) warning("some trees not equal")
 		}
-		YY<-sapply(tree,getStates)
+		YY<-getStates(tree)
 		states<-sort(unique(as.vector(YY)))
 		ZZ<-t(apply(YY,1,function(x,levels,Nsim) summary(factor(x,levels))/Nsim,levels=states,Nsim=length(tree)))
 		XX<-countSimmap(tree,states,FALSE)
 		XX<-XX[,-(which(as.vector(diag(-1,length(states)))==-1)+1)]
-		AA<-t(sapply(tree,function(x) c(colSums(x$mapped.edge),sum(x$edge.length))))
+		AA<-t(sapply(unclass(tree),function(x) c(colSums(x$mapped.edge),sum(x$edge.length))))
 		colnames(AA)[ncol(AA)]<-"total"
-		BB<-sapply(tree,getStates,type="tips")
+		BB<-getStates(tree,type="tips")
 		CC<-t(apply(BB,1,function(x,levels,Nsim) summary(factor(x,levels))/Nsim,levels=states,Nsim=length(tree)))
 		if(message){
 			cat(paste(length(tree),"trees with a mapped discrete character with states:\n",paste(states,collapse=", "),"\n\n"))
@@ -103,6 +167,25 @@ describe.simmap<-function(tree,...){
 	}
 }
 
+# function to get states at internal nodes from simmap style trees
+# written by Liam J. Revell 2013
+getStates<-function(tree,type=c("nodes","tips")){
+	type<-type[1]
+	if(class(tree)=="multiPhylo"){
+		tree<-unclass(tree)
+		y<-sapply(tree,getStates,type=type)
+	} else if(class(tree)=="phylo"){ 
+		if(type=="nodes"){
+			y<-setNames(sapply(tree$maps,function(x) names(x)[1]),tree$edge[,1])
+			y<-y[as.character(length(tree$tip)+1:tree$Nnode)]
+		} else if(type=="tips"){
+			y<-setNames(sapply(tree$maps,function(x) names(x)[length(x)]),tree$edge[,2])
+			y<-setNames(y[as.character(1:length(tree$tip.label))],tree$tip.label)
+		}
+	} else stop("tree should be an object of class 'phylo' or 'multiPhylo'")
+	return(y)
+}
+
 # function counts transitions from a mapped history
 # written by Liam J. Revell 2013
 countSimmap<-function(tree,states=NULL,message=TRUE){
@@ -112,6 +195,7 @@ countSimmap<-function(tree,states=NULL,message=TRUE){
 			setNames(c(XX$N,as.vector(t(XX$Tr))),c("N",
 			sapply(rownames(XX$Tr),paste,colnames(XX$Tr),sep=",")))
 		}
+		tree<-unclass(tree)
 		XX<-t(sapply(tree,ff))	
 		if(!message) return(XX)
 		else return(list(Tr=XX,message=
@@ -141,6 +225,23 @@ countSimmap<-function(tree,states=NULL,message=TRUE){
 			"N is the total number of character changes on the tree",
 			"Tr gives the number of transitions from row state->column state")))
 	}
+}
+
+# function to re-root a phylogeny along an edge
+# written by Liam Revell 2011-2013
+reroot<-function(tree,node.number,position){
+	if(class(tree)!="phylo") stop("tree object must be of class 'phylo.'")
+	tt<-splitTree(tree,list(node=node.number,bp=position))
+	p<-tt[[1]]; d<-tt[[2]]
+	p<-root(p,outgroup="NA",resolve.root=T)
+	bb<-which(p$tip.label=="NA")
+	ee<-p$edge.length[which(p$edge[,2]==bb)]
+	p$edge.length[which(p$edge[,2]==bb)]<-0
+	cc<-p$edge[which(p$edge[,2]==bb),1]
+	dd<-setdiff(p$edge[which(p$edge[,1]==cc),2],bb)
+	p$edge.length[which(p$edge[,2]==dd)]<-p$edge.length[which(p$edge[,2]==dd)]+ee
+	tt<-paste.tree(p,d)
+	return(tt)
 }
 
 # function returns random state with probability given by y

@@ -5,13 +5,13 @@
 expm(Y)
 }
 \arguments{
-  \item{Y}{a matrix.}
+	\item{Y}{a matrix.}
 }
 \description{
-  Wrapper for \code{\link{MatrixExp}} that retains row/column names.
+	Wrapper for \code{\link{MatrixExp}} that retains row/column names.
 }
 \value{
-  a matrix.
+	A matrix.
 }
 \author{Liam Revell \email{liam.revell@umb.edu}}
 \keyword{math}

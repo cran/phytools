@@ -2,7 +2,7 @@
 \alias{untangle}
 \title{Attempts to untangle crossing branches for plotting}
 \usage{
-	untangle(tree, method=c("reorder","read.tree"))
+untangle(tree, method=c("reorder","read.tree"))
 }
 \arguments{
 	\item{tree}{tree as an object of class \code{"phylo"}. Can be a SIMMAP style tree (e.g., \code{\link{read.simmap}}.}
@@ -12,7 +12,7 @@
 	This function attempts to untangle the branches of a tree that are tangled in plotting with \code{\link{plot.phylo}}, \code{\link{plotTree}}, or \code{\link{plotSimmap}}. Note that \code{method="read.tree"} does not presently work for SIMMAP style trees
 }
 \value{
-	a tree with branch lengths, or modified \code{"phylo"} object with a mapped discrete character.
+	A tree with branch lengths, or modified \code{"phylo"} object with a mapped discrete character.
 }
 \author{Liam Revell \email{liam.revell@umb.edu}}
 \keyword{phylogenetics}
