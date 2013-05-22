@@ -2,7 +2,7 @@
 \alias{plotThresh}
 \title{Tree plotting with posterior probabilities of ancestral states from the threshold model}
 \usage{
-	plotThresh(tree, x, mcmc, burnin=NULL, piecol, tipcol="input", ...)
+plotThresh(tree, x, mcmc, burnin=NULL, piecol, tipcol="input", ...)
 }
 \arguments{
 	\item{tree}{phylogenetic tree.}
@@ -17,7 +17,7 @@
 	This function uses the object returned by \code{\link{ancThresh}} to plot the posterior probabilities of ancestral states under the threshold model. It is also called internally by \code{\link{ancThresh}}.
 }
 \value{
-	plots a tree.
+	Plots a tree.
 }
 \author{Liam Revell \email{liam.revell@umb.edu}}
 \seealso{

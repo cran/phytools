@@ -2,7 +2,7 @@
 \alias{fastAnc}
 \title{Fast estimation of ML ancestral states}
 \usage{
-	fastAnc(tree, x, vars=FALSE, CI=FALSE)
+fastAnc(tree, x, vars=FALSE, CI=FALSE)
 }
 \arguments{
 	\item{tree}{an object of class \code{"phylo"}.}
@@ -14,7 +14,7 @@
 	This function performs fast estimation of the ML ancestral states for a continuous trait by taking advantage of the fact that the state computed for the root node of the tree during Felsenstein's (1985) contrasts algorithm is also the MLE of the root node. Thus, the function reroots the tree at all internal nodes and computes the contrasts state at the root each time. The function can also (optionally) compute variances or 95-percent confidence intervals on the estimates.
 }
 \value{
-	a named vector containing the states at internal nodes - names are node numbers; or a list containing ancestral state estimates (\code{ace}), variances on the estimates (\code{var}), and/or 95-percent confidence intervals (\code{CI95}).
+	A named vector containing the states at internal nodes - names are node numbers; or a list containing ancestral state estimates (\code{ace}), variances on the estimates (\code{var}), and/or 95-percent confidence intervals (\code{CI95}).
 }
 \author{Liam Revell \email{liam.revell@umb.edu}}
 \seealso{

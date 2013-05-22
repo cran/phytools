@@ -1,30 +1,33 @@
 \name{contMap}
 \alias{contMap}
+\alias{plot.contMap}
 \title{Map continuous trait evolution on the tree}
 \usage{
-	contMap(tree, x, res=100, fsize=NULL, ftype=NULL, lwd=4, legend=NULL,
-     lims=NULL, outline=TRUE, sig=3)
+contMap(tree, x, res=100, fsize=NULL, ftype=NULL, lwd=4, legend=NULL,
+	lims=NULL, outline=TRUE, sig=3)
+\method{plot}{contMap}(x, ...)
 }
 \arguments{
  	\item{tree}{object of class \code{"phylo"}.}
-	\item{x}{vector of phenotypic trait values for species. \code{names(x)} should contain the species names and match \code{tree$tip.label}.}
+	\item{x}{vector of phenotypic trait values for species. \code{names(x)} should contain the species names and match \code{tree$tip.label}. Or, for \code{plot.contMap}, an object of class \code{"contMap"}.}
 	\item{res}{resolution for gradient plotting. Larger numbers indicate a finer (smoother) gradient.}
 	\item{fsize}{relative font size - can be a vector with the second element giving the font size for the legend.}
-	\item{ftype}{font type - see options in \code{\link{plotSimmap}}. As with \code{fsize}, can be a vector with the second element giving font type for the legend.}
+	\item{ftype}{font type - see options in \code{\link{plotSimmap}}. As with \code{fsize}, this can be a vector with the second element giving font type for the legend.}
 	\item{lwd}{line width for branches.}
 	\item{legend}{if \code{FALSE} no legend is plotted; if a numeric value, it gives the length of the legend in units of branch length. Default is 0.5 times the total tree length.}
 	\item{lims}{range for the color map. By default, this will be \code{c(min(x),max(x))}, and should always include this range.}
 	\item{outline}{logical value indicating whether or not to outline the branches of the tree in black.}
 	\item{sig}{the number of decimal places to show on the legend limits.}
+	\item{...}{optional arguments for \code{plot.contMap} which include all the arguments of \code{contMap} except for \code{tree}, \code{x}, \code{res}, and \code{lims}.}
 }
 \description{
 	Function plots a tree with a mapped continuous character. The mapping is accomplished by estimating states at internal nodes using ML with \code{\link{fastAnc}}, and the interpolating the states along each edge using equation [2] of Felsenstein (1985).
 }
 \value{
-	plots a tree.
+	Plots a tree. An object of class \code{"contMap"} is returned invisibly.
 }
 \references{
-	Revell, L. J. \emph{Submitted.} Two new graphical methods for mapping trait evolution on phylogenies. 
+	Revell, L. J. \emph{In press.} Two new graphical methods for mapping trait evolution on phylogenies. \emph{Methods in Ecology and Evolution}.
 
 	Felsenstein, J. 1985. Phylogenies and the comparative method. \emph{American Naturalist}, \bold{125}, 1-15. 
 }

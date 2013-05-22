@@ -2,7 +2,7 @@
 \alias{add.color.bar}
 \title{Add color bar to a plot}
 \usage{
-	add.color.bar(leg, cols, title=NULL, lims=c(0,1), digits=1, prompt=TRUE)
+add.color.bar(leg, cols, title=NULL, lims=c(0,1), digits=1, prompt=TRUE)
 }
 \arguments{
 	\item{leg}{numerical value for the length of the legend.}

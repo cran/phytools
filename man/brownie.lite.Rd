@@ -1,11 +1,11 @@
 \name{brownie.lite}
 \alias{brownie.lite}
-\title{Likelihood test for rate variation}
+\title{Likelihood test for rate variation in a continuous trait}
 \usage{
-	brownie.lite(tree, x, maxit=2000, test="chisq", nsim=100, se=NULL)
+brownie.lite(tree, x, maxit=2000, test="chisq", nsim=100, se=NULL)
 }
 \arguments{
-	\item{tree}{a phylogenetic tree in modified \code{"phylo"} format (see \code{\link{read.simmap}} and \code{\link{make.simmap}}).}
+	\item{tree}{a phylogenetic tree in modified \code{"phylo"} format (see \code{\link{read.simmap}}, \code{\link{make.simmap}}, or \code{\link{paintSubTree}}).}
 	\item{x}{a vector of tip values for species; \code{names(x)} should be the species names.}
 	\item{maxit}{an optional integer value indicating the maximum number of iterations for optimization - may need to be increased for large trees.}
 	\item{test}{an optional string indicating the method for hypothesis testing - options are \code{"chisq"} or \code{"simulation"}.}
@@ -19,7 +19,7 @@
 	Sampling error in the estimation of species means can also be accounted for by assigning the vector \code{se} with the species specific sampling errors for \code{x}.
 }
 \value{
-	a list with the following components:
+	A list with the following components:
 	\item{sig2.single}{is the rate for a single rate model - this is usually the "null" model.}
 	\item{a.single}{is the estimated state at the root node for the single rate model.}
 	\item{var.single}{variance on the single rate estimator - obtained from the Hessian.}
@@ -36,7 +36,6 @@
 }
 \references{
 	O'Meara, B. C., C. Ane, M. J. Sanderson, and P. C. Wainwright. (2006) Testing for different rates of continuous trait evolution using likelihood. \emph{Evolution}, \bold{60}, 922--933.
-
 }
 \author{Liam Revell \email{liam.revell@umb.edu}}
 \seealso{

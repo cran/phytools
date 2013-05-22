@@ -2,7 +2,7 @@
 \alias{splitplotTree}
 \title{Plots a phylogeny in two columns}
 \usage{
-	splitplotTree(tree, fsize=1.0, ftype="reg", lwd=2, split=NULL, new.window=FALSE)
+splitplotTree(tree, fsize=1.0, ftype="reg", lwd=2, split=NULL, new.window=FALSE)
 }
 \arguments{
  	\item{tree}{an object of class "phylo".}
@@ -16,7 +16,7 @@
 	Function plots a tree in two columns or windows.
 }
 \value{
-	plots a tree.
+	Plots a tree.
 }
 \author{Liam Revell \email{liam.revell@umb.edu}}
 \seealso{

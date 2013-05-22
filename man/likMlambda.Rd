@@ -5,18 +5,18 @@
 likMlambda(lambda, X, C)
 }
 \arguments{
-  \item{lambda}{scalar, usually on the interval 0,1.}
-  \item{X}{data, in a matrix.}
-  \item{C}{matrix probably returned by \code{\link{vcv.phylo}}.}
+	\item{lambda}{scalar, usually on the interval 0,1.}
+	\item{X}{data, in a matrix.}
+	\item{C}{matrix probably returned by \code{\link{vcv.phylo}}.}
 }
 \description{
-  Computes the likelihood.
+	Computes the likelihood.
 }
 \details{
-  Do not use unless you know what you're doing.
+	Do not use unless you know what you're doing.
 }
 \value{
-  a scalar.
+	A scalar.
 }
 \author{Liam Revell \email{liam.revell@umb.edu}}
 \keyword{phylogenetics}

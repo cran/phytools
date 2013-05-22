@@ -2,7 +2,7 @@
 \alias{estDiversity}
 \title{Estimate diversity at each node of the tree}
 \usage{
-	estDiversity(tree, x, method=c("asr","simulation"), model="ER", ...)
+estDiversity(tree, x, method=c("asr","simulation"), model="ER", ...)
 }
 \arguments{
 	\item{tree}{is a phylogenetic tree in \code{"phylo"} format.}
@@ -21,9 +21,9 @@
 	A vector containing the estimated lineage density at each node
 }
 \references{
-	Mahler, D. L, L. J. Revell, R. E. Glor, and J. B. Losos. 2010. Ecological opportunity and the rate of morphological evolution in the diversification of Greater Antillean anoles. \emph{Evolution}, \bold{64}, 2731-2745.
+	Mahler, D. L, L. J. Revell, R. E. Glor, and J. B. Losos. (2010) Ecological opportunity and the rate of morphological evolution in the diversification of Greater Antillean anoles. \emph{Evolution}, \bold{64}, 2731-2745.
 
-	Yang, Z. 2006. \emph{Computational Molecular Evolution}. Oxford University Press.
+	Yang, Z. (2006) \emph{Computational Molecular Evolution}. Oxford University Press.
 }
 \author{Liam Revell \email{liam.revell@umb.edu}}
 \seealso{

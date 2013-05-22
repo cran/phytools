@@ -2,8 +2,8 @@
 \alias{pbtree}
 \title{Simulate pure-birth or birth-death stochastic tree or trees}
 \usage{
-	pbtree(b=1, d=0, n=NULL, t=NULL, scale=NULL, nsim=1,
-		type=c("continuous","discrete"), ...)
+pbtree(b=1, d=0, n=NULL, t=NULL, scale=NULL, nsim=1,
+	type=c("continuous","discrete"), ...)
 }
 \arguments{
 	\item{b}{birth rate or speciation rate for \code{type="continuous"}; the probability of speciating per time-step for \code{type="discrete"}.}
@@ -23,15 +23,15 @@
 	Note that if \code{ape=FALSE}, then the function will run faster, and the tree is theoretically compatible with the ape \code{"phylo"} standard; however some downstream errors with functions such as \code{\link{bind.tree}} have been observed.
 }
 \value{
-	a tree or list of trees.
+	A tree or list of trees as an object of class \code{"phylo"} or \code{"multiPhylo"}, respectively.
 }
 \author{Liam Revell \email{liam.revell@umb.edu}}
 \examples{
-	# simulate a pure-birth tree with 1000 tips, scaled to a length of 1.0
-	tree<-pbtree(n=1000,scale=1)
-	# simulate a pure-birth tree conditioning on n & t
-	tt<-log(50)-log(2)
-	tree<-pbtree(n=50,t=tt)
+# simulate a pure-birth tree with 1000 tips, scaled to a length of 1.0
+tree<-pbtree(n=1000,scale=1)
+# simulate a pure-birth tree conditioning on n & t
+tt<-log(50)-log(2)
+tree<-pbtree(n=50,t=tt)
 }
 \keyword{phylogenetics}
 \keyword{simulation}

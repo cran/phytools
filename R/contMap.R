@@ -1,5 +1,5 @@
 # function plots reconstructed values for ancestral characters along the edges of the tree
-# written by Liam J. Revell 2012
+# written by Liam J. Revell 2012-2013
 
 contMap<-function(tree,x,res=100,fsize=NULL,ftype=NULL,lwd=4,legend=NULL,lims=NULL,outline=TRUE,sig=3){
 	h<-max(nodeHeights(tree))
@@ -22,44 +22,10 @@ contMap<-function(tree,x,res=100,fsize=NULL,ftype=NULL,lwd=4,legend=NULL,lims=NU
 		tree$maps[[i]]<-XX[,2]-XX[,1]
 		names(tree$maps[[i]])<-d
 	}
-	if(is.null(legend)) legend<-0.5*max(H)
-	if(is.null(fsize)) fsize<-c(1,1)
-	if(length(fsize)==1) fsize<-rep(fsize,2)
-	if(is.null(ftype)) ftype<-c("i","reg")
-	if(length(ftype)==1) ftype<-c(ftype,"reg")
-	if(legend){
-		if(legend>max(H)){ 
-			message("legend scale cannot be longer than total tree length; resetting")
-			legend<-0.5*max(H)
-		}
-		layout(c(1,2),heights=c(0.92,0.08))
-		if(outline){
-			par(col="white")
-			plotTree(tree,fsize=fsize[1],mar=c(0,0.1,0.1,0.1),lwd=lwd+2,offset=0.2*lwd/3+0.2/3,ftype=ftype[1])
-			par(col="black")
-			plotSimmap(tree,cols,pts=FALSE,lwd=lwd,fsize=fsize[1],mar=c(0,0.1,0.1,0.1),add=TRUE,ftype=ftype[1])
-		} else
-			plotSimmap(tree,cols,pts=FALSE,lwd=lwd,fsize=fsize[1],mar=c(0,0.1,0.1,0.1),ftype=ftype[1])
-		X<-cbind(0:1000/1001,1:1001/1001)*(legend/max(H))*(1-fsize[1]*max(strwidth(tree$tip.label)))
-		Y<-cbind(rep(0,1001),rep(0,1001))
-		par(mar=c(0.1,0.1,0,0.1),xpd=NA)
-		plot(NA,xlim=c(0,1),ylim=c(-0.3,0.3),xaxt="n",yaxt="n",bty="n")
-		lines(c(X[1,1],X[nrow(X),2]),c(Y[1,1],Y[nrow(Y),2]),lwd=lwd+2,lend=2)
-		for(i in 1:1001) lines(X[i,],Y[i,],col=cols[i],lwd=lwd,lend=2)
-		legf<-match(ftype[2],c("reg","b","i","bi"))
-		text(x=0,y=0,round(lims[1],sig),pos=3,cex=fsize[2],font=legf)
-		text(x=(legend/max(H))*(1-fsize[1]*max(strwidth(tree$tip.label))),y=0,round(lims[2],sig),pos=3,cex=fsize[2],font=legf)
-		text(x=(legend/max(H))*(1-fsize[1]*max(strwidth(tree$tip.label)))/2,y=0,"trait value",pos=3,cex=fsize[2],font=legf)
-		text(x=(legend/max(H))*(1-fsize[1]*max(strwidth(tree$tip.label)))/2,y=0,paste("length=",round(legend,3),sep=""),pos=1,cex=fsize[2],font=legf)
-	} else {
-		if(outline){
-			par(col="white")
-			plotTree(tree,cols,pts=FALSE,lwd=lwd+2,fsize=fsize[1],offset=0.2*lwd/3+0.2/3,ftype=ftype[1])
-			par(col="black")
-			plotSimmap(tree,cols,pts=FALSE,lwd=lwd,fsize=fsize[1],add=TRUE,ftype=ftype[1])
-		} else
-			plotSimmap(tree,cols,pts=FALSE,lwd=lwd,fsize=fsize[1],ftype=ftype[1])
-	}
+	xx<-list(tree=tree,cols=cols,lims=lims)
+	class(xx)<-"contMap"
+	plot.contMap(xx,fsize=fsize,ftype=ftype,lwd=lwd,legend=legend,outline=outline,sig=sig)
+	invisible(xx)
 }
 
 # function
@@ -72,5 +38,38 @@ getState<-function(x,trans){
 		i<-i+1
 	}
 	return(state)
+}
+
+# function
+# written by Liam J. Revell 2012-2013
+
+plot.contMap<-function(x,...){
+	if(class(x)=="contMap"){
+		lims<-x$lims
+		x<-list(tree=x$tree,cols=x$cols)
+		class(x)<-"densityMap"
+	} else stop("x should be an object of class 'contMap'")
+	H<-nodeHeights(x$tree)
+	# get & set optional arguments
+	if(hasArg(legend)) legend<-list(...)$legend
+	else legend<-NULL
+	if(hasArg(fsize)) fsize<-list(...)$fsize
+	else fsize<-NULL
+	if(hasArg(ftype)) ftype<-list(...)$ftype
+	else ftype<-NULL
+	if(hasArg(outline)) outline<-list(...)$outline
+	else outline<-TRUE
+	if(hasArg(lwd)) lwd<-list(...)$lwd
+	else lwd<-4
+	if(hasArg(sig)) sig<-list(...)$sig
+	else sig<-3
+	if(is.null(legend)) legend<-0.5*max(H)
+	if(is.null(fsize)) fsize<-c(1,1)
+	if(length(fsize)==1) fsize<-rep(fsize,2)
+	if(is.null(ftype)) ftype<-c("i","reg")
+	if(length(ftype)==1) ftype<-c(ftype,"reg")
+	# done optional arguments
+	leg.txt<-c(round(lims[1],sig),"trait value",round(lims[2],sig))
+	plot(x,fsize=fsize,ftype=ftype,lwd=lwd,legend=legend,outline=outline,leg.txt=leg.txt)
 }
 

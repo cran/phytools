@@ -5,17 +5,17 @@
 multiC(tree)
 }
 \arguments{
-  \item{tree}{is a modified phylogenetic tree in \code{"phylo"} format (see \code{\link{read.simmap}}.}
+	\item{tree}{a phylogeny with mapped discrete state in a modified object of class \code{"phylo"} (e.g., see \code{\link{read.simmap}}.}
 }
 \description{
-  This function takes a modified \code{"phylo"} object as input and returns a set of so-called phylogenetic covariance matrices as a list: one for each mapped state.
+	This function takes a modified \code{"phylo"} object as input and returns a set of so-called phylogenetic covariance matrices as a list: one for each mapped state.
 }
 \value{
-  a list of matrices.
+	A list of matrices.
 }
 \author{Liam Revell \email{liam.revell@umb.edu}}
 \seealso{
-  \code{\link{evolvcv.lite}}, \code{\link{read.simmap}}, \code{\link{vcvPhylo}}, \code{\link{vcv.phylo}}
+	\code{\link{evolvcv.lite}}, \code{\link{read.simmap}}, \code{\link{vcvPhylo}}, \code{\link{vcv.phylo}}
 }
 \keyword{phylogenetics}
 \keyword{utilities}

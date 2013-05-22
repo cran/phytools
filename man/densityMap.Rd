@@ -1,9 +1,11 @@
 \name{densityMap}
 \alias{densityMap}
+\alias{plot.densityMap}
 \title{Plot posterior density of stochastic mapping on a tree}
 \usage{
-	densityMap(trees, res=100, fsize=NULL, ftype=NULL, lwd=3, check=FALSE,
-     legend=NULL, outline=FALSE)
+densityMap(trees, res=100, fsize=NULL, ftype=NULL, lwd=3, check=FALSE,
+	legend=NULL, outline=FALSE)
+\method{plot}{densityMap}(x, ...)
 }
 \arguments{
  	\item{trees}{set of phylogenetic trees in a modified \code{"multiPhylo"} object. Values for a discrete character are mapped on the tree. See \code{\link{make.simmap}} and \code{\link{read.simmap}} for details.}
@@ -14,15 +16,17 @@
 	\item{check}{check to make sure that the topology and branch lengths of all phylogenies in \code{trees} are equal.}
 	\item{legend}{if \code{FALSE} no legend is plotted; if a numeric value, it gives the length of the legend in units of branch length. Default is 0.5 times the total tree length.}
 	\item{outline}{logical value indicating whether or not to outline the branches of the tree in black.}
+	\item{x}{for \code{plot.densityMap}, an object of class \code{"densityMap"}.}
+	\item{...}{optional arguments for \code{plot.densityMap}. These include all the arguments of \code{densityMap} except \code{trees} and \code{res}.}
 }
 \description{
 	Function plots a tree with the posterior density for a mapped character from stochastic character mapping on the tree. Since the mapped value is the probability of being in state "1", only binary [0,1] characters are allowed.
 }
 \value{
-	plots a tree.
+	Plots a tree and returns an object of class \code{"densityMap"} invisibly.
 }
 \references{
-	Revell, L. J. \emph{Submitted.} Two new graphical methods for mapping trait evolution on phylogenies. 
+	Revell, L. J. \emph{In press.} Two new graphical methods for mapping trait evolution on phylogenies. \emph{Methods in Ecology and Evolution}.
 
 	Huelsenbeck, J. P., R. Neilsen, and J. P. Bollback. 2003. Stochastic mapping of morphological characters. \emph{Systematic Biology}, \bold{52}, 131-138. 
 

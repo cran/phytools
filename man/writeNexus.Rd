@@ -2,7 +2,7 @@
 \alias{writeNexus}
 \title{Write a tree to file in Nexus format}
 \usage{
-	writeNexus(tree, file="")
+writeNexus(tree, file="")
 }
 \arguments{
  	\item{tree}{object of class \code{"phylo"} or \code{"multiPhylo"}.}

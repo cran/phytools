@@ -9,10 +9,10 @@
 	\item{thresholds}{a named vector containing the thresholds.}
 }
 \description{
-	Primarily to be used internally by \code{\link{ancThresh}}.
+	Primarily to be used internally by \code{\link{ancThresh}}; can also be used to simulate threshold traits.
 }
 \value{
-	a discrete character value.
+	A discrete character value.
 }
 \author{Liam Revell \email{liam.revell@umb.edu}}
 \seealso{

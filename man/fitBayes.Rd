@@ -2,7 +2,7 @@
 \alias{fitBayes}
 \title{Evolutionary model fitting with intraspecific variability using Bayesian MCMC}
 \usage{
-	fitBayes(tree, x, ngen=10000, model="BM", method="reduced", control=list())
+fitBayes(tree, x, ngen=10000, model="BM", method="reduced", control=list())
 }
 \arguments{
 	\item{tree}{an object of class \code{"phylo"}.}
@@ -16,7 +16,7 @@
 	This function uses Bayesian MCMC to sample terminal states (species means) as well as evolutionary parameters.
 }
 \value{
-	a matrix with number of rows \code{ngen/control$sample+1} containing the posterior sample and likelihoods.  Matrix columns are labeled by species (for species means and variances), or by the corresponding evolutionary parameter.
+	A matrix with number of rows \code{ngen/control$sample+1} containing the posterior sample and likelihoods.  Matrix columns are labeled by species (for species means and variances), or by the corresponding evolutionary parameter.
 }
 \references{
 	Revell, L. J. and R. G. Reynolds. (2012) A new Bayesian method for fitting evolutionary models to comparative data with intraspecific variation. \emph{Evolution}, 66, 2697-2707.

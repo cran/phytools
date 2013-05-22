@@ -2,7 +2,7 @@
 \alias{phyl.RMA}
 \title{Phylogenetic reduced major axis (RMA) regression}
 \usage{
-	phyl.RMA(x, y, tree, method="BM", lambda=NULL, fixed=FALSE, h0=1.0)
+phyl.RMA(x, y, tree, method="BM", lambda=NULL, fixed=FALSE, h0=1.0)
 }
 \arguments{
 	\item{x}{vector with names.}
@@ -20,7 +20,7 @@
 	Optionally jointly estimates lambda if \code{method="lambda"}. Likelihood optimization of lambda is performed using \code{\link{optimize}} on the interval (0,1).
 }
 \value{
-	a list with the following components:
+	A list with the following components:
 	\item{RMA.beta}{a vector of RMA regression coefficients.}
 	\item{V}{a VCV matrix for the traits.}
 	\item{lambda}{fitted value of lambda (\code{method="lambda"} only).}
@@ -30,7 +30,7 @@
 }
 \author{Liam Revell \email{liam.revell@umb.edu}}
 \seealso{
-	\code{\link{phyl.pca}}, \code{\link{phyl.resid}}
+	\code{\link{phyl.cca}}, \code{\link{phyl.pca}}, \code{\link{phyl.resid}}
 }
 \keyword{phylogenetics}
 \keyword{comparative method}

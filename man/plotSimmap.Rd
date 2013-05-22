@@ -2,8 +2,8 @@
 \alias{plotSimmap}
 \title{Plot stochastic character mapped tree}
 \usage{
-	plotSimmap(tree, colors=NULL, fsize=1.0, ftype="reg", lwd=2, pts=TRUE, 
-     node.numbers=FALSE, mar=NULL, add=FALSE, offset=NULL, direction="rightwards")
+plotSimmap(tree, colors=NULL, fsize=1.0, ftype="reg", lwd=2, pts=TRUE, 
+	node.numbers=FALSE, mar=NULL, add=FALSE, offset=NULL, direction="rightwards")
 }
 \arguments{
  	\item{tree}{a modified object of class "phylo" or "multiPhylo" containing a stochastic mapping or set of mappings (e.g., see \code{\link{read.simmap}} & \code{\link{make.simmap}}).}
@@ -25,23 +25,25 @@
 	The underscore character \code{"_"} is automatically swapped for a space in tip labels, as in \code{\link{plot.phylo}}.
 }
 \value{
-	plots a tree.
+	Plots a tree.
 }
 \references{
-	Huelsenbeck, J. P., R. Neilsen, and J. P. Bollback. 2003. Stochastic mapping of morphological characters. \emph{Systematic Biology}, \bold{52}, 131-138. 
+	Huelsenbeck, J. P., R. Neilsen, and J. P. Bollback. (2003) Stochastic mapping of morphological characters. \emph{Systematic Biology}, \bold{52}, 131-138. 
 
-	Bollback, J. P. 2006. Stochastic character mapping of discrete traits on phylogenies. \emph{BMC Bioinformatics}, \bold{7}, 88.
+	Bollback, J. P. (2006) Stochastic character mapping of discrete traits on phylogenies. \emph{BMC Bioinformatics}, \bold{7}, 88.
 }
 \author{Liam Revell \email{liam.revell@umb.edu}}
 \seealso{
 	\code{\link{densityMap}}, \code{\link{make.simmap}}, \code{\link{read.simmap}} 
 }
 \examples{
-	Q<-matrix(c(-2,1,1,1,-2,1,1,1,-2),3,3)
-	rownames(Q)<-colnames(Q)<-letters[1:3]
-	tree<-sim.history(pbtree(n=100,scale=1),Q)
-	cols<-setNames(c("blue","red","green"),letters[1:3])
-	plotSimmap(tree,cols,ftype="i",fsize=0.7)
+# simulate a mapped tree
+Q<-matrix(c(-2,1,1,1,-2,1,1,1,-2),3,3)
+rownames(Q)<-colnames(Q)<-letters[1:3]
+tree<-sim.history(pbtree(n=100,scale=1),Q)
+cols<-setNames(c("blue","red","green"),letters[1:3])
+# plot the mapping
+plotSimmap(tree,cols,ftype="i",fsize=0.7)
 }
 \keyword{phylogenetics}
 \keyword{plotting}

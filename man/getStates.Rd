@@ -2,17 +2,17 @@
 \alias{getStates}
 \title{Get the states at nodes or tips from a mapped tree}
 \usage{
-	getStates(tree, type=c("nodes","tips"))
+getStates(tree, type=c("nodes","tips"))
 }
 \arguments{
-	\item{tree}{is a modified object of class \code{"phylo"}.}
+	\item{tree}{is a modified object of class \code{"phylo"} or \code{"multiPhylo"}.}
 	\item{type}{mode indicating whether to get states at the nodes (\code{type="nodes"}) or the tips (\code{type="tips"}) of the tree.}
 }
 \description{
 	This function gets the states from the nodes or tips of a mapped tree (e.g., \code{\link{make.simmap}}).
 }
 \value{
-	A named vector.
+	A named vector (for \code{"phylo"}) or matrix (for \code{"multiPhylo"}).
 }
 \author{Liam Revell \email{liam.revell@umb.edu}}
 \seealso{

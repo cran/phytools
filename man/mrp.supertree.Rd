@@ -2,7 +2,7 @@
 \alias{mrp.supertree}
 \title{Matrix representation parsimony supertree estimation}
 \usage{
-	mrp.supertree(trees, method=c("pratchet","optim.parsimony"), ...)
+mrp.supertree(trees, method=c("pratchet","optim.parsimony"), ...)
 }
 \arguments{
 	\item{trees}{an object of class \code{"multiPhylo"} (i.e., a list of trees).}
@@ -10,20 +10,20 @@
 	\item{...}{optional arguments - mostly to be passed to \code{\link{pratchet}} or \code{\link{optim.parsimony}}.}
 }
 \description{
-	This function estimates the MRP supertree from a set of trees.
+	This function estimates the MRP (matrix representation parsimony) supertree from a set of trees.
 }
 \details{
-	Function uses \code{\link{pratchet}} or \code{\link{optim.parsimony}} rom the "phangorn" package (Schliep 2011) and \code{\link{prop.part}} from the "ape" package (Paradis et al. 2004). See \code{\link{pratchet}} or \code{\link{optim.parsimony}} for optional arguments, which vary slightl depending on the method. All optional arguments of these methods are available to the user with one exception. The argument \code{tree} in \code{\link{optim.parsimony}} is supplied instead as \code{start}. In addition to being an object of class \code{"phylo"}, \code{start} can also be assigned the string values of \code{"NJ"} or \code{"random"}, in which case either a neighbor-joining or random tree will be used as the starting tree for optimization.
+	Function uses \code{\link{pratchet}} or \code{\link{optim.parsimony}} from the "phangorn" package (Schliep 2011) and \code{\link{prop.part}} from the "ape" package (Paradis et al. 2004). See \code{\link{pratchet}} or \code{\link{optim.parsimony}} for optional arguments, which vary slightly depending on the method. All optional arguments of these methods are available to the user with one exception. The argument \code{tree} in \code{\link{optim.parsimony}} is supplied instead as \code{start}. In addition to being an object of class \code{"phylo"}, \code{start} can also be assigned the string values of \code{"NJ"} or \code{"random"}, in which case either a neighbor-joining or random tree will be used as the starting tree for optimization.
 }
 \value{
-	a \code{"phylo"} or \code{"multiPhylo"} object that is the MP or set of MP MRP trees.
+	A \code{"phylo"} or \code{"multiPhylo"} object that is the MP or set of MP MRP trees.
 }
 \references{
-	Felsenstein, J. 2004. \emph{Inferring Phylogenies}. Sinauer.
+	Felsenstein, J. (2004) \emph{Inferring Phylogenies}. Sinauer.
 
-	Paradis, E., J. Claude, and K. Strimmer. 2004. APE: Analyses of phylogenetics and evolution in R language. \emph{Bioinformatics}, \bold{20}, 289--290.
+	Paradis, E., J. Claude, and K. Strimmer (2004) APE: Analyses of phylogenetics and evolution in R language. \emph{Bioinformatics}, \bold{20}, 289--290.
 
-	Schliep, K. P. 2011. phangorn: phylogenetic analysis in R. \emph{Bioinformatics}, \bold{27}, 592-593.
+	Schliep, K. P. (2011) phangorn: phylogenetic analysis in R. \emph{Bioinformatics}, \bold{27}, 592-593.
 }
 \author{Liam Revell \email{liam.revell@umb.edu}}
 \seealso{

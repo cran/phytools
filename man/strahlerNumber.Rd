@@ -3,8 +3,8 @@
 \alias{extract.strahlerNumber}
 \title{Computes Strahler number for trees and nodes}
 \usage{
-	strahlerNumber(tree, plot=TRUE)
-	extract.strahlerNumber(tree, i, plot=TRUE)
+strahlerNumber(tree, plot=TRUE)
+extract.strahlerNumber(tree, i, plot=TRUE)
 }
 \arguments{
 	\item{tree}{an object of class \code{"phylo"}.}

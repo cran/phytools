@@ -2,7 +2,7 @@
 \alias{threshDIC}
 \title{Deviance Information Criterion from the threshold model}
 \usage{
-	threshDIC(tree, x, mcmc, burnin=NULL, sequence=NULL, method="pD")
+threshDIC(tree, x, mcmc, burnin=NULL, sequence=NULL, method="pD")
 }
 \arguments{
 	\item{tree}{phylogenetic tree.}
@@ -16,7 +16,7 @@
 	This function computes the Deviance Information Criterion from the MCMC object returned by \code{\link{ancThresh}}.
 }
 \value{
-	a vector containing the mean deviance and deviance for the parameter means, the effective number of parameters, and the DIC.
+	A vector containing the mean deviance and deviance for the parameter means, the effective number of parameters, and the DIC.
 }
 \author{Liam Revell \email{liam.revell@umb.edu}}
 \seealso{

@@ -5,14 +5,14 @@
 vcvPhylo(tree, anc.nodes=TRUE)
 }
 \arguments{
-  \item{tree}{object of class \code{"phylo"}.}
-  \item{anc.nodes}{logical value indicating whether or not to include ancestral nodes.}
+	\item{tree}{object of class \code{"phylo"}.}
+	\item{anc.nodes}{logical value indicating whether or not to include ancestral nodes.}
 }
 \description{
-  This function returns a so-called \emph{phylogenetic variance covariance matrix} (e.g., see \code{\link{vcv.phylo}}), but (optionally) including ancestral nodes.
+	This function returns a so-called \emph{phylogenetic variance covariance matrix} (e.g., see \code{\link{vcv.phylo}}), but (optionally) including ancestral nodes.
 }
 \value{
-  matrix.
+	A matrix.
 }
 \author{Liam Revell \email{liam.revell@umb.edu}}
 \keyword{phylogenetics}

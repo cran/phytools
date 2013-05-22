@@ -2,7 +2,7 @@
 \alias{ave.rates}
 \title{Average the posterior rates}
 \usage{
-	ave.rates(tree, shift, tips, sig1, sig2, ave.shift, showTree=TRUE)
+ave.rates(tree, shift, tips, sig1, sig2, ave.shift, showTree=TRUE)
 }
 \arguments{
 	\item{tree}{a tree.}
@@ -15,10 +15,10 @@
 
 }
 \description{
-	Primarily internal function for \code{\link{posterior.evolrate}}.
+	Primarily used internally by \code{\link{posterior.evolrate}}.
 }
 \value{
-	a list of the rates.
+	A list of the rates.
 }
 \author{Liam Revell \email{liam.revell@umb.edu}}
 \seealso{

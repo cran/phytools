@@ -12,7 +12,9 @@ estDiversity<-function(tree,x,method=c("asr","simulation"),model="ER",...){
 			cat("Warning:\n  only symmetric models allowed for method='asr'\n  changing to model='ER'\n")
 			model<-"ER"
 		}
-		aa<-rerootingMethod(tree,x,model=model)$marginal.anc
+		bb<-rerootingMethod(tree,x,model=model)
+		aa<-bb$marginal.anc
+		Q<-bb$Q
 		D<-matrix(0,nrow(aa),ncol(aa),dimnames=dimnames(aa))
 		# now loop through every node above the root
 		message("Please wait. . . . Warning - this may take a while!")
@@ -23,7 +25,7 @@ estDiversity<-function(tree,x,method=c("asr","simulation"),model="ER",...){
 			hh<-H[ii,1]
 			for(j in 1:length(ee)){
 				tr<-reroot(tree,node.number=ee[j],position=tt-hh[j])
-				D[i,]<-D[i,]+apeAce(tr,x[tr$tip.label],model=model)$lik.anc[1,]
+				D[i,]<-D[i,]+apeAce(tr,x[tr$tip.label],model=model,fixedQ=Q)$lik.anc[1,]
 			}
 			D[i,]<-D[i,]*aa[i,]
 			if(i%%10==0) message(paste("Completed",i,"nodes"))

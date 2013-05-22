@@ -1,10 +1,10 @@
 # function plots posterior density of mapped states from stochastic mapping
-# written by Liam J. Revell 2012
+# written by Liam J. Revell 2012-2013
 
 densityMap<-function(trees,res=100,fsize=NULL,ftype=NULL,lwd=3,check=FALSE,legend=NULL,outline=FALSE){
 	tol<-1e-10
 	if(class(trees)!="multiPhylo") stop("trees not 'multiPhylo' object; just use plotSimmap")
-	h<-sapply(trees,function(x) max(nodeHeights(x)))
+	h<-sapply(unclass(trees),function(x) max(nodeHeights(x)))
 	steps<-0:res/res*max(h)
 	trees<-rescaleSimmap(trees,totalDepth=max(h))
 	if(check){
@@ -15,6 +15,7 @@ densityMap<-function(trees,res=100,fsize=NULL,ftype=NULL,lwd=3,check=FALSE,legen
 	tree<-trees[[1]]
 	H<-nodeHeights(tree)
 	message("sorry - this might take a while; please be patient")
+	trees<-unclass(trees)
 	for(i in 1:nrow(tree$edge)){
 		YY<-cbind(c(H[i,1],steps[intersect(which(steps>H[i,1]),which(steps<H[i,2]))]),
 			c(steps[intersect(which(steps>H[i,1]),which(steps<H[i,2]))],H[i,2]))-H[i,1]
@@ -41,11 +42,39 @@ densityMap<-function(trees,res=100,fsize=NULL,ftype=NULL,lwd=3,check=FALSE,legen
 		names(tree$maps[[i]])<-round(ZZ*1000)
 	}
 	cols<-rainbow(1001,start=0.7,end=0); names(cols)<-0:1000
+	x<-list(tree=tree,cols=cols); class(x)<-"densityMap"
+	plot.densityMap(x,fsize=fsize,ftype=ftype,lwd=lwd,legend=legend,outline=outline)
+	invisible(x)
+}
+
+# function
+# written by Liam J. Revell 2012-2013
+
+plot.densityMap<-function(x,...){
+	if(class(x)=="densityMap"){
+		tree<-x$tree
+		cols<-x$cols
+	} else stop("x should be an object of class 'densityMap'")
+	H<-nodeHeights(tree)
+	# get & set optional arguments
+	if(hasArg(legend)) legend<-list(...)$legend
+	else legend<-NULL
+	if(hasArg(fsize)) fsize<-list(...)$fsize
+	else fsize<-NULL
+	if(hasArg(ftype)) ftype<-list(...)$ftype
+	else ftype<-NULL
+	if(hasArg(outline)) outline<-list(...)$outline
+	else outline<-FALSE
+	if(hasArg(lwd)) lwd<-list(...)$lwd
+	else lwd<-3
+	if(hasArg(leg.txt)) leg.txt<-list(...)$leg.txt
+	else leg.txt<-c("0","PP(state=1)","1")
 	if(is.null(legend)) legend<-0.5*max(H)
 	if(is.null(fsize)) fsize<-c(1,1)
 	if(length(fsize)==1) fsize<-rep(fsize,2)
 	if(is.null(ftype)) ftype<-c("i","reg")
 	if(length(ftype)==1) ftype<-c(ftype,"reg")
+	# done optional arguments
 	if(legend){
 		if(legend>max(H)){ 
 			message("legend scale cannot be longer than total tree length; resetting")
@@ -66,9 +95,9 @@ densityMap<-function(trees,res=100,fsize=NULL,ftype=NULL,lwd=3,check=FALSE,legen
 		lines(c(X[1,1],X[nrow(X),2]),c(Y[1,1],Y[nrow(Y),2]),lwd=lwd+2,lend=2)
 		for(i in 1:1001) lines(X[i,],Y[i,],col=cols[i],lwd=lwd,lend=2)
 		legf<-match(ftype[2],c("reg","b","i","bi"))
-		text(x=0,y=0,"0",pos=3,cex=fsize[2],font=legf)
-		text(x=(legend/max(H))*(1-fsize[1]*max(strwidth(tree$tip.label))),y=0,"1",pos=3,cex=fsize[2],font=legf)
-		text(x=(legend/max(H))*(1-fsize[1]*max(strwidth(tree$tip.label)))/2,y=0,"PP(state=1)",pos=3,cex=fsize[2],font=legf)
+		text(x=0,y=0,leg.txt[1],pos=3,cex=fsize[2],font=legf)
+		text(x=(legend/max(H))*(1-fsize[1]*max(strwidth(tree$tip.label))),y=0,leg.txt[3],pos=3,cex=fsize[2],font=legf)
+		text(x=(legend/max(H))*(1-fsize[1]*max(strwidth(tree$tip.label)))/2,y=0,leg.txt[2],pos=3,cex=fsize[2],font=legf)
 		text(x=(legend/max(H))*(1-fsize[1]*max(strwidth(tree$tip.label)))/2,y=0,paste("length=",round(legend,3),sep=""),pos=1,cex=fsize[2],font=legf)
 	} else {
 		if(outline){
@@ -80,4 +109,3 @@ densityMap<-function(trees,res=100,fsize=NULL,ftype=NULL,lwd=3,check=FALSE,legen
 			plotSimmap(tree,cols,pts=FALSE,lwd=lwd,fsize=fsize[1],ftype=ftype[1])
 	}
 }
-

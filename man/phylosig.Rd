@@ -2,8 +2,8 @@
 \alias{phylosig}
 \title{Compute phylogenetic signal with two methods}
 \usage{
-	phylosig(tree, x, method="K", test=FALSE, nsim=1000, se=NULL, start=NULL,
-     control=list())
+phylosig(tree, x, method="K", test=FALSE, nsim=1000, se=NULL, start=NULL,
+	control=list())
 }
 \arguments{
 	\item{tree}{a phylogenetic tree in \code{"phylo"} format.}
@@ -22,12 +22,12 @@
 	\eqn{\lambda} optimization is performed using \code{\link{optimize}} with the range of lambda set between 0 and the theoretical upper limit of lambda (determined by the relative height of the most recent internal node on the tree).
 }
 \value{
-	if \code{(method="K")}, a list with the following components:
+	If \code{(method="K")}, a list with the following components:
 	\item{K}{value of the K-statistic.}
 	\item{sig2}{rate of evolution, \eqn{\sigma^2}, for estimation with sampling error.}
 	\item{logL}{log-likelihood, for estimation with sampling error.}
 	\item{P}{optionally, the P-value from the randomization test.}
-	if \code{(method="lambda")}, a list with the following components:
+	If \code{(method="lambda")}, a list with the following components:
 	\item{lambda}{fitted value of lambda.}
 	\item{sig2}{rate of evolution, for estimation with sampling error.}
 	\item{logL}{log-likelihood.}
@@ -37,18 +37,18 @@
 	\item{message}{message from \code{\link{optim}}, for estimation with sampling error only.}
 }
 \references{
-	Pagel, M. 1999. Inferring the historical patterns of biological evolution. \emph{Nature}, \bold{401}, 877--884.
+	Pagel, M. (1999) Inferring the historical patterns of biological evolution. \emph{Nature}, \bold{401}, 877--884.
 
-	Blomberg, S. P., T. Garland Jr., A. R. Ives. 2003. Testing for phylogenetic signal in comparative data: Behavioral traits are more labile. \emph{Evolution}, \bold{57},
+	Blomberg, S. P., T. Garland Jr., A. R. Ives (2003) Testing for phylogenetic signal in comparative data: Behavioral traits are more labile. \emph{Evolution}, \bold{57},
   717--745.
 
-	Ives, A. R., P. E. Midford, T. Garland Jr. 2007. Within-species variation and measurement error in phylogenetic comparative biology. \emph{Systematic Biology}, \bold{56}, 252-270.
+	Ives, A. R., P. E. Midford, T. Garland Jr. (2007) Within-species variation and measurement error in phylogenetic comparative biology. \emph{Systematic Biology}, \bold{56}, 252-270.
 }
 \author{Liam Revell \email{liam.revell@umb.edu}}
 \examples{
-	tree<-pbtree(n=100)
-	x<-fastBM(tree)
-	phylosig(tree,x,method="lambda",test=TRUE)
+tree<-pbtree(n=100)
+x<-fastBM(tree)
+phylosig(tree,x,method="lambda",test=TRUE)
 }
 \keyword{phylogenetics}
 \keyword{comparative method}

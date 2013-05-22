@@ -4,7 +4,7 @@
 rerootingMethod<-function(tree,x,model=c("ER","SYM"),...){
 	if(hasArg(tips)) tips<-list(...)$tips
 	else tips<-NULL
-	model<-model[1]
+	if(!is.matrix(model)) model<-model[1]
 	n<-length(tree$tip.label)
 	# if vector convert to binary matrix
 	if(!is.matrix(x)){ 
@@ -21,13 +21,13 @@ rerootingMethod<-function(tree,x,model=c("ER","SYM"),...){
 	colnames(XX)<-colnames(yy)
 	YY<-apeAce(tree,yy,model=model)
 	XX[n+1,]<-YY$lik.anc[1,]
-	Q<-matrix(YY$rates[YY$index.matrix],ncol(XX),ncol(XX),dimnames=list(colnames(XX),colnames(XX)))
+	Q<-matrix(c(0,YY$rates)[YY$index.matrix+1],ncol(XX),ncol(XX),dimnames=list(colnames(XX),colnames(XX)))
 	diag(Q)<--colSums(Q,na.rm=TRUE)
 	for(i in 1:(tree$Nnode+n)){
 		if(i!=(n+1)){
 			if(i>n||tips){
 				tt<-reroot(tree,node.number=i,position=tree$edge.length[which(tree$edge[,2]==i)])
-				XX[i,]<-apeAce(tt,yy,model=model)$lik.anc[1,]
+				XX[i,]<-apeAce(tt,yy,model=model,fixedQ=Q)$lik.anc[1,]
 			}
 		}
 	}

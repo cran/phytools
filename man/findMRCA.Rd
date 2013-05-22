@@ -22,8 +22,8 @@ findMRCA(tree, tips=NULL)
   \code{\link{mrca}}
 }
 \examples{
-	tree<-pbtree(n=20)
-	anc<-findMRCA(tree,c("t1","t10","t15"))
+tree<-pbtree(n=20)
+anc<-findMRCA(tree,c("t1","t10","t15"))
 }
 \keyword{phylogenetics}
 \keyword{utilities}

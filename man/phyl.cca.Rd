@@ -2,7 +2,7 @@
 \alias{phyl.cca}
 \title{Phylogenetic canonical correlation analysis}
 \usage{
-	phyl.cca(tree, X, Y, lambda=1.0, fixed=TRUE)
+phyl.cca(tree, X, Y, lambda=1.0, fixed=TRUE)
 }
 \arguments{
 	\item{tree}{a phylogenetic tree in \code{"phylo"} format.}
@@ -18,7 +18,7 @@
 	(Optional) joint optimization of \eqn{\lambda} is performed using \code{\link{optimize}} on the interval (0,1).
 }
 \value{
-	a list with the following components:
+	A list with the following components:
 	\item{cor}{canonical correlations.}
 	\item{xcoef}{coefficients for the canonical variables for \code{X}.}
 	\item{ycoef}{coefficients for the canonical variables for \code{Y}.}
@@ -28,7 +28,7 @@
 	\item{p}{P-values for the hypothesis test that the \emph{i}th and all subsequent correlations are zero.}
 }
 \references{
-	Revell, L. J. & A. S. Harrison. 2008. PCCA: A program for phylogenetic canonical correlation analysis. \emph{Bioinformatics}, \bold{24}, 1018--1020.
+	Revell, L. J. & A. S. Harrison. (2008) PCCA: A program for phylogenetic canonical correlation analysis. \emph{Bioinformatics}, \bold{24}, 1018--1020.
 }
 \author{Liam Revell \email{liam.revell@umb.edu}}
 \seealso{
