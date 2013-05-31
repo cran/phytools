@@ -28,4 +28,5 @@ importFrom(calibrate, textxy)
 importFrom(msm, MatrixExp)
 importFrom(numDeriv, hessian)
 importFrom(phangorn, allTrees, Ancestors, dist.hamming, NJ, nni, optim.parsimony, parsimony, phyDat, pratchet)
+importFrom(plotrix, draw.arc)
 

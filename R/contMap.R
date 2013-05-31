@@ -1,7 +1,9 @@
 # function plots reconstructed values for ancestral characters along the edges of the tree
 # written by Liam J. Revell 2012-2013
 
-contMap<-function(tree,x,res=100,fsize=NULL,ftype=NULL,lwd=4,legend=NULL,lims=NULL,outline=TRUE,sig=3){
+contMap<-function(tree,x,res=100,fsize=NULL,ftype=NULL,lwd=4,legend=NULL,lims=NULL,outline=TRUE,sig=3,type="phylogram",...){
+	if(hasArg(mar)) mar<-list(...)$mar
+	else mar<-rep(0.3,4)
 	h<-max(nodeHeights(tree))
 	steps<-0:res/res*max(h)
 	H<-nodeHeights(tree)
@@ -24,7 +26,7 @@ contMap<-function(tree,x,res=100,fsize=NULL,ftype=NULL,lwd=4,legend=NULL,lims=NU
 	}
 	xx<-list(tree=tree,cols=cols,lims=lims)
 	class(xx)<-"contMap"
-	plot.contMap(xx,fsize=fsize,ftype=ftype,lwd=lwd,legend=legend,outline=outline,sig=sig)
+	plot.contMap(xx,fsize=fsize,ftype=ftype,lwd=lwd,legend=legend,outline=outline,sig=sig,type=type,mar=mar)
 	invisible(xx)
 }
 
@@ -63,6 +65,10 @@ plot.contMap<-function(x,...){
 	else lwd<-4
 	if(hasArg(sig)) sig<-list(...)$sig
 	else sig<-3
+	if(hasArg(type)) type<-list(...)$type
+	else type<-"phylogram"
+	if(hasArg(mar)) mar<-list(...)$mar
+	else mar<-rep(0.3,4)
 	if(is.null(legend)) legend<-0.5*max(H)
 	if(is.null(fsize)) fsize<-c(1,1)
 	if(length(fsize)==1) fsize<-rep(fsize,2)
@@ -70,6 +76,6 @@ plot.contMap<-function(x,...){
 	if(length(ftype)==1) ftype<-c(ftype,"reg")
 	# done optional arguments
 	leg.txt<-c(round(lims[1],sig),"trait value",round(lims[2],sig))
-	plot(x,fsize=fsize,ftype=ftype,lwd=lwd,legend=legend,outline=outline,leg.txt=leg.txt)
+	plot(x,fsize=fsize,ftype=ftype,lwd=lwd,legend=legend,outline=outline,leg.txt=leg.txt,type=type,mar=mar)
 }
 

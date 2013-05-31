@@ -146,7 +146,7 @@ mcmcQ<-function(bt,xx,model,tree,tol,m,burnin,samplefreq,nsim,vQ,prior){
 		np<-max(rate)
 	}
 	# burn-in
-	p<-rep(0.1,np)
+	p<-rgamma(np,prior$alpha,prior$beta)
 	Q<-matrix(p[rate],m,m)
 	diag(Q)<--rowSums(Q,na.rm=TRUE)
 	yy<-getPars(bt,xx,model,Q,tree,tol,m)
@@ -178,7 +178,7 @@ mcmcQ<-function(bt,xx,model,tree,tol,m,burnin,samplefreq,nsim,vQ,prior){
 			p<-pp
 		}
 		if(i%%samplefreq==0){
-			Qi<-matrix(pp[rate],m,m)
+			Qi<-matrix(p[rate],m,m)
 			diag(Qi)<--rowSums(Qi,na.rm=TRUE)
 			XX[[i/samplefreq]]<-getPars(bt,xx,model,Qi,tree,tol,m,TRUE)
 		}

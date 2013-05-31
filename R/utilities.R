@@ -1,6 +1,20 @@
 # some utility functions
 # written by Liam J. Revell 2011, 2012, 2013
 
+# function reorders simmap tree
+# written Liam Revell 2011, 2013
+reorderSimmap<-function(tree,order="cladewise"){
+	x<-reorder(tree,order)
+	o<-whichorder(x$edge[,2],tree$edge[,2])
+	x$mapped.edge<-tree$mapped.edge[o,]
+	x$maps<-tree$maps[o]
+	return(x)
+}
+
+# function whichorder
+# written by Liam Revell 2011, 2013
+whichorder<-function(x,y) sapply(x,function(x,y) which(x==y),y=y)
+
 # function works like extract.clade in ape but will preserve a discrete character mapping
 # written by Liam J. Revell 2013
 extract.clade.simmap<-function(tree,node){
@@ -79,7 +93,7 @@ mergeMappedStates<-function(tree,old.states,new.state){
 }
 
 # function to rescale simmap style trees
-# written by Liam J. Revell 2012-2013
+# written by Liam J. Revell 2012, 2013
 rescaleSimmap<-function(tree,totalDepth=1.0){
 	if(class(tree)=="multiPhylo"){
 		trees<-unclass(tree)
@@ -546,16 +560,6 @@ expm<-function(Y){
 	return(Z)
 }
 	
-# function reorders simmap tree
-# written Liam Revell 2011
-reorderSimmap<-function(tree,order="cladewise"){
-	ntree<-reorder(tree,order)
-	o<-whichorder(ntree$edge[,2],tree$edge[,2])
-	ntree$mapped.edge<-tree$mapped.edge[o,]
-	ntree$maps<-tree$maps[o]
-	return(ntree)
-}
-
 # function 'untangles' (or attempts to untangle) a tree with crossing branches
 # written by Liam J. Revell 2013
 untangle<-function(tree,method=c("reorder","read.tree")){
