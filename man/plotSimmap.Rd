@@ -3,7 +3,8 @@
 \title{Plot stochastic character mapped tree}
 \usage{
 plotSimmap(tree, colors=NULL, fsize=1.0, ftype="reg", lwd=2, pts=TRUE, 
-	node.numbers=FALSE, mar=NULL, add=FALSE, offset=NULL, direction="rightwards")
+	node.numbers=FALSE, mar=NULL, add=FALSE, offset=NULL, direction="rightwards",
+	type="phylogram")
 }
 \arguments{
  	\item{tree}{a modified object of class "phylo" or "multiPhylo" containing a stochastic mapping or set of mappings (e.g., see \code{\link{read.simmap}} & \code{\link{make.simmap}}).}
@@ -17,6 +18,7 @@ plotSimmap(tree, colors=NULL, fsize=1.0, ftype="reg", lwd=2, pts=TRUE,
 	\item{add}{a logical value indicating whether or not to add the plotted tree to the current plot (\code{TRUE}) or create a new plot (\code{FALSE}, the default).}
 	\item{offset}{offset for the tip labels. Primarily to be used internally by \code{\link{densityMap}}.}
 	\item{direction}{plotting direction. Options are \code{"rightwards"} (the default) and \code{"leftwards"}. Note that for some reason that is not totally clear, \code{node.numbers=TRUE} does not work for \code{direction="leftwards"}.}
+	\item{type}{plot type. Can be \code{"phylogram"} or \code{"fan"}. Only a subset of options are presently available for \code{type="fan"}.}
 }
 \description{
 	Function plots one or multiple stochastic character mapped trees.
