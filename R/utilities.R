@@ -1,6 +1,77 @@
 # some utility functions
 # written by Liam J. Revell 2011, 2012, 2013
 
+# function adds a new tip to the tree
+# written by Liam J. Revell 2012, 2013
+bind.tip<-function(tree,tip.label,edge.length=NULL,where=NULL,position=0){
+	if(is.null(where)) where<-length(tree$tip)+1
+	if(where<=length(tree$tip.label)&&position==0){
+		pp<-1e-12
+		if(tree$edge.length[which(tree$edge[,2]==where)]<=1e-12){
+			tree$edge.length[which(tree$edge[,2]==where)]<-2e-12
+			ff<-TRUE
+		} else ff<-FALSE
+	} else pp<-position
+	if(is.null(edge.length)&&is.ultrametric(tree)){
+		H<-nodeHeights(tree)
+		if(where==(length(tree$tip)+1)) edge.length<-max(H)
+		else edge.length<-max(H)-H[tree$edge[,2]==where,2]+position
+	}
+	tip<-list(edge=matrix(c(2,1),1,2),
+		tip.label=tip.label,
+		edge.length=edge.length,
+		Nnode=1)
+		class(tip)<-"phylo"
+	obj<-bind.tree(tree,tip,where=where,position=pp)
+	if(where<=length(tree$tip.label)&&position==0){
+		nn<-obj$edge[which(obj$edge[,2]==which(obj$tip.label==tip$tip.label)),1]
+		obj$edge.length[which(obj$edge[,2]==nn)]<-obj$edge.length[which(obj$edge[,2]==nn)]+1e-12
+		obj$edge.length[which(obj$edge[,2]==which(obj$tip.label==tip$tip.label))]<-0
+		obj$edge.length[which(obj$edge[,2]==which(obj$tip.label==tree$tip.label[where]))]<-0
+	}
+	return(obj)
+}
+
+# function collapses the subtree descended from node to a star tree
+# written by Liam J. Revell 2013
+collapse.to.star<-function(tree,node){
+	tt<-splitTree(tree,split=list(node=node,bp=tree$edge.length[which(tree$edge[,2]==node)]))
+	ss<-starTree(species=tt[[2]]$tip.label,branch.lengths=diag(vcv(tt[[2]])))
+	ss$root.edge<-0
+	tree<-paste.tree(tt[[1]],ss)
+	return(tree)
+}
+
+# function returns the MRCA, or its height above the root, for a set of taxa (in tips)
+# written by Liam Revell 2012, 2013
+findMRCA<-function(tree,tips=NULL,type=c("node","height")){
+	type<-type[1]
+	if(is.null(tips)){ 
+		X<-mrca(tree)
+		if(type=="height"){
+			H<-nodeHeights(tree)
+			X<-apply(X,c(1,2),function(x,y,z) y[which(z==x)[1]],y=H,z=tree$edge)
+		}
+		return(X)
+	} else {
+		H<-nodeHeights(tree)
+		X<-sapply(tips,function(x,y,z) sapply(y,fastMRCA,sp1=x,tree=z),y=tips,z=tree)
+		Y<-apply(X,c(1,2),function(x,y,z) y[which(z==x)[1]],y=H,z=tree$edge)
+		if(type=="height") return(Y[which.min(Y)]) else return(X[which.min(Y)])
+	}
+}
+
+# fast pairwise MRCA function
+# written by Liam Revell 2012
+fastMRCA<-function(tree,sp1,sp2){
+	x<-match(sp1,tree$tip.label)
+	y<-match(sp2,tree$tip.label)
+	a<-Ancestors(tree,x)
+	b<-Ancestors(tree,y)
+	z<-a%in%b
+	return(a[min(which(z))])
+}
+
 # function reorders simmap tree
 # written Liam Revell 2011, 2013
 reorderSimmap<-function(tree,order="cladewise"){
