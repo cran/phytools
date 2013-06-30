@@ -26,6 +26,10 @@ phylomorphospace<-function(tree,X,A=NULL,label=TRUE,control=list(),...){
 	# get optional argument
 	if(hasArg(node.by.map)) node.by.map<-list(...)$node.by.map
 	else node.by.map<-FALSE
+	if(hasArg(node.size)){ 
+		node.size<-list(...)$node.size
+		if(length(node.size)==1) node.size<-c(node.size,node.size)
+	} else node.size<-c(1,1.3)
 
 	# set xlim & ylim
 	if(hasArg(xlim)) xlim<-list(...)$xlim
@@ -79,9 +83,9 @@ phylomorphospace<-function(tree,X,A=NULL,label=TRUE,control=list(),...){
 		}
 	}
 	zz<-c(tree$edge[1,1],tree$edge[tree$edge[,2]>length(tree$tip.label),2])
-	points(c(XX[1,1],XX[tree$edge[,2]>length(tree$tip.label),2]),c(YY[1,1],YY[tree$edge[,2]>length(tree$tip.label),2]),pch=16,cex=1.0,col=con$col.node[as.character(zz)])
+	points(c(XX[1,1],XX[tree$edge[,2]>length(tree$tip.label),2]),c(YY[1,1],YY[tree$edge[,2]>length(tree$tip.label),2]),pch=16,cex=node.size[1],col=con$col.node[as.character(zz)])
 	zz<-tree$edge[tree$edge[,2]<=length(tree$tip.label),2]
-	points(XX[tree$edge[,2]<=length(tree$tip.label),2],YY[tree$edge[,2]<=length(tree$tip.label),2],pch=16,cex=1.3,col=con$col.node[as.character(zz)])
+	points(XX[tree$edge[,2]<=length(tree$tip.label),2],YY[tree$edge[,2]<=length(tree$tip.label),2],pch=16,cex=node.size[2],col=con$col.node[as.character(zz)])
 	zz<-sapply(1:length(tree$tip.label),function(x,y) which(x==y),y=tree$edge[,2])
 	if(label) textxy(XX[zz,2],YY[zz,2],labs=tree$tip.label,cx=fsize)
 }

@@ -14,7 +14,7 @@ fancyTree<-function(tree,type=c("extinction","traitgram3d","droptip","xkcd","den
 	if(class(tree)!="phylo"&&type%in%c("extinction","traitgram3d","droptip","xkcd")) stop("tree should be an object of class 'phylo'")
 	else if(class(tree)!="multiPhylo"&&type=="densitymap") stop("for type='densitymap' tree should be an object of class 'multiPhylo'")
 	if(type=="extinction") extinctionTree(tree)
-	else if(type=="traitgram3d") traitgram3d(tree,...,control=control)
+	else if(type=="traitgram3d") invisible(traitgram3d(tree,...,control=control))
 	else if(type=="droptip") return(droptipTree(tree,...))
 	else if(type=="xkcd") plotXkcdTree(tree,...)
 	else if(type=="densitymap") plotDensityMap(tree,...)
@@ -110,7 +110,8 @@ traitgram3d<-function(tree,...,control){
 	X<-cbind(X,diag(vcv(tree))[rownames(X)])
 	A<-cbind(A,nodeHeights(tree)[match(rownames(A)[1:nrow(A)],tree$edge)])
 	colnames(X)[3]<-colnames(A)[3]<-"time"
-	phylomorphospace3d(tree,X,A,control=control)
+	xx<-phylomorphospace3d(tree,X,A,control=control)
+	return(xx)
 }
 
 # droptipTree internal function

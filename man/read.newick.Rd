@@ -1,21 +1,21 @@
 \name{read.newick}
 \alias{read.newick}
-\title{Read Newick style tree}
+\title{Robust Newick style tree reader}
 \usage{
 read.newick(file="", text)
 }
 \arguments{
-	\item{file}{name of text file with single Newick style tree.}
+	\item{file}{name of text file with single Newick style tree or multiple trees, one per line.}
 	\item{text}{character string containing tree.}
 }
 \description{
 	This function reads a Newick style tree from file.
 }
 \details{
-	Note, this function does not do anything that \code{\link{read.tree}} doesn't do better - and is included mostly for development purposes.
+	This function is almost completely redundant with \code{\link{read.tree}}; however it is 'robust' in that it does not fail if the tree contains so-called 'singles' (nodes with only one descendant).
 }
 \value{
-	An object of class \code{"phylo"}
+	An object of class \code{"phylo"}, possibly containing singles (see \code{\link{collapse.singles}}).
 }
 \author{Liam Revell \email{liam.revell@umb.edu}}
 \seealso{

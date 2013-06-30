@@ -1,10 +1,10 @@
 # function plots a stochastic character mapped tree
 # written by Liam Revell 2011, 2013
 
-plotSimmap<-function(tree,colors=NULL,fsize=1.0,ftype="reg",lwd=2,pts=TRUE,node.numbers=FALSE,mar=NULL,add=FALSE,offset=NULL,direction="rightwards",type="phylogram"){
+plotSimmap<-function(tree,colors=NULL,fsize=1.0,ftype="reg",lwd=2,pts=TRUE,node.numbers=FALSE,mar=NULL,add=FALSE,offset=NULL,direction="rightwards",type="phylogram",setEnv=FALSE){
 	if(class(tree)=="multiPhylo"){
 		par(ask=TRUE)
-		for(i in 1:length(tree)) plotSimmap(tree[[i]],colors=colors,fsize=fsize,ftype=ftype,lwd=lwd,pts=pts,node.numbers=node.numbers,mar,add,offset,direction,type)
+		for(i in 1:length(tree)) plotSimmap(tree[[i]],colors=colors,fsize=fsize,ftype=ftype,lwd=lwd,pts=pts,node.numbers=node.numbers,mar,add,offset,direction,type,setEnv)
 	} else {
 		# check font
 		ftype<-which(c("off","reg","b","i","bi")==ftype)-1
@@ -90,8 +90,15 @@ plotSimmap<-function(tree,colors=NULL,fsize=1.0,ftype="reg",lwd=2,pts=TRUE,node.
 			if(is.null(offset)) offset<-0.2*lwd/3+0.2/3
 			pos<-if(direction=="leftwards") 2 else 4
 			for(i in 1:n) if(ftype) text(node.height[which(cw$edge[,2]==i),2],Y[i],cw$tip.label[i],pos=pos,offset=offset,cex=fsize,font=ftype)
-			# reset margin
-			par(mar=c(5,4,4,2)+0.1)
+			if(setEnv){
+				cat("setEnv=TRUE is experimental. please be patient with bugs\n")
+				PP<-list(type=type,use.edge.length=TRUE,node.pos=1,show.tip.label=if(ftype) TRUE else FALSE,show.node.label=FALSE,
+					font=ftype,cex=fsize,adj=0,srt=0,no.margin=FALSE,label.offset=offset,x.lim=par()$usr[1:2],y.lim=par()$usr[3:4],
+					direction=direction,tip.color="black",Ntip=length(cw$tip.label),Nnode=cw$Nnode,edge=cw$edge,
+					xx=sapply(1:(length(cw$tip.label)+cw$Nnode),function(x,y,z) y[match(x,z)],y=node.height,z=cw$edge),
+					yy=Y[,1])
+				assign("last_plot.phylo",PP,envir=.PlotPhyloEnv)
+			}
 		} else if(type=="fan"){
 			plotFan(tree,colors,fsize,ftype,lwd,mar,add)
 		}
@@ -157,3 +164,37 @@ plotFan<-function(tree,colors,fsize,ftype,lwd,mar,add){
 		if(ftype) text(x[ii,2],y[ii,2],tt,srt=aa,adj=adj,cex=fsize,font=ftype)
 	}
 }
+
+# adds legend to an open stochastic map style plot
+# written by Liam J. Revell 2013
+add.simmap.legend<-function(leg=NULL,colors,prompt=TRUE,vertical=TRUE,...){
+	if(prompt){
+		cat("Click where you want to draw the legend\n")
+		x<-unlist(locator(1))
+		y<-x[2]
+		x<-x[1]
+	} else {
+		if(hasArg(x)) x<-list(...)$x
+		else x<-0
+		if(hasArg(y)) y<-list(...)$y
+		else y<-0
+	}
+	if(hasArg(fsize)) fsize<-list(...)$fsize
+	else fsize<-1.0
+	if(is.null(leg)) leg<-names(colors)
+	h<-fsize*strheight(leg[1])
+	w<-h*(par()$usr[2]-par()$usr[1])/(par()$usr[4]-par()$usr[3])
+	if(vertical){
+		y<-y-0:(length(leg)-1)*1.5*h
+		x<-rep(x+w/2,length(y))
+		symbols(x,y,squares=rep(w,length(x)),bg=colors,add=TRUE,inches=FALSE)		
+		text(x+w,y,leg,pos=4,cex=fsize)
+	} else {
+		sp<-fsize*max(strwidth(leg))
+		x<-x-w/2+0:(length(leg)-1)*1.5*(sp+w)
+		y<-rep(y+w/2,length(x))
+		symbols(x,y,squares=rep(w,length(x)),bg=colors,add=TRUE,inches=FALSE)
+		text(x,y,leg,pos=4,cex=fsize)
+	}
+}
+

@@ -24,7 +24,7 @@ phylomorphospace3d<-function(tree,X,A=NULL,label=TRUE,control=list()){
 	}
 	if(is.null(colnames(X))) colnames(X)<-c("x","y","z")
 	plot3d(rbind(X,A),xlab=colnames(X)[1],ylab=colnames(X)[2],zlab=colnames(X)[3],axes=con$axes,box=con$box)
-	spheres3d(X,radius=0.02*mean(apply(X,2,range)))
+	spheres3d(X,radius=0.02*mean(apply(X,2,max)-apply(X,2,min)))
 	for(i in 1:nrow(tree$edge)) segments3d(x[i,],y[i,],z[i,],lwd=con$lwd)
 	ms<-colMeans(X)
 	rs<-apply(rbind(X,A),2,range)
@@ -38,5 +38,10 @@ phylomorphospace3d<-function(tree,X,A=NULL,label=TRUE,control=list()){
 		adj<-0.03*rs*(2*(X[i,]>ms)-1)
 		if(con$ftype) text3d(X[i,]+adj,texts=tree$tip.label[i],font=con$ftype)
 	}
-	if(con$spin) play3d(spin3d(axis=c(0,0,1),rpm=10),duration=5)
+	if(con$spin){
+		xx<-spin3d(axis=c(0,0,1),rpm=10)
+		play3d(xx,duration=5)
+		invisible(xx)
+	}
+	else invisible(NULL)
 }	
