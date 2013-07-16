@@ -1,6 +1,38 @@
 # some utility functions
 # written by Liam J. Revell 2011, 2012, 2013
 
+# function rotates a node or multiple nodes
+# written by Liam J. Revell 2013
+rotateNodes<-function(tree,nodes,polytom=c(1,2),...){
+	n<-length(tree$tip.label)
+	if(nodes[1]=="all") nodes<-1:tree$Nnode+n
+	for(i in 1:length(nodes)) tree<-rotate(tree,nodes[i],polytom)
+	if(hasArg(reversible)) reversible<-list(...)$reversible
+	else reversible<-TRUE
+	if(reversible){ 
+		ii<-which(tree$edge[,2]<=n)
+		jj<-tree$edge[ii,2]
+		tree$edge[ii,2]<-1:n
+		tree$tip.label<-tree$tip.label[jj]
+	}
+	return(tree)
+}
+
+# function simulates random sampling from xbar, xvar, with sample sizes n
+# written by Liam J. Revell 2012
+sampleFrom<-function(xbar=0,xvar=1,n=1,randn=NULL,type="norm"){
+	if(length(xvar)==1&&length(xbar)!=length(xvar)) xvar<-rep(xvar,length(xbar))
+	if(!is.null(randn))
+		for(i in 1:length(xbar)) n[i]<-floor(runif(n=1,min=randn[1],max=(randn[2]+1)))
+	x<-vector()
+	for(i in 1:length(xbar)){
+		y<-rnorm(n=n[i],mean=xbar[i],sd=sqrt(xvar[i]))
+   		names(y)<-rep(names(xbar)[i],length(y))
+   		x<-c(x,y)
+	}
+	return(x)
+}
+
 # function adds a new tip to the tree
 # written by Liam J. Revell 2012, 2013
 bind.tip<-function(tree,tip.label,edge.length=NULL,where=NULL,position=0){

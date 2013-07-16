@@ -26,14 +26,16 @@ plotTree<-function(tree,...){
 	else direction<-"rightwards"
 	if(hasArg(setEnv)) setEnv<-list(...)$setEnv
 	else setEnv<-FALSE
+	if(hasArg(part)) part<-list(...)$part
+	else part<-1.0
 	if(class(tree)=="multiPhylo"){
 		par(ask=TRUE)
 		if(!is.null(color)) names(color)<-"1"
-		for(i in 1:length(tree)) plotTree(tree[[i]],color=color,fsize=fsize,ftype=ftype,lwd=lwd,pts=pts,node.numbers=node.numbers,mar=mar,add=add,offset=offset,direction=direction,type=type,setEnv=setEnv)
+		for(i in 1:length(tree)) plotTree(tree[[i]],color=color,fsize=fsize,ftype=ftype,lwd=lwd,pts=pts,node.numbers=node.numbers,mar=mar,add=add,offset=offset,direction=direction,type=type,setEnv=setEnv,part=part)
 	} else {
 		tree$maps<-as.list(tree$edge.length)
 		for(i in 1:length(tree$maps)) names(tree$maps[[i]])<-c("1")
 		if(!is.null(color)) names(color)<-"1"
-		plotSimmap(tree,colors=color,fsize=fsize,ftype=ftype,lwd=lwd,pts=pts,node.numbers=node.numbers,mar=mar,add=add,offset=offset,direction=direction,type=type,setEnv=setEnv)
+		plotSimmap(tree,colors=color,fsize=fsize,ftype=ftype,lwd=lwd,pts=pts,node.numbers=node.numbers,mar=mar,add=add,offset=offset,direction=direction,type=type,setEnv=setEnv,part=part)
 	}
 }

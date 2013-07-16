@@ -1,7 +1,7 @@
 # function plots a stochastic character mapped tree
 # written by Liam Revell 2011, 2013
 
-plotSimmap<-function(tree,colors=NULL,fsize=1.0,ftype="reg",lwd=2,pts=TRUE,node.numbers=FALSE,mar=NULL,add=FALSE,offset=NULL,direction="rightwards",type="phylogram",setEnv=FALSE){
+plotSimmap<-function(tree,colors=NULL,fsize=1.0,ftype="reg",lwd=2,pts=TRUE,node.numbers=FALSE,mar=NULL,add=FALSE,offset=NULL,direction="rightwards",type="phylogram",setEnv=FALSE,part=1.0){
 	if(class(tree)=="multiPhylo"){
 		par(ask=TRUE)
 		for(i in 1:length(tree)) plotSimmap(tree[[i]],colors=colors,fsize=fsize,ftype=ftype,lwd=lwd,pts=pts,node.numbers=node.numbers,mar,add,offset,direction,type,setEnv)
@@ -100,14 +100,14 @@ plotSimmap<-function(tree,colors=NULL,fsize=1.0,ftype="reg",lwd=2,pts=TRUE,node.
 				assign("last_plot.phylo",PP,envir=.PlotPhyloEnv)
 			}
 		} else if(type=="fan"){
-			plotFan(tree,colors,fsize,ftype,lwd,mar,add)
+			plotFan(tree,colors,fsize,ftype,lwd,mar,add,part)
 		}
 	}
 }	
 
 # function to plot simmap tree in type "fan"
 # written by Liam J. Revell 2013
-plotFan<-function(tree,colors,fsize,ftype,lwd,mar,add){
+plotFan<-function(tree,colors,fsize,ftype,lwd,mar,add,part){
 	cat("\nNote: type=\"fan\" is in development.\nMany options of type=\"phylogram\" are not yet available.\n\n")
 	# reorder
 	cw<-reorder(tree)
@@ -117,14 +117,15 @@ plotFan<-function(tree,colors,fsize,ftype,lwd,mar,add){
 	m<-cw$Nnode 
 	# get Y coordinates on uncurved space
 	Y<-vector(length=m+n)
-	Y[cw$edge[cw$edge[,2]<=length(cw$tip),2]]<-1:n
+	if(part<1.0) Y[cw$edge[cw$edge[,2]<=length(cw$tip),2]]<-0:(n-1)
+	else Y[cw$edge[cw$edge[,2]<=length(cw$tip),2]]<-1:n
 	nodes<-unique(pw$edge[,1])
 	for(i in 1:m){
 		desc<-pw$edge[which(pw$edge[,1]==nodes[i]),2]
 		Y[nodes[i]]<-(min(Y[desc])+max(Y[desc]))/2
 	}
 	Y<-setNames(Y/max(Y)*2*pi,1:(n+m))
-	Y<-cbind(Y[as.character(tree$edge[,2])],Y[as.character(tree$edge[,2])])
+	Y<-part*cbind(Y[as.character(tree$edge[,2])],Y[as.character(tree$edge[,2])])
 	R<-nodeHeights(cw)
 	# now put into a circular coordinate system
 	x<-R*cos(Y)
@@ -135,11 +136,16 @@ plotFan<-function(tree,colors,fsize,ftype,lwd,mar,add){
 	offset<-0
 	pp<-par("pin")[1]
  	sw<-fsize*(max(strwidth(cw$tip.label,units="inches")))+offsetFudge*offset*fsize*strwidth("W",units="inches") 
-	alp<-optimize(function(a,H,sw,pp) (2*a*1.04*max(H)+2*sw-pp)^2,H=R,sw=sw,pp=pp,interval=c(0,1e6))$minimum 
-	xylim<-c(-max(R)-sw/alp,max(R)+sw/alp)
+	alp<-optimize(function(a,H,sw,pp) (2*a*1.04*max(H)+2*sw-pp)^2,H=R,sw=sw,pp=pp,interval=c(0,1e6))$minimum
+	if(part<=0.25) xylim<-c(0,max(R)+sw/alp)
+	else if(part>0.25&&part<=0.5){ 
+		xlim<-c(-max(R)-sw/alp,max(R)+sw/alp)
+		ylim<-c(0,max(R)+sw/alp)
+	} else xylim<-c(-max(R)-sw/alp,max(R)+sw/alp)
 	# plot tree
 	if(!add) plot.new()
-	plot.window(xlim=xylim,ylim=xylim,asp=1,)
+	if(part<=0.25||part>0.5) plot.window(xlim=xylim,ylim=xylim,asp=1)
+	else plot.window(xlim=xlim,ylim=ylim,asp=1)
 	# plot radial lines (edges)
 	for(i in 1:nrow(cw$edge)){
 		maps<-cumsum(cw$maps[[i]])/sum(cw$maps[[i]])
@@ -168,6 +174,8 @@ plotFan<-function(tree,colors,fsize,ftype,lwd,mar,add){
 # adds legend to an open stochastic map style plot
 # written by Liam J. Revell 2013
 add.simmap.legend<-function(leg=NULL,colors,prompt=TRUE,vertical=TRUE,...){
+	if(hasArg(shape)) shape<-list(...)$shape
+	else shape<-"square"
 	if(prompt){
 		cat("Click where you want to draw the legend\n")
 		x<-unlist(locator(1))
@@ -186,15 +194,16 @@ add.simmap.legend<-function(leg=NULL,colors,prompt=TRUE,vertical=TRUE,...){
 	w<-h*(par()$usr[2]-par()$usr[1])/(par()$usr[4]-par()$usr[3])
 	if(vertical){
 		y<-y-0:(length(leg)-1)*1.5*h
-		x<-rep(x+w/2,length(y))
-		symbols(x,y,squares=rep(w,length(x)),bg=colors,add=TRUE,inches=FALSE)		
+		x<-rep(x+w/2,length(y))		
 		text(x+w,y,leg,pos=4,cex=fsize)
 	} else {
 		sp<-fsize*max(strwidth(leg))
 		x<-x-w/2+0:(length(leg)-1)*1.5*(sp+w)
 		y<-rep(y+w/2,length(x))
-		symbols(x,y,squares=rep(w,length(x)),bg=colors,add=TRUE,inches=FALSE)
 		text(x,y,leg,pos=4,cex=fsize)
 	}
+	if(shape=="square") symbols(x,y,squares=rep(w,length(x)),bg=colors,add=TRUE,inches=FALSE)
+	else if(shape=="circle") symbols(x,y,circles=rep(w,length(x)),bg=colors,add=TRUE,inches=FALSE)
+	else stop(paste("shape=\"",shape,"\" is not a recognized option.",sep=""))
 }
 

@@ -1,7 +1,7 @@
 # function plots reconstructed values for ancestral characters along the edges of the tree
 # written by Liam J. Revell 2012-2013
 
-contMap<-function(tree,x,res=100,fsize=NULL,ftype=NULL,lwd=4,legend=NULL,lims=NULL,outline=TRUE,sig=3,type="phylogram",...){
+contMap<-function(tree,x,res=100,fsize=NULL,ftype=NULL,lwd=4,legend=NULL,lims=NULL,outline=TRUE,sig=3,type="phylogram",plot=TRUE,...){
 	if(hasArg(mar)) mar<-list(...)$mar
 	else mar<-rep(0.3,4)
 	h<-max(nodeHeights(tree))
@@ -26,7 +26,7 @@ contMap<-function(tree,x,res=100,fsize=NULL,ftype=NULL,lwd=4,legend=NULL,lims=NU
 	}
 	xx<-list(tree=tree,cols=cols,lims=lims)
 	class(xx)<-"contMap"
-	plot.contMap(xx,fsize=fsize,ftype=ftype,lwd=lwd,legend=legend,outline=outline,sig=sig,type=type,mar=mar)
+	if(plot) plot.contMap(xx,fsize=fsize,ftype=ftype,lwd=lwd,legend=legend,outline=outline,sig=sig,type=type,mar=mar)
 	invisible(xx)
 }
 

@@ -9,7 +9,7 @@ add.simmap.legend(leg=NULL, colors, prompt=TRUE, vertical=TRUE, ...)
 	\item{colors}{colors for the legend in the order of \code{leg}, or, if \code{leg=NULL}, named vector of colors in which \code{names(colors} are the states of the mapped discrete character.}
 	\item{prompt}{logical value indicating whether the location of the legend should be obtained interactively (i.e., by clicking in the plotting area).}
 	\item{vertical}{logical value indiciating whether to plot the legend vertically (if \code{TRUE}) or horizontally.}
-	\item{...}{optional arguments including: \code{x} x-coordinate of the legend (if \code{prompt=FALSE}); \code{y} y-coordinate of the legend.}
+	\item{...}{optional arguments including: \code{x} x-coordinate of the legend (if \code{prompt=FALSE}); \code{y} y-coordinate of the legend; and \code{shape} which can be \code{shape="square"}, the default, or \code{shape="circle"}.}
 }
 \description{
 	This function adds a legend (by default, interactively) to a plotted stochastic character mapped tree.
