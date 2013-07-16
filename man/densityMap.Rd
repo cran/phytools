@@ -4,7 +4,7 @@
 \title{Plot posterior density of stochastic mapping on a tree}
 \usage{
 densityMap(trees, res=100, fsize=NULL, ftype=NULL, lwd=3, check=FALSE,
-	legend=NULL, outline=FALSE, type="phylogram", ...)
+	legend=NULL, outline=FALSE, type="phylogram", plot=TRUE, ...)
 \method{plot}{densityMap}(x, ...)
 }
 \arguments{
@@ -17,6 +17,7 @@ densityMap(trees, res=100, fsize=NULL, ftype=NULL, lwd=3, check=FALSE,
 	\item{legend}{if \code{FALSE} no legend is plotted; if a numeric value, it gives the length of the legend in units of branch length. Default is 0.5 times the total tree length.}
 	\item{outline}{logical value indicating whether or not to outline the branches of the tree in black.}
 	\item{type}{type of plot desired. Options are \code{"phylogram"} for a rightward square phylogram; and \code{"fan"} for a circular phylogram.}
+	\item{plot}{logical value indicating whether or not to plot the tree. If \code{plot=FALSE} then an object of class \code{"densityMap"} will be returned without plotting.}
 	\item{x}{for \code{plot.densityMap}, an object of class \code{"densityMap"}.}
 	\item{...}{optional arguments for \code{plot.densityMap}. These include all the arguments of \code{densityMap} except \code{trees} and \code{res}.}
 }

@@ -7,10 +7,11 @@
 # "densitymap" maps the posterior density of a binary stochastic character mapping
 # "contmap" maps reconstructed trait evolution for a continuous character on the tree
 # "phenogram95" plots a 95% CI phenogram
+# "scattergram" plots a phylogenetic scatterplot matrix
 # written by Liam J. Revell 2012, 2013
 
-fancyTree<-function(tree,type=c("extinction","traitgram3d","droptip","xkcd","densitymap","contmap","phenogram95"),...,control=list()){
-	type<-matchType(type,c("extinction","traitgram3d","droptip","xkcd","densitymap","contmap","phenogram95"))
+fancyTree<-function(tree,type=c("extinction","traitgram3d","droptip","xkcd","densitymap","contmap","phenogram95","scattergram"),...,control=list()){
+	type<-matchType(type,c("extinction","traitgram3d","droptip","xkcd","densitymap","contmap","phenogram95","scattergram"))
 	if(class(tree)!="phylo"&&type%in%c("extinction","traitgram3d","droptip","xkcd")) stop("tree should be an object of class 'phylo'")
 	else if(class(tree)!="multiPhylo"&&type=="densitymap") stop("for type='densitymap' tree should be an object of class 'multiPhylo'")
 	if(type=="extinction") extinctionTree(tree)
@@ -20,7 +21,42 @@ fancyTree<-function(tree,type=c("extinction","traitgram3d","droptip","xkcd","den
 	else if(type=="densitymap") plotDensityMap(tree,...)
 	else if(type=="contmap") plotContMap(tree,...)
 	else if(type=="phenogram95") phenogram95(tree,...)
+	else if(type=="scattergram") phyloScattergram(tree,...)
 	else stop(paste("do not recognize type = \"",type,"\"",sep=""))
+}
+
+# phyloScattergram internal function
+# written by Liam J. Revell 2013
+
+phyloScattergram<-function(tree,...){
+	if(hasArg(X)) X<-list(...)$X
+	else stop("phenotypic data should be provided in the matrix X")
+	if(hasArg(fsize)) fsize<-list(...)$fsize
+	else fsize<-0.7
+	if(hasArg(colors)) colors<-list(...)$colors
+	else if(!is.null(tree$maps)) colors<-setNames(palette()[1:ncol(tree$mapped.edge)],sort(colnames(tree$mapped.edge)))
+	if(hasArg(label)) label<-list(...)$label
+	else label<-"radial"
+	m<-ncol(X)
+	par(mfrow=c(m,m))
+	par(cex=fsize)
+	par(mar=c(0,0,0,0))
+	par(oma=c(5,5,3,3))
+	m<-ncol(X)
+	for(i in 1:m) for(j in 1:m){
+		if(i==j) contMap(tree,X[,i],legend=FALSE,lwd=2,outline=F,fsize=fsize)
+		else { 
+			phylomorphospace(tree,X[,c(j,i)],lwd=1,node.by.map=TRUE,axes=FALSE,node.size=c(0,1),colors=colors,label=label)
+			if(i==1) axis(side=3) # top row
+			if(i==m) axis(side=1) # first column
+			if(j==1) axis(side=2) # bottom row
+			if(j==m) axis(side=4) # last column
+		}
+	}
+	par(cex=0.9)
+	if(is.null(colnames(X))) colnames(X)<-paste("V",1:m,sep="")
+	invisible(mapply(title,xlab=colnames(X),adj=seq(0,(m-1)/m,1/m)+1/(2*m),MoreArgs=list(outer=TRUE,cex=0.9)))
+	invisible(mapply(title,ylab=colnames(X)[m:1],adj=seq(0,(m-1)/m,1/m)+1/(2*m),MoreArgs=list(outer=TRUE,cex=0.9)))
 }
 
 # phenogram95 internal function

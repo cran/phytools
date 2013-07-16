@@ -1,7 +1,7 @@
 # function plots posterior density of mapped states from stochastic mapping
 # written by Liam J. Revell 2012-2013
 
-densityMap<-function(trees,res=100,fsize=NULL,ftype=NULL,lwd=3,check=FALSE,legend=NULL,outline=FALSE,type="phylogram",...){
+densityMap<-function(trees,res=100,fsize=NULL,ftype=NULL,lwd=3,check=FALSE,legend=NULL,outline=FALSE,type="phylogram",plot=TRUE,...){
 	if(hasArg(mar)) mar<-list(...)$mar
 	else mar<-rep(0.3,4)
 	tol<-1e-10
@@ -45,7 +45,7 @@ densityMap<-function(trees,res=100,fsize=NULL,ftype=NULL,lwd=3,check=FALSE,legen
 	}
 	cols<-rainbow(1001,start=0.7,end=0); names(cols)<-0:1000
 	x<-list(tree=tree,cols=cols); class(x)<-"densityMap"
-	plot.densityMap(x,fsize=fsize,ftype=ftype,lwd=lwd,legend=legend,outline=outline,type=type,mar=mar)
+	if(plot) plot.densityMap(x,fsize=fsize,ftype=ftype,lwd=lwd,legend=legend,outline=outline,type=type,mar=mar)
 	invisible(x)
 }
 
