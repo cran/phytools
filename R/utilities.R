@@ -1,6 +1,179 @@
 # some utility functions
 # written by Liam J. Revell 2011, 2012, 2013
 
+# returns the heights of each node
+# written by Liam J. Revell 2011, 2012, 2013
+nodeHeights<-function(tree){
+	if(attr(tree,"order")!="cladewise"||is.null(attr(tree,"order"))) t<-reorder(tree)
+	else t<-tree
+	root<-length(t$tip.label)+1
+	X<-matrix(NA,nrow(t$edge),2)
+	for(i in 1:nrow(t$edge)){
+		if(t$edge[i,1]==root){
+			X[i,1]<-0.0
+			X[i,2]<-t$edge.length[i]
+		} else {
+			X[i,1]<-X[match(t$edge[i,1],t$edge[,2]),2]
+			X[i,2]<-X[i,1]+t$edge.length[i]
+		}
+	}
+	if(attr(tree,"order")!="cladewise"||is.null(attr(tree,"order")))
+		o<-apply(matrix(tree$edge[,2]),1,function(x,y) which(x==y),y=t$edge[,2])
+	else o<-1:nrow(t$edge)
+	return(X[o,])
+}
+
+# function computes phylogenetic variance-covariance matrix, including for internal nodes
+# written by Liam J. Revell 2011, 2013
+vcvPhylo<-function(tree,anc.nodes=TRUE,...){
+	# get & set optional arguments
+	if(hasArg(internal)) internal<-list(...)$internal
+	else internal<-anc.nodes
+	if(internal!=anc.nodes){ 
+		message(paste("arguments \"internal\" and \"anc.nodes\" are synonyms; setting internal =",anc.nodes))
+		internal<-anc.nodes
+	}
+	if(hasArg(model)) model<-list(...)$model
+	else model<-"BM"
+	if(hasArg(tol)) tol<-list(...)$tol
+	else tol<-1e-12
+	if(model=="OU"){
+		if(hasArg(alpha)) alpha<-list(...)$alpha
+		else alpha<-0
+	}
+	if(model=="OU"&&alpha<tol) model<-"BM"
+	# done settings
+	n<-length(tree$tip.label)
+	h<-nodeHeights(tree)[order(tree$edge[,2]),2]
+	h<-c(h[1:n],0,h[(n+1):length(h)])
+	M<-mrca(tree,full=internal)[c(1:n,internal*(n+2:tree$Nnode)),c(1:n,internal*(n+2:tree$Nnode))]
+	C<-matrix(h[M],nrow(M),ncol(M))
+	if(internal) rownames(C)<-colnames(C)<-c(tree$tip.label,n+2:tree$Nnode)
+	else rownames(C)<-colnames(C)<-tree$tip.label
+	if(model=="OU"){
+		D<-dist.nodes(tree)
+		rownames(D)[1:n]<-colnames(D)[1:n]<-tree$tip.label
+		D<-D[rownames(C),colnames(C)]
+		# not sure 
+		C<-(1-exp(-2*alpha*C))*exp(-alpha*D)/(2*alpha) # Hansen (2007)
+		# C<-(1-exp(-2*alpha*C))*exp(-2*alpha*(1-C))/(2*alpha) # Butler & King (2004)
+	}
+	return(C)
+}
+
+## function drops all the leaves from the tree & collapses singleton nodes
+## written by Liam J. Revell 2013
+drop.leaves<-function(tree,...){
+	## optional arguments
+	if(hasArg(keep.tip.labels)) keep.tip.labels<-list(...)$keep.tip.labels
+	else keep.tip.labels<-FALSE
+	## end optional arguments
+	n<-length(tree$tip)
+	edge<-tree$edge
+	edge[edge>n]<--edge[edge>n]+n
+	ii<-which(edge[,2]>0)
+	edge<-edge[-ii,]
+	if(!is.null(tree$edge.length)){
+		edge.length<-tree$edge.length
+		edge.length<-edge.length[-ii]
+	}
+	zz<-sapply(edge[,2],function(x,y) !(x%in%y),y=edge[,1])
+	if(is.null(tree$node.label)) tree$node.label<-1:tree$Nnode+n
+	nn<-matrix(tree$node.label[-edge],nrow(edge),ncol(edge))
+	tip.label<-nn[zz,2]
+	node.label<-c(nn[1,1],nn[!zz,2])
+	edge[zz,2]<-1:sum(zz)
+	Nnode<-length(unique(edge[edge<0]))
+	rr<-cbind(sort(unique(edge[edge<0]),decreasing=TRUE),1:Nnode+sum(zz))
+	for(i in 1:nrow(rr)) edge[edge==rr[i,1]]<-rr[i,2]
+	tt<-list(edge=edge,Nnode=Nnode,tip.label=tip.label,edge.length=edge.length,node.label=node.label)
+	class(tt)<-"phylo"
+	tt<-collapse.singles(tt)
+	if(keep.tip.labels){
+		for(i in 1:length(tt$tip.label)){
+			yy<-getDescendants(tree,node=which(tree$node.label==tt$tip.label[i])+n)
+			tt$tip.label[i]<-paste(tree$tip.label[yy[yy<=n]],collapse=",")
+		}
+	}
+	return(tt)
+}
+
+# function rounds the branch lengths of the tree & applies rounding to simmap tree
+# written by Liam J. Revell 2012, 2013
+roundBranches<-function(tree,digits=0){
+	if(class(tree)=="multiPhylo"){
+		trees<-lapply(tree,roundBranches,digits=digits)
+		class(trees)<-"multiPhylo"
+		return(trees)
+	} else {
+		tree$edge.length<-round(tree$edge.length,digits)
+		if(!is.null(tree$maps)){
+			for(i in 1:nrow(tree$edge)){
+				temp<-tree$maps[[i]]/sum(tree$maps[[i]])
+				tree$maps[[i]]<-temp*tree$edge.length[i]
+			}
+		}
+		if(!is.null(tree$mapped.edge)){
+			a<-vector()
+			for(i in 1:nrow(tree$edge)) a<-c(a,names(tree$maps[[i]]))
+			a<-unique(a)
+			tree$mapped.edge<-matrix(data=0,length(tree$edge.length),length(a),dimnames=list(apply(tree$edge,1,function(x) paste(x,collapse=",")),state=a))
+			for(i in 1:length(tree$maps)) for(j in 1:length(tree$maps[[i]])) tree$mapped.edge[i,names(tree$maps[[i]])[j]]<-tree$mapped.edge[i,names(tree$maps[[i]])[j]]+tree$maps[[i]][j]
+		}
+		return(tree)
+	}
+}
+
+# function to merge mapped states
+# written by Liam J. Revell 2013
+mergeMappedStates<-function(tree,old.states,new.state){
+	if(class(tree)=="multiPhylo"){
+		tree<-unclass(tree)
+		tree<-lapply(tree,mergeMappedStates,old.states=old.states,new.state=new.state)
+		class(tree)<-"multiPhylo"
+	} else {
+		maps<-tree$maps
+		rr<-function(map,oo,nn){ 
+			for(i in 1:length(map)) if(names(map)[i]%in%oo) names(map)[i]<-nn
+			map
+		}
+		mm<-function(map){
+			if(length(map)>1){
+				new.map<-vector()
+				j<-1
+				new.map[j]<-map[1]
+				names(new.map)[j]<-names(map)[1]
+				for(i in 2:length(map)){
+					if(names(map)[i]==names(map)[i-1]){ 
+						new.map[j]<-map[i]+new.map[j]
+						names(new.map)[j]<-names(map)[i]
+					} else {
+						j<-j+1
+						new.map[j]<-map[i]
+						names(new.map)[j]<-names(map)[i]
+					}
+				}
+				map<-new.map
+			}
+			map
+		}
+		maps<-lapply(maps,rr,oo=old.states,nn=new.state)
+		if(length(old.states)>1){ 
+			maps<-lapply(maps,mm)
+			mapped.edge<-tree$mapped.edge
+			mapped.edge<-cbind(rowSums(mapped.edge[,colnames(mapped.edge)%in%old.states]),
+				mapped.edge[,setdiff(colnames(mapped.edge),old.states)])
+			colnames(mapped.edge)<-c(new.state,setdiff(colnames(tree$mapped.edge),old.states))
+		} else {
+			mapped.edge<-tree$mapped.edge
+			colnames(mapped.edge)[which(colnames(mapped.edge)==old.states)]<-new.state
+		}
+		tree$maps<-maps
+		tree$mapped.edge<-mapped.edge
+	}
+	return(tree)
+}
+
 # function rotates a node or multiple nodes
 # written by Liam J. Revell 2013
 rotateNodes<-function(tree,nodes,polytom=c(1,2),...){
@@ -148,51 +321,6 @@ getCladesofSize<-function(tree,clade.size=2){
 	trees<-lapply(nodes,extract.clade,phy=tree)
 	class(trees)<-"multiPhylo"
 	return(trees)
-}
-
-# function to merge mapped states
-# written by Liam J. Revell 2013
-mergeMappedStates<-function(tree,old.states,new.state){
-	if(class(tree)=="multiPhylo"){
-		tree<-unclass(tree)
-		tree<-lapply(tree,mergeMappedStates,old.states=old.states,new.state=new.state)
-		class(tree)<-"multiPhylo"
-	} else {
-		maps<-tree$maps
-		rr<-function(map,oo,nn){ 
-			for(i in 1:length(map)) if(names(map)[i]%in%oo) names(map)[i]<-nn
-			map
-		}
-		mm<-function(map){
-			if(length(map)>1){
-				new.map<-vector()
-				j<-1
-				new.map[j]<-map[1]
-				names(new.map)[j]<-names(map)[1]
-				for(i in 2:length(map)){
-					if(names(map)[i]==names(map)[i-1]){ 
-						new.map[j]<-map[i]+new.map[j]
-						names(new.map)[j]<-names(map)[i]
-					} else {
-						j<-j+1
-						new.map[j]<-map[i]
-						names(new.map)[j]<-names(map)[i]
-					}
-				}
-				map<-new.map
-			}
-			map
-		}
-		maps<-lapply(maps,rr,oo=old.states,nn=new.state)
-		maps<-lapply(maps,mm)
-		mapped.edge<-tree$mapped.edge
-		mapped.edge<-cbind(rowSums(mapped.edge[,colnames(mapped.edge)%in%old.states]),
-			mapped.edge[,setdiff(colnames(mapped.edge),old.states)])
-		colnames(mapped.edge)<-c(new.state,setdiff(colnames(tree$mapped.edge),old.states))
-		tree$maps<-maps
-		tree$mapped.edge<-mapped.edge
-	}
-	return(tree)
 }
 
 # function to rescale simmap style trees
@@ -415,32 +543,6 @@ matchNodes<-function(tr1,tr2,method=c("descendants","distances"),...){
 		}
 	}
 	return(Nodes)
-}
-
-# function rounds the branch lengths of the tree & applies rounding to simmap tree
-# written by Liam J. Revell 2012
-roundBranches<-function(tree,digits=0){
-	if(class(tree)=="multiPhylo"){
-		trees<-lapply(tree,roundBranches)
-		class(trees)<-"multiPhylo"
-		return(trees)
-	} else {
-		tree$edge.length<-round(tree$edge.length,digits)
-		if(!is.null(tree$maps)){
-			for(i in 1:nrow(tree$edge)){
-				temp<-tree$maps[[i]]/sum(tree$maps[[i]])
-				tree$maps[[i]]<-temp*tree$edge.length[i]
-			}
-		}
-		if(!is.null(tree$mapped.edge)){
-			a<-vector()
-			for(i in 1:nrow(tree$edge)) a<-c(a,names(tree$maps[[i]]))
-			a<-unique(a)
-			tree$mapped.edge<-matrix(data=0,length(tree$edge.length),length(a),dimnames=list(apply(tree$edge,1,function(x) paste(x,collapse=",")),state=a))
-			for(i in 1:length(tree$maps)) for(j in 1:length(tree$maps[[i]])) tree$mapped.edge[i,names(tree$maps[[i]])[j]]<-tree$mapped.edge[i,names(tree$maps[[i]])[j]]+tree$maps[[i]][j]
-		}
-		return(tree)
-	}
 }
 
 # function applies the branch lengths of a reference tree to a second tree, including mappings

@@ -2,7 +2,7 @@
 \alias{plotThresh}
 \title{Tree plotting with posterior probabilities of ancestral states from the threshold model}
 \usage{
-plotThresh(tree, x, mcmc, burnin=NULL, piecol, tipcol="input", ...)
+plotThresh(tree, x, mcmc, burnin=NULL, piecol, tipcol="input", legend=TRUE, ...)
 }
 \arguments{
 	\item{tree}{phylogenetic tree.}
@@ -11,6 +11,7 @@ plotThresh(tree, x, mcmc, burnin=NULL, piecol, tipcol="input", ...)
 	\item{burnin}{number of generations (not samples) to exclude as burn in; if \code{NULL} then 20 percent of generations are excluded as burn-in.}
 	\item{piecol}{a named vector containing the colors for the posterior probabilities plotted as pie charts at internal nodes.}
 	\item{tipcol}{a string indicating  whether the tip colors should be based on the input data (\code{"input"}) or sampled tip liabilities (\code{"estimated"}). These will only differ if there is uncertainty in the tip states.}
+	\item{legend}{logical value or text to be plotted in the legend.}
 	\item{...}{other arguments to be passed to \code{\link{plot.phylo}} - \code{label.offset} should be >0 so that tip labels and species names do not overlap.}
 }
 \description{

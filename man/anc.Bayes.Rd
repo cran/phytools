@@ -21,7 +21,7 @@ anc.Bayes(tree, x, ngen=10000, control=list())
 	\code{\link{ace}}, \code{\link{anc.ML}}, \code{\link{anc.trend}}, \code{\link{evol.rate.mcmc}}, \code{\link{fastAnc}}
 }
 \examples{
-tree<-rtree(50)
+tree<-pbtree(n=50)
 x<-fastBM(tree,sig2=2) # simulate using fastBM
 X<-anc.Bayes(tree,x,ngen=10000) # sample ancestral states
 estimates<-colMeans(X[21:nrow(X),]) # get estimates, excluding burnin

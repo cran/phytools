@@ -27,7 +27,7 @@ anc.ML(tree, x, maxit=2000)
 	\code{\link{ace}}, \code{\link{anc.Bayes}}, \code{\link{fastAnc}}, \code{\link{optim}}
 }
 \examples{
-tree<-rtree(50)
+tree<-pbtree(n=50)
 x<-fastBM(tree) # simulate using fastBM
 anc.ML(tree,x) # fit model & estimate ancestral states
 }

@@ -1,7 +1,8 @@
 # phylomorphospace3d: projection of a tree into three dimensional morphospace
-# written by Liam J. Revell 2012
+# written by Liam J. Revell 2012, 2013
 
-phylomorphospace3d<-function(tree,X,A=NULL,label=TRUE,control=list()){
+phylomorphospace3d<-function(tree,X,A=NULL,label=TRUE,control=list(),method=c("dynamic","static"),...){
+	method<-method[1]
 	if(class(tree)!="phylo") stop("tree object must be of class 'phylo.'")
 	# control list
 	con=list(spin=TRUE,axes=TRUE,box=TRUE,simple.axes=FALSE,lwd=1,ftype="reg")
@@ -23,25 +24,49 @@ phylomorphospace3d<-function(tree,X,A=NULL,label=TRUE,control=list()){
 		z[tree$edge[,1]==i,1]<-z[tree$edge[,2]==i,2]<-A[as.character(i),3]
 	}
 	if(is.null(colnames(X))) colnames(X)<-c("x","y","z")
-	plot3d(rbind(X,A),xlab=colnames(X)[1],ylab=colnames(X)[2],zlab=colnames(X)[3],axes=con$axes,box=con$box)
-	spheres3d(X,radius=0.02*mean(apply(X,2,max)-apply(X,2,min)))
-	for(i in 1:nrow(tree$edge)) segments3d(x[i,],y[i,],z[i,],lwd=con$lwd)
-	ms<-colMeans(X)
-	rs<-apply(rbind(X,A),2,range)
-	if(con$simple.axes){
-		lines3d(x=rs[,1],y=c(rs[1,2],rs[1,2]),z=c(rs[1,3],rs[1,3]))
-		lines3d(x=c(rs[1,1],rs[1,1]),y=rs[,2],z=c(rs[1,3],rs[1,3]))
-		lines3d(x=c(rs[1,1],rs[1,1]),y=c(rs[1,2],rs[1,2]),z=rs[,3])
-	}
-	rs<-rs[2,]-rs[1,]
-	for(i in 1:length(tree$tip)){
-		adj<-0.03*rs*(2*(X[i,]>ms)-1)
-		if(con$ftype) text3d(X[i,]+adj,texts=tree$tip.label[i],font=con$ftype)
-	}
-	if(con$spin){
-		xx<-spin3d(axis=c(0,0,1),rpm=10)
-		play3d(xx,duration=5)
+	if(method=="dynamic"){
+		params<-get("r3dDefaults")
+		plot3d(rbind(X,A),xlab=colnames(X)[1],ylab=colnames(X)[2],zlab=colnames(X)[3],axes=con$axes,box=con$box,params=params)
+		spheres3d(X,radius=0.02*mean(apply(X,2,max)-apply(X,2,min)))
+		for(i in 1:nrow(tree$edge)) segments3d(x[i,],y[i,],z[i,],lwd=con$lwd)
+		ms<-colMeans(X)
+		rs<-apply(rbind(X,A),2,range)
+		if(con$simple.axes){
+			lines3d(x=rs[,1],y=c(rs[1,2],rs[1,2]),z=c(rs[1,3],rs[1,3]))
+			lines3d(x=c(rs[1,1],rs[1,1]),y=rs[,2],z=c(rs[1,3],rs[1,3]))
+			lines3d(x=c(rs[1,1],rs[1,1]),y=c(rs[1,2],rs[1,2]),z=rs[,3])
+		}
+		rs<-rs[2,]-rs[1,]
+		for(i in 1:length(tree$tip)){
+			adj<-0.03*rs*(2*(X[i,]>ms)-1)
+			if(con$ftype) text3d(X[i,]+adj,texts=tree$tip.label[i],font=con$ftype)
+		}
+		if(con$spin){
+			xx<-spin3d(axis=c(0,0,1),rpm=10)
+			play3d(xx,duration=5)
+			invisible(xx)
+		}
+		else invisible(NULL)
+	} else if(method=="static"){
+		if(hasArg(angle)) angle<-list(...)$angle
+		else angle<-30
+		if(hasArg(xlim)) xlim<-list(...)$xlim
+		else xlim<-NULL
+		if(hasArg(ylim)) ylim<-list(...)$ylim
+		else ylim<-NULL
+		if(hasArg(zlim)) zlim<-list(...)$zlim
+		else zlim=NULL
+		xx<-scatterplot3d(X,xlab=colnames(X)[1],zlab=colnames(X)[3],pch=19,angle=angle,ylab=colnames(X)[2],asp=1,cex.symbols=1.3,xlim=xlim,ylim=ylim,zlim=zlim)
+		aa<-xx$xyz.convert(A)
+		points(aa$x,aa$y,pch=19,cex=0.8)
+		for(i in 1:nrow(tree$edge)){
+			aa<-xx$xyz.convert(x[i,],y[i,],z[i,])
+			lines(aa$x,aa$y,lwd=2)
+		}
+		for(i in 1:length(tree$tip.label)){
+			aa<-xx$xyz.convert(x[which(tree$edge[,2]==i),2],y[which(tree$edge[,2]==i),2],z[which(tree$edge[,2]==i),2])
+			text(tree$tip.label[i],x=aa$x,y=aa$y,pos=2)
+		}
 		invisible(xx)
 	}
-	else invisible(NULL)
 }	

@@ -1,10 +1,10 @@
-# function plots a stochastic character mapped tree
-# written by Liam Revell 2011, 2013
+## functions plot stochastic character mapped trees
+## written by Liam Revell 2011, 2013
 
-plotSimmap<-function(tree,colors=NULL,fsize=1.0,ftype="reg",lwd=2,pts=TRUE,node.numbers=FALSE,mar=NULL,add=FALSE,offset=NULL,direction="rightwards",type="phylogram",setEnv=FALSE,part=1.0){
+plotSimmap<-function(tree,colors=NULL,fsize=1.0,ftype="reg",lwd=2,pts=FALSE,node.numbers=FALSE,mar=NULL,add=FALSE,offset=NULL,direction="rightwards",type="phylogram",setEnv=TRUE,part=1.0,xlim=NULL,ylim=NULL){
 	if(class(tree)=="multiPhylo"){
 		par(ask=TRUE)
-		for(i in 1:length(tree)) plotSimmap(tree[[i]],colors=colors,fsize=fsize,ftype=ftype,lwd=lwd,pts=pts,node.numbers=node.numbers,mar,add,offset,direction,type,setEnv)
+		for(i in 1:length(tree)) plotSimmap(tree[[i]],colors=colors,fsize=fsize,ftype=ftype,lwd=lwd,pts=pts,node.numbers=node.numbers,mar,add,offset,direction,type,setEnv,part,xlim,ylim)
 	} else {
 		# check font
 		ftype<-which(c("off","reg","b","i","bi")==ftype)-1
@@ -27,88 +27,85 @@ plotSimmap<-function(tree,colors=NULL,fsize=1.0,ftype="reg",lwd=2,pts=TRUE,node.
 		# get margin
 		if(is.null(mar)) mar=rep(0.1,4)
 		if(type=="phylogram"){
-			# reorder
-			cw<-reorderSimmap(tree)
-			pw<-reorderSimmap(tree,"pruningwise")
-			# count nodes and tips
-			n<-length(cw$tip); m<-cw$Nnode
-			# Y coordinates for nodes
-			Y<-matrix(NA,m+n,1)
-			# first, assign y coordinates to all the tip nodes
-			Y[cw$edge[cw$edge[,2]<=length(cw$tip),2]]<-1:n
-			# get Y coordinates of the nodes
-			nodes<-unique(pw$edge[,1])
-			for(i in 1:m){
-				desc<-pw$edge[which(pw$edge[,1]==nodes[i]),2]
-				Y[nodes[i]]<-(min(Y[desc])+max(Y[desc]))/2
-			}
-			# compute node heights
-			root<-length(cw$tip)+1
-			node.height<-matrix(NA,nrow(cw$edge),2)
-			for(i in 1:nrow(cw$edge)){
-				if(cw$edge[i,1]==root){
-					node.height[i,1]<-0.0
-					node.height[i,2]<-cw$edge.length[i]
-				} else {
-					node.height[i,1]<-node.height[match(cw$edge[i,1],cw$edge[,2]),2]
-					node.height[i,2]<-node.height[i,1]+cw$edge.length[i]
-				}
-			}
-			# open plot
-			par(mar=mar)
-			if(!add) plot.new()
-			if(fsize*max(strwidth(cw$tip.label))<1.0){
-				c<-(1-fsize*max(strwidth(cw$tip.label)))/max(node.height)
-				cw$edge.length<-c*cw$edge.length
-				cw$maps<-lapply(cw$maps,function(x) x<-c*x)
-				node.height<-c*node.height
-			} else message("Font size too large to properly rescale tree to window.")
-			if(!add){
-				if(direction=="leftwards") plot.window(xlim=c(max(node.height)+fsize*max(strwidth(cw$tip.label)),0),ylim=c(1,max(Y)))
-				else plot.window(xlim=c(0,max(node.height)+fsize*max(strwidth(cw$tip.label))),ylim=c(1,max(Y)))
-			}
-			for(i in 1:m) lines(node.height[which(cw$edge[,1]==nodes[i]),1],Y[cw$edge[which(cw$edge[,1]==nodes[i]),2]],col=colors[names(cw$maps[[match(nodes[i],cw$edge[,1])]])[1]],lwd=lwd)
-			for(i in 1:nrow(cw$edge)){
-				x<-node.height[i,1]
-		 		for(j in 1:length(cw$maps[[i]])){
-					lines(c(x,x+cw$maps[[i]][j]),c(Y[cw$edge[i,2]],Y[cw$edge[i,2]]),col=colors[names(cw$maps[[i]])[j]],lwd=lwd,lend=2)
-					if(pts) points(c(x,x+cw$maps[[i]][j]),c(Y[cw$edge[i,2]],Y[cw$edge[i,2]]),pch=20,lwd=(lwd-1))
-					x<-x+cw$maps[[i]][j]; j<-j+1
-				}
-			}
-			if(node.numbers){
-				symbols(0,mean(Y[cw$edge[cw$edge[,1]==(length(cw$tip)+1),2]]),rectangles=matrix(c(1.2*fsize*strwidth(as.character(length(cw$tip)+1)),1.4*fsize*strheight(as.character(length(cw$tip)+1))),1,2),inches=FALSE,bg="white",add=TRUE)
-				text(0,mean(Y[cw$edge[cw$edge[,1]==(length(cw$tip)+1),2]]),length(cw$tip)+1,cex=fsize)
-				for(i in 1:nrow(cw$edge)){
-					x<-node.height[i,2]
-					if(cw$edge[i,2]>length(tree$tip)){
-						symbols(x,Y[cw$edge[i,2]],rectangles=matrix(c(1.2*fsize*strwidth(as.character(cw$edge[i,2])),1.4*fsize*strheight(as.character(cw$edge[i,2]))),1,2),inches=FALSE,bg="white",add=TRUE)
-						text(x,Y[cw$edge[i,2]],cw$edge[i,2],cex=fsize)
-					}
-				}
-			}
-			if(is.null(offset)) offset<-0.2*lwd/3+0.2/3
-			pos<-if(direction=="leftwards") 2 else 4
-			for(i in 1:n) if(ftype) text(node.height[which(cw$edge[,2]==i),2],Y[i],cw$tip.label[i],pos=pos,offset=offset,cex=fsize,font=ftype)
-			if(setEnv){
-				cat("setEnv=TRUE is experimental. please be patient with bugs\n")
-				PP<-list(type=type,use.edge.length=TRUE,node.pos=1,show.tip.label=if(ftype) TRUE else FALSE,show.node.label=FALSE,
-					font=ftype,cex=fsize,adj=0,srt=0,no.margin=FALSE,label.offset=offset,x.lim=par()$usr[1:2],y.lim=par()$usr[3:4],
-					direction=direction,tip.color="black",Ntip=length(cw$tip.label),Nnode=cw$Nnode,edge=cw$edge,
-					xx=sapply(1:(length(cw$tip.label)+cw$Nnode),function(x,y,z) y[match(x,z)],y=node.height,z=cw$edge),
-					yy=Y[,1])
-				assign("last_plot.phylo",PP,envir=.PlotPhyloEnv)
-			}
+			plotPhylogram(tree,colors,fsize,ftype,lwd,pts,node.numbers,mar,add,offset,direction,setEnv,xlim,ylim)
 		} else if(type=="fan"){
-			plotFan(tree,colors,fsize,ftype,lwd,mar,add,part)
+			plotFan(tree,colors,fsize,ftype,lwd,mar,add,part,setEnv,xlim,ylim)
 		}
 	}
 }	
 
+# function to plot simmap tree in type "phylogram"
+# written by Liam J. Revell 2011, 2013
+plotPhylogram<-function(tree,colors,fsize,ftype,lwd,pts,node.numbers,mar,add,offset,direction,setEnv,xlim,ylim){
+	# set offset fudge (empirically determined)
+	offsetFudge<-1.37
+	# reorder
+	cw<-reorderSimmap(tree)
+	pw<-reorderSimmap(tree,"pruningwise")
+	# count nodes and tips
+	n<-length(cw$tip); m<-cw$Nnode
+	# Y coordinates for nodes
+	Y<-matrix(NA,m+n,1)
+	# first, assign y coordinates to all the tip nodes
+	Y[cw$edge[cw$edge[,2]<=length(cw$tip),2]]<-1:n
+	# get Y coordinates of the nodes
+	nodes<-unique(pw$edge[,1])
+	for(i in 1:m){
+		desc<-pw$edge[which(pw$edge[,1]==nodes[i]),2]
+		Y[nodes[i]]<-(min(Y[desc])+max(Y[desc]))/2
+	}
+	# compute node heights
+	H<-nodeHeights(cw)
+	# open plot
+	par(mar=mar)
+	if(is.null(offset)) offset<-0.2*lwd/3+0.2/3
+	if(!add){
+		plot.new()
+		if(is.null(xlim)){
+			pp<-par("pin")[1]
+			sw<-fsize*(max(strwidth(cw$tip.label,units="inches")))+offsetFudge*fsize*strwidth("W",units="inches")
+			alp<-optimize(function(a,H,sw,pp) (a*1.04*max(H)+sw-pp)^2,H=H,sw=sw,pp=pp,interval=c(0,1e6))$minimum
+			xlim<-c(min(H),max(H)+sw/alp)
+		}
+		if(is.null(ylim)) ylim=c(1,max(Y))
+		if(direction=="leftwards") plot.window(xlim=xlim[2:1],ylim=ylim)
+		else plot.window(xlim=xlim,ylim=ylim)
+	}
+	for(i in 1:m) lines(H[which(cw$edge[,1]==nodes[i]),1],Y[cw$edge[which(cw$edge[,1]==nodes[i]),2]],col=colors[names(cw$maps[[match(nodes[i],cw$edge[,1])]])[1]],lwd=lwd)
+	for(i in 1:nrow(cw$edge)){
+		x<-H[i,1]
+ 		for(j in 1:length(cw$maps[[i]])){
+			lines(c(x,x+cw$maps[[i]][j]),c(Y[cw$edge[i,2]],Y[cw$edge[i,2]]),col=colors[names(cw$maps[[i]])[j]],lwd=lwd,lend=2)
+			if(pts) points(c(x,x+cw$maps[[i]][j]),c(Y[cw$edge[i,2]],Y[cw$edge[i,2]]),pch=20,lwd=(lwd-1))
+			x<-x+cw$maps[[i]][j]; j<-j+1
+		}
+	}
+	if(node.numbers){
+		symbols(0,mean(Y[cw$edge[cw$edge[,1]==(length(cw$tip)+1),2]]),rectangles=matrix(c(1.2*fsize*strwidth(as.character(length(cw$tip)+1)),1.4*fsize*strheight(as.character(length(cw$tip)+1))),1,2),inches=FALSE,bg="white",add=TRUE)
+		text(0,mean(Y[cw$edge[cw$edge[,1]==(length(cw$tip)+1),2]]),length(cw$tip)+1,cex=fsize)
+		for(i in 1:nrow(cw$edge)){
+			x<-H[i,2]
+			if(cw$edge[i,2]>length(tree$tip)){
+				symbols(x,Y[cw$edge[i,2]],rectangles=matrix(c(1.2*fsize*strwidth(as.character(cw$edge[i,2])),1.4*fsize*strheight(as.character(cw$edge[i,2]))),1,2),inches=FALSE,bg="white",add=TRUE)
+				text(x,Y[cw$edge[i,2]],cw$edge[i,2],cex=fsize)
+			}
+		}
+	}
+	pos<-if(direction=="leftwards") 2 else 4
+	for(i in 1:n) if(ftype) text(H[which(cw$edge[,2]==i),2],Y[i],cw$tip.label[i],pos=pos,offset=offset,cex=fsize,font=ftype)
+	if(setEnv){
+		PP<-list(type="phylogram",use.edge.length=TRUE,node.pos=1,show.tip.label=if(ftype) TRUE else FALSE,show.node.label=FALSE,
+			font=ftype,cex=fsize,adj=0,srt=0,no.margin=FALSE,label.offset=offset,x.lim=par()$usr[1:2],y.lim=par()$usr[3:4],
+			direction=direction,tip.color="black",Ntip=length(cw$tip.label),Nnode=cw$Nnode,edge=cw$edge,
+			xx=sapply(1:(length(cw$tip.label)+cw$Nnode),function(x,y,z) y[match(x,z)],y=H,z=cw$edge),
+			yy=Y[,1])
+		assign("last_plot.phylo",PP,envir=.PlotPhyloEnv)
+	}
+}
+
 # function to plot simmap tree in type "fan"
 # written by Liam J. Revell 2013
-plotFan<-function(tree,colors,fsize,ftype,lwd,mar,add,part){
-	cat("\nNote: type=\"fan\" is in development.\nMany options of type=\"phylogram\" are not yet available.\n\n")
+plotFan<-function(tree,colors,fsize,ftype,lwd,mar,add,part,setEnv,xlim,ylim){
 	# reorder
 	cw<-reorder(tree)
 	pw<-reorder(tree,"pruningwise")
@@ -137,15 +134,16 @@ plotFan<-function(tree,colors,fsize,ftype,lwd,mar,add,part){
 	pp<-par("pin")[1]
  	sw<-fsize*(max(strwidth(cw$tip.label,units="inches")))+offsetFudge*offset*fsize*strwidth("W",units="inches") 
 	alp<-optimize(function(a,H,sw,pp) (2*a*1.04*max(H)+2*sw-pp)^2,H=R,sw=sw,pp=pp,interval=c(0,1e6))$minimum
-	if(part<=0.25) xylim<-c(0,max(R)+sw/alp)
+	if(part<=0.25) x.lim<-y.lim<-c(0,max(R)+sw/alp)
 	else if(part>0.25&&part<=0.5){ 
-		xlim<-c(-max(R)-sw/alp,max(R)+sw/alp)
-		ylim<-c(0,max(R)+sw/alp)
-	} else xylim<-c(-max(R)-sw/alp,max(R)+sw/alp)
+		x.lim<-c(-max(R)-sw/alp,max(R)+sw/alp)
+		y.lim<-c(0,max(R)+sw/alp)
+	} else x.lim<-y.lim<-c(-max(R)-sw/alp,max(R)+sw/alp)
+	if(is.null(xlim)) xlim<-x.lim
+	if(is.null(ylim)) ylim<-y.lim
 	# plot tree
 	if(!add) plot.new()
-	if(part<=0.25||part>0.5) plot.window(xlim=xylim,ylim=xylim,asp=1)
-	else plot.window(xlim=xlim,ylim=ylim,asp=1)
+	plot.window(xlim=xlim,ylim=ylim,asp=1)
 	# plot radial lines (edges)
 	for(i in 1:nrow(cw$edge)){
 		maps<-cumsum(cw$maps[[i]])/sum(cw$maps[[i]])
@@ -169,6 +167,17 @@ plotFan<-function(tree,colors,fsize,ftype,lwd,mar,add,part){
 		aa<-if(aa>90&&aa<270) 180+aa else aa
 		if(ftype) text(x[ii,2],y[ii,2],tt,srt=aa,adj=adj,cex=fsize,font=ftype)
 	}
+	if(setEnv){
+		cat("setEnv=TRUE for this type is experimental. please be patient with bugs\n")
+		PP<-list(type="fan",use.edge.length=TRUE,node.pos=1,show.tip.label=if(ftype) TRUE else FALSE,show.node.label=FALSE,
+			font=ftype,cex=fsize,adj=0,srt=0,no.margin=FALSE,label.offset=offset,x.lim=xlim,y.lim=ylim,
+			direction="rightwards",tip.color="black",Ntip=length(cw$tip.label),Nnode=cw$Nnode,edge=cw$edge,
+			xx=c(x[sapply(1:n,function(x,y) which(x==y)[1],y=tree$edge[,2]),2],x[1,1],
+			x[sapply(2:m+n,function(x,y) which(x==y)[1],y=tree$edge[,2]),2]),
+			yy=c(y[sapply(1:n,function(x,y) which(x==y)[1],y=tree$edge[,2]),2],y[1,1],
+			y[sapply(2:m+n,function(x,y) which(x==y)[1],y=tree$edge[,2]),2]))
+		assign("last_plot.phylo",PP,envir=.PlotPhyloEnv)
+	}
 }
 
 # adds legend to an open stochastic map style plot
@@ -190,20 +199,66 @@ add.simmap.legend<-function(leg=NULL,colors,prompt=TRUE,vertical=TRUE,...){
 	if(hasArg(fsize)) fsize<-list(...)$fsize
 	else fsize<-1.0
 	if(is.null(leg)) leg<-names(colors)
-	h<-fsize*strheight(leg[1])
+	h<-fsize*strheight(LETTERS[1])
 	w<-h*(par()$usr[2]-par()$usr[1])/(par()$usr[4]-par()$usr[3])
 	if(vertical){
 		y<-y-0:(length(leg)-1)*1.5*h
 		x<-rep(x+w/2,length(y))		
-		text(x+w,y,leg,pos=4,cex=fsize)
+		text(x+w,y,leg,pos=4,cex=fsize/par()$cex)
 	} else {
 		sp<-fsize*max(strwidth(leg))
 		x<-x-w/2+0:(length(leg)-1)*1.5*(sp+w)
 		y<-rep(y+w/2,length(x))
-		text(x,y,leg,pos=4,cex=fsize)
+		text(x,y,leg,pos=4,cex=fsize/par()$cex)
 	}
 	if(shape=="square") symbols(x,y,squares=rep(w,length(x)),bg=colors,add=TRUE,inches=FALSE)
 	else if(shape=="circle") symbols(x,y,circles=rep(w,length(x)),bg=colors,add=TRUE,inches=FALSE)
 	else stop(paste("shape=\"",shape,"\" is not a recognized option.",sep=""))
+}
+
+# function plots a tree; in the new version this is just a wrapper for plotSimmap
+# written by Liam Revell 2012, 2013
+plotTree<-function(tree,...){
+	if(hasArg(color)) color<-list(...)$color
+	else color<-NULL
+	if(hasArg(fsize)) fsize<-list(...)$fsize
+	else fsize<-1.0
+	if(hasArg(ftype)) ftype<-list(...)$ftype
+	else ftype<-"reg"
+	if(hasArg(lwd)) lwd<-list(...)$lwd
+	else lwd<-2
+	if(hasArg(pts)) pts<-list(...)$pts
+	else pts<-FALSE
+	if(hasArg(node.numbers)) node.numbers<-list(...)$node.numbers
+	else node.numbers<-FALSE
+	if(hasArg(mar)) mar<-list(...)$mar
+	else mar<-NULL
+	if(hasArg(add)) add<-list(...)$add
+	else add<-FALSE
+	if(hasArg(offset)) offset<-list(...)$offset
+	else offset<-NULL
+	if(hasArg(type)) type<-list(...)$type
+	else type<-"phylogram"
+	if(hasArg(direction)) direction<-list(...)$direction
+	else direction<-"rightwards"
+	if(hasArg(setEnv)) setEnv<-list(...)$setEnv
+	else setEnv<-TRUE
+	if(hasArg(part)) part<-list(...)$part
+	else part<-1.0
+	if(hasArg(xlim)) xlim<-list(...)$xlim
+	else xlim<-NULL
+	if(hasArg(ylim)) ylim<-list(...)$ylim
+	else ylim<-NULL
+	if(class(tree)=="multiPhylo"){
+		par(ask=TRUE)
+		if(!is.null(color)) names(color)<-"1"
+		for(i in 1:length(tree)) plotTree(tree[[i]],color=color,fsize=fsize,ftype=ftype,lwd=lwd,pts=pts,node.numbers=node.numbers,mar=mar,add=add,offset=offset,direction=direction,type=type,setEnv=setEnv,part=part,xlim=xlim,ylim=ylim)
+	} else {
+		if(is.null(tree$edge.length)) tree<-compute.brlen(tree)
+		tree$maps<-as.list(tree$edge.length)
+		for(i in 1:length(tree$maps)) names(tree$maps[[i]])<-c("1")
+		if(!is.null(color)) names(color)<-"1"
+		plotSimmap(tree,colors=color,fsize=fsize,ftype=ftype,lwd=lwd,pts=pts,node.numbers=node.numbers,mar=mar,add=add,offset=offset,direction=direction,type=type,setEnv=setEnv,part=part,xlim=xlim,ylim=ylim)
+	}
 }
 

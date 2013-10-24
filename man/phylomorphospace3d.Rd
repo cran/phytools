@@ -2,7 +2,8 @@
 \alias{phylomorphospace3d}
 \title{Creates tree-dimensional phylomorphospace plot}
 \usage{
-phylomorphospace3d(tree, X, A=NULL, label=TRUE, control=list())
+phylomorphospace3d(tree, X, A=NULL, label=TRUE, control=list(), 
+	method=c("dynamic","static"), ...)
 }
 \arguments{
 	\item{tree}{a phylogenetic tree in \code{"phylo"} format.}
@@ -11,6 +12,8 @@ phylomorphospace3d(tree, X, A=NULL, label=TRUE, control=list())
 	\item{label}{logical value indicating whether to print tip labels next to terminal nodes in the plot (presently doesn't do anything, but labels can be dropped using \code{control}).}
 spin=TRUE,axes=TRUE,box=TRUE,simple.axes=FALSE,lwd=1,ftype="reg"
 	\item{control}{a list containing the following optional control parameters: \code{spin}: a logical value indicating whether to animate the plot when created; \code{axes}: a logical indicating whether to plot the axes; \code{box}: a logical value indicating whether to plot in box; \code{simple.axes}: logical value indicating whether to replace \code{box} and \code{axes} with simpler axes; \code{lwd}: line widths; \code{ftype}: font type ("off" turns off labels altogether).}
+	\item{method}{a string either \code{"dynamic"} for a dynamic (animated) plot created using \code{rgl}; or \code{"static"} for a flat 3D plot created using \code{scatterplot3d} and base graphics. The latter has the advantage of being very easy to export in standard format.}
+	\item{...}{optional arguments to be passed to \code{scatterplot3d}. Most options not available. \code{angle} is an important option that does work here.}
 }
 \description{
 	This function creates a phylomorphospace plot for three characters using the 3D visualization package, 'rgl'.
@@ -28,6 +31,7 @@ X<-fastBM(tree,nsim=3)
 \dontrun{
 phylomorphospace3d(tree,X,control=list(spin=FALSE))
 }
+phylomorphospace3d(tree,X,method="static")
 }
 \seealso{
 	\code{\link{fancyTree}}, \code{\link{phenogram}}, \code{\link{phylomorphospace}}

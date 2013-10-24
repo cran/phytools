@@ -17,7 +17,7 @@ strahlerNumber<-function(tree,plot=TRUE){
 	ss<-ss[order(as.numeric(names(ss)))]
 	names(ss)[1:length(tree$tip.label)]<-tree$tip.label
 	if(plot){ 
-		plot(tree,no.margin=TRUE,edge.width=2)
+		plotTree(tree)
 		nodelabels(ss[1:tree$Nnode+length(tree$tip.label)])
 	}
 	return(ss)

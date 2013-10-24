@@ -48,6 +48,8 @@ phylomorphospace<-function(tree,X,A=NULL,label=c("radial","horizontal","off"),co
 	# other optional arguments?
 	if(hasArg(axes)) axes<-list(...)$axes
 	else axes<-TRUE
+	if(hasArg(add)) add<-list(...)$add
+	else add<-FALSE
 	# deprecate to logical label argument
 	label<-label[1]
 	if(label==TRUE||label==FALSE) message("options for label have changed.\nNow choose \"radial\", \"horizontal\", or \"off\".")
@@ -59,7 +61,7 @@ phylomorphospace<-function(tree,X,A=NULL,label=c("radial","horizontal","off"),co
 	XX<-matrix(aa[as.character(tree$edge)],nrow(tree$edge),2)
 	YY<-matrix(bb[as.character(tree$edge)],nrow(tree$edge),2)
 	# plot projection
-	plot(x=A[1,1],y=A[1,2],xlim=xlim,ylim=ylim,xlab=xlab,ylab=ylab,pch=16,cex=0.1,col="white",axes=axes,frame.plot=TRUE)
+	if(!add) plot(x=A[1,1],y=A[1,2],xlim=xlim,ylim=ylim,xlab=xlab,ylab=ylab,pch=16,cex=0.1,col="white",axes=axes,frame.plot=TRUE)
 	if(is.null(tree$maps)){
 		for(i in 1:nrow(XX)) lines(XX[i,],YY[i,],col=con$col.edge[as.character(tree$edge[i,2])],lwd=lwd)
 	} else {

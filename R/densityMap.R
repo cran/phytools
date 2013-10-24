@@ -1,7 +1,7 @@
 # function plots posterior density of mapped states from stochastic mapping
 # written by Liam J. Revell 2012-2013
 
-densityMap<-function(trees,res=100,fsize=NULL,ftype=NULL,lwd=3,check=FALSE,legend=NULL,outline=FALSE,type="phylogram",plot=TRUE,...){
+densityMap<-function(trees,res=100,fsize=NULL,ftype=NULL,lwd=3,check=FALSE,legend=NULL,outline=FALSE,type="phylogram",direction="rightwards",plot=TRUE,...){
 	if(hasArg(mar)) mar<-list(...)$mar
 	else mar<-rep(0.3,4)
 	tol<-1e-10
@@ -44,8 +44,10 @@ densityMap<-function(trees,res=100,fsize=NULL,ftype=NULL,lwd=3,check=FALSE,legen
 		names(tree$maps[[i]])<-round(ZZ*1000)
 	}
 	cols<-rainbow(1001,start=0.7,end=0); names(cols)<-0:1000
+	tree$mapped.edge<-makeMappedEdge(tree$edge,tree$maps)
+	tree$mapped.edge<-tree$mapped.edge[,order(as.numeric(colnames(tree$mapped.edge)))]
 	x<-list(tree=tree,cols=cols); class(x)<-"densityMap"
-	if(plot) plot.densityMap(x,fsize=fsize,ftype=ftype,lwd=lwd,legend=legend,outline=outline,type=type,mar=mar)
+	if(plot) plot.densityMap(x,fsize=fsize,ftype=ftype,lwd=lwd,legend=legend,outline=outline,type=type,mar=mar,direction=direction)
 	invisible(x)
 }
 
@@ -75,6 +77,8 @@ plot.densityMap<-function(x,...){
 	else type<-"phylogram"
 	if(hasArg(mar)) mar<-list(...)$mar
 	else mar<-rep(0.3,4)
+	if(hasArg(direction)) direction<-list(...)$direction
+	else direction<-"rightwards"
 	if(is.null(legend)) legend<-0.5*max(H)
 	if(is.null(fsize)) fsize<-c(1,1)
 	if(length(fsize)==1) fsize<-rep(fsize,2)
@@ -88,34 +92,24 @@ plot.densityMap<-function(x,...){
 		}
 	}
 	if(type=="phylogram"){
+		N<-length(tree$tip.label)
+		if(legend) ylim<-c(1-0.12*(N-1),N)
+		else ylim<-NULL
+		if(outline){
+			par(col="white")
+			plotTree(tree,fsize=fsize[1],lwd=lwd+2,offset=0.2*lwd/3+0.2/3,ftype=ftype[1],ylim=ylim,mar=mar,direction=direction)
+			par(col="black")
+			add<-TRUE
+		} else add<-FALSE
+		plotSimmap(tree,cols,pts=FALSE,lwd=lwd,fsize=fsize[1],mar=mar,ftype=ftype[1],add=add,ylim=ylim,direction=direction)
 		if(legend){
-			layout(c(1,2),heights=c(0.92,0.08))
-			if(outline){
-				par(col="white")
-				plotTree(tree,fsize=fsize[1],mar=c(0,0.1,0.1,0.1),lwd=lwd+2,offset=0.2*lwd/3+0.2/3,ftype=ftype[1])
-				par(col="black")
-				plotSimmap(tree,cols,pts=FALSE,lwd=lwd,fsize=fsize[1],mar=c(0,0.1,0.1,0.1),add=TRUE,ftype=ftype[1])
-			} else
-				plotSimmap(tree,cols,pts=FALSE,lwd=lwd,fsize=fsize[1],mar=c(0,0.1,0.1,0.1),ftype=ftype[1])
-			X<-cbind(0:1000/1001,1:1001/1001)*(legend/max(H))*(1-fsize[1]*max(strwidth(tree$tip.label)))
-			Y<-cbind(rep(0,1001),rep(0,1001))
-			par(mar=c(0.1,0.1,0,0.1),xpd=NA)
-			plot(NA,xlim=c(0,1),ylim=c(-0.3,0.3),xaxt="n",yaxt="n",bty="n")
-			lines(c(X[1,1],X[nrow(X),2]),c(Y[1,1],Y[nrow(Y),2]),lwd=lwd+2,lend=2)
-			for(i in 1:1001) lines(X[i,],Y[i,],col=cols[i],lwd=lwd,lend=2)
-			legf<-match(ftype[2],c("reg","b","i","bi"))
-			text(x=0,y=0,leg.txt[1],pos=3,cex=fsize[2],font=legf)
-			text(x=(legend/max(H))*(1-fsize[1]*max(strwidth(tree$tip.label))),y=0,leg.txt[3],pos=3,cex=fsize[2],font=legf)
-			text(x=(legend/max(H))*(1-fsize[1]*max(strwidth(tree$tip.label)))/2,y=0,leg.txt[2],pos=3,cex=fsize[2],font=legf)
-			text(x=(legend/max(H))*(1-fsize[1]*max(strwidth(tree$tip.label)))/2,y=0,paste("length=",round(legend,3),sep=""),pos=1,cex=fsize[2],font=legf)
-		} else {
-			if(outline){
-				par(col="white")
-				plotTree(tree,cols,pts=FALSE,lwd=lwd+2,fsize=fsize[1],offset=0.2*lwd/3+0.2/3,ftype=ftype[1])
-				par(col="black")
-				plotSimmap(tree,cols,pts=FALSE,lwd=lwd,fsize=fsize[1],add=TRUE,ftype=ftype[1])
-			} else
-				plotSimmap(tree,cols,pts=FALSE,lwd=lwd,fsize=fsize[1],ftype=ftype[1])
+			ff<-function(dd){
+				if(!("."%in%dd)) dig<-0
+				else dig<-length(dd)-which(dd==".")
+				dig
+			}
+			dig<-max(sapply(strsplit(leg.txt[c(1,3)],split=""),ff))
+			add.color.bar(legend,cols,title=leg.txt[2],lims<-as.numeric(leg.txt[c(1,3)]),digits=dig,prompt=FALSE,x=0,y=1-0.08*(N-1),lwd=lwd,fsize=fsize[2])
 		}
 	} else if(type=="fan"){
 		if(outline){
@@ -131,7 +125,7 @@ plot.densityMap<-function(x,...){
 				dig
 			}
 			dig<-max(sapply(strsplit(leg.txt[c(1,3)],split=""),ff))
-			add.color.bar(legend,cols,title=leg.txt[2],lims<-as.numeric(leg.txt[c(1,3)]),digits=dig,prompt=FALSE,x=0.9*par()$usr[1],y=0.9*par()$usr[3],fsize=fsize[2])
+			add.color.bar(legend,cols,title=leg.txt[2],lims<-as.numeric(leg.txt[c(1,3)]),digits=dig,prompt=FALSE,x=0.9*par()$usr[1],y=0.9*par()$usr[3],lwd=lwd,fsize=fsize[2])
 		}
 	}
 }

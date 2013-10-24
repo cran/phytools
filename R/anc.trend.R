@@ -3,6 +3,9 @@
 
 anc.trend<-function(tree,x,maxit=2000){
 
+	## check if tree is ultretric
+	if(is.ultrametric(tree)) cat("Warning: the trend model is generally non-identifiable for ultrametric trees.\n")
+
 	# preliminaries
 	# set global
 	tol<-1e-8

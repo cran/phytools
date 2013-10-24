@@ -1,11 +1,11 @@
 \name{anoletree}
 \alias{anoletree}
-\title{Phylogeny of 100 Greater Antillean anole species with mapped discrete character}
+\title{Phylogeny of Greater Antillean anole ecomorph species with mapped discrete character}
 \description{
-	A phylogeny of 100 Greater Antillean anole species with a mapped discrete character - 'ecomorph class.' Data and tree are from Mahler et al. (2010).
+	A phylogeny of Greater Antillean anole species with a mapped discrete character - 'ecomorph class.' Data and tree are from Mahler et al. (2010).
 }
 \usage{
-	data(anoletree)
+data(anoletree)
 }
 \format{
 	The data are stored as a modified object of class \code{"phylo"} with a mapped discrete character. (E.g., see \code{read.simmap}.)

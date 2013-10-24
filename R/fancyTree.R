@@ -84,10 +84,10 @@ phenogram95<-function(tree,...){
 	args$offset<-0
 	for(i in 0:50){
   		p<-i/length(trans)
-		args$add<-i>1
-		args$spread.labels<-if(i==1) spread.labels else FALSE
-		args$link<-if(i==1) link else 0
-		args$offset<-if(i==1) offset else offset+link
+		args$add<-i>0
+		args$spread.labels<-if(i==0) spread.labels else FALSE
+		args$link<-if(i==0) link else 0
+		args$offset<-if(i==0) offset else offset+link
 		args$x<-c(x,(1-p)*A$CI95[,1]+p*A$ace)
 		args$colors<-paste("#0000ff",trans[i+1],sep="")
 		do.call(phenogram,args)
@@ -126,7 +126,7 @@ extinctionTree<-function(tree){
 }
 
 # traitgram3d internal function
-# written by Liam J. Revell 2012
+# written by Liam J. Revell 2012, 2013
 
 traitgram3d<-function(tree,...,control){
 	if(hasArg(X)) X<-list(...)$X
@@ -146,7 +146,13 @@ traitgram3d<-function(tree,...,control){
 	X<-cbind(X,diag(vcv(tree))[rownames(X)])
 	A<-cbind(A,nodeHeights(tree)[match(rownames(A)[1:nrow(A)],tree$edge)])
 	colnames(X)[3]<-colnames(A)[3]<-"time"
-	xx<-phylomorphospace3d(tree,X,A,control=control)
+	# other optional arguments
+	if(hasArg(method)) method<-list(...)$method
+	else method<-"dynamic"
+	if(hasArg(angle)) angle<-list(...)$angle
+	else angle<-30
+	# done other optional arguments
+	xx<-phylomorphospace3d(tree,X,A,control=control,method=method,angle=angle,zlim=range(nodeHeights(tree)))
 	return(xx)
 }
 

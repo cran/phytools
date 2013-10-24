@@ -4,7 +4,8 @@
 \title{Map continuous trait evolution on the tree}
 \usage{
 contMap(tree, x, res=100, fsize=NULL, ftype=NULL, lwd=4, legend=NULL,
-	lims=NULL, outline=TRUE, sig=3, type="phylogram", plot=TRUE, ...)
+	lims=NULL, outline=TRUE, sig=3, type="phylogram", direction="rightwards", 
+	plot=TRUE, ...)
 \method{plot}{contMap}(x, ...)
 }
 \arguments{
@@ -19,6 +20,7 @@ contMap(tree, x, res=100, fsize=NULL, ftype=NULL, lwd=4, legend=NULL,
 	\item{outline}{logical value indicating whether or not to outline the branches of the tree in black.}
 	\item{sig}{the number of decimal places to show on the legend limits.}
 	\item{type}{type of plot desired. Options are \code{"phylogram"} for a rightward square phylogram; and \code{"fan"} for a circular phylogram.}
+	\item{direction}{plotting direction for \code{type="phylogram"}.}
 	\item{plot}{logical value indicating whether or not to plot the tree. If \code{plot=FALSE} then an object of class \code{"contMap"} will be returned without plotting.}
 	\item{...}{optional arguments for \code{plot.contMap} which include all the arguments of \code{contMap} except for \code{tree}, \code{x}, \code{res}, and \code{lims}.}
 }
