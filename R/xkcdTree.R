@@ -9,16 +9,16 @@ xkcdTree<-function(tree,file=NULL,gsPath=NULL,fsize=2,lwd=7,color="blue",dim=c(8
 	if(is.null(gsPath)) gsPath="C:/Program Files/gs/gs9.10/bin/gswin32.exe"
 	if(.Platform$OS.type=="windows") Sys.setenv(R_GSCMD=gsPath)
 	# try to load extrafont
-	if(is.na(match("xkcd",fonts()))){
+	if(is.na(match("xkcd", extrafont::fonts()))){
 		message(paste(c("**** cannot find 'xkcd' font, searching for 'xkcd.ttf'\n",
 						"**** (this may take a moment)\n",
 						"**** if this fails, it is probably because 'xkcd' font is not installed\n"))) 
-		font_import(prompt=FALSE,pattern="xkcd.ttf")
+		 extrafont::font_import(prompt=FALSE,pattern="xkcd.ttf")
 	}
-	if(is.na(match("xkcd",fonts()))) stop(paste(c("\n",
+	if(is.na(match("xkcd", extrafont::fonts()))) stop(paste(c("\n",
 								"**** cannot find 'xkcd' font\n",
 								"**** locate & install 'xkcd.ttf'")))
-	loadfonts(quiet=TRUE)
+	 extrafont::loadfonts(quiet=TRUE)
 	# if filename not specified	
 	if(is.null(file)) file<-"xkcdTree.pdf"
 	# check filename ending
@@ -93,8 +93,8 @@ xkcdTree<-function(tree,file=NULL,gsPath=NULL,fsize=2,lwd=7,color="blue",dim=c(8
 	dev.off()
 	message(paste(c("**** NOTE: an 'embed_fonts' error most likely means that Ghostscript\n",
 					"**** is not installed or that the path is incorrect")))
-	embedFonts(file)
-	embed_fonts(file)
+	extrafont::embedFonts(file)
+	extrafont::embed_fonts(file)
 	# reset margin
 	par(mar=c(5,4,4,2)+0.1)
 }

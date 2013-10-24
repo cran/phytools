@@ -1,5 +1,5 @@
-38403caa9b0f74b097f1deeb413618c2 *DESCRIPTION
-48b42f2437e5ac3a0953afb1ca69cf5e *NAMESPACE
+07fd1f4ffca01f84ded4c097bdce6bda *DESCRIPTION
+4fb7ba24bd8e7d1101948653dfeb7d1b *NAMESPACE
 8f41acffe68735aa7449b5e66a9812b1 *R/add.everywhere.R
 34423edfd64ed1b237c63a0364288bdf *R/add.random.R
 f0df86c98d2fd0c6d76f49ca3172d129 *R/allFurcTrees.R
@@ -73,7 +73,7 @@ a38bac98b4681cee859750b8193a9a9b *R/treeSlice.R
 7282f87b3143db28b7e982e86d90b6e5 *R/write.simmap.R
 8a960b2dfaa3924ae71d485d68ea66b3 *R/writeAncestors.R
 c6d9cb0dbedb17c4cc0d4e16032da623 *R/writeNexus.R
-b8f7c0b3de977f7509d629ce8a6c704e *R/xkcdTree.R
+46a56cdb92b0bb7f161f10967da6dd95 *R/xkcdTree.R
 93c8e79ef949a21de4bfe83d817c32fb *data/anoletree.rda
 0eb3bef3466bd6d264c669571621c2d1 *inst/CITATION
 ec77726fbbcab60bca3fba16b672e710 *man/add.color.bar.Rd
