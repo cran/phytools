@@ -17,7 +17,7 @@ pgls.Ives(tree, X, y, Vx=NULL, Vy=NULL, Cxy=NULL, lower=c(1e-8,1e-8))
 	This function fits the phylogenetic regression model with within-species sampling error following Ives et al. (2007).
 }
 \details{
-	Presently only the bivariate regression model is implemented. Uses \code{optim(...,method="L-BFGS-B")} for optimization.
+	Presently only the bivariate regression model is implemented. Uses \code{optim(...,method="L-BFGS-B")} for optimization. Note that some problems have been reported with the optimization algorithm for this model, which is simple and thus may fail to find the ML solution.
 }
 \value{
 	A list with the following components:

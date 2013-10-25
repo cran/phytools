@@ -2,9 +2,9 @@
 \alias{plotSimmap}
 \title{Plot stochastic character mapped tree}
 \usage{
-plotSimmap(tree, colors=NULL, fsize=1.0, ftype="reg", lwd=2, pts=TRUE, 
+plotSimmap(tree, colors=NULL, fsize=1.0, ftype="reg", lwd=2, pts=FALSE, 
 	node.numbers=FALSE, mar=NULL, add=FALSE, offset=NULL, direction="rightwards",
-	type="phylogram", setEnv=FALSE, part=1.0)
+	type="phylogram", setEnv=TRUE, part=1.0, xlim=NULL, ylim=NULL)
 }
 \arguments{
  	\item{tree}{a modified object of class "phylo" or "multiPhylo" containing a stochastic mapping or set of mappings (e.g., see \code{\link{read.simmap}} & \code{\link{make.simmap}}).}
@@ -21,6 +21,8 @@ plotSimmap(tree, colors=NULL, fsize=1.0, ftype="reg", lwd=2, pts=TRUE,
 	\item{type}{plot type. Can be \code{"phylogram"} or \code{"fan"}. Only a subset of options are presently available for \code{type="fan"}.}
 	\item{setEnv}{logical value indicating whether or not to set the environment \code{.PlotPhyloEnv}. Setting this to \code{TRUE} will allow (so far, only for \code{type="phylogram"} compatibility with ape function \code{\link{nodelabels}}.}
 	\item{part}{value between 0 and 1 for \code{type="fan"} indicating what fraction of the full circular tree to use as plotting area. For instance, \code{part=0.5} will plot a half fan phylogeny. It also affects the axis scaling used.}
+	\item{xlim}{x-limits for the plot.}
+	\item{ylim}{y-limits for the plot.}
 }
 \description{
 	Function plots one or multiple stochastic character mapped trees.

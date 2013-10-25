@@ -13,6 +13,25 @@ pbtree<-function(b=1,d=0,n=NULL,t=NULL,scale=NULL,nsim=1,type=c("continuous","di
 	else max.count<-1e5
 	if(hasArg(method)) method<-list(...)$method
 	else method<-"rejection"
+	if(hasArg(tip.label)){
+		tip.label<-list(...)$tip.label
+		if(!is.null(tip.label)){
+			if(is.null(n)){ 
+				tip.label<-NULL
+				cat("Warning: tip.label not allowed for n=NULL.\n")
+				cat("         using default labels\n")
+			} else if(length(tip.label)==n){ 
+				if(d>0){ 
+					cat("Warning: only using labels in tip.label for extant tips.\n")
+					cat("         extinct tips will be labeled X1, X2, etc.\n")
+				}
+			} else if(length(tip.label)!=n) {
+				cat("Warning: length(tip.label) and n do not match.\n")
+				cat("         using default labels\n")
+				tip.label<-NULL
+			}
+		}
+	} else tip.label<-NULL
 	type<-matchType(type[1],c("continuous","discrete"))
 	if(type=="discrete"){
 		if((b+d)>1){ 
@@ -26,10 +45,11 @@ pbtree<-function(b=1,d=0,n=NULL,t=NULL,scale=NULL,nsim=1,type=c("continuous","di
 	# done get arguments
 	# if nsim > 1 replicate nsim times
 	if(nsim>1){
-		trees<-replicate(nsim,pbtree(b,d,n,t,scale,type=type,ape=ape,quiet=quiet,extant.only=extant.only,method=method),simplify=FALSE)
+		trees<-replicate(nsim,pbtree(b,d,n,t,scale,type=type,ape=ape,quiet=quiet,extant.only=extant.only,method=method,tip.label=tip.label),simplify=FALSE)
 		class(trees)<-"multiPhylo"
 		return(trees)
 	} else {
+		if(!is.null(n)) NN<-n else NN<-NULL
 		if(!is.null(n)&&!is.null(t)){
 			if(method=="rejection"){
 				# simulate taxa & time stop using rejection sampling to max.count
@@ -191,6 +211,11 @@ pbtree<-function(b=1,d=0,n=NULL,t=NULL,scale=NULL,nsim=1,type=c("continuous","di
 					# this might happen in discrete time only
 					cat("Warning:\n  due to multiple speciation events in the final time interval\n")
 					cat("  realized n may not equal input n\n\n")
+					if(!is.null(tip.label)){
+						cat("Warning: length(tip.label) and n do not match.\n")
+						cat("         using default labels\n")
+						tip.label<-NULL
+					}
 				}
 				n<-nn
 				# done unique part of taxa stop
@@ -216,6 +241,17 @@ pbtree<-function(b=1,d=0,n=NULL,t=NULL,scale=NULL,nsim=1,type=c("continuous","di
 		}
 		# if ape==TRUE make sure 'phylo' is consistent with ape
 		if(ape&&is.null(tree)==FALSE) tree<-read.tree(text=write.tree(tree))
+		if(!is.null(tip.label)){
+			if(length(getExtant(tree))!=NN){
+				# simulation must have gone extint before reaching NN
+				tree$tip.label<-paste("X",1:length(tree$tip.label),sep="")
+			} else {
+				ll<-getExtant(tree)
+				ii<-sapply(ll,function(x,y) which(x==y),y=tree$tip.label)
+				tree$tip.label[ii]<-tip.label
+				tree$tip.label[-ii]<-paste("X",1:(length(tree$tip.label)-length(ii)),sep="")
+			}
+		}
 		# done
 		return(tree)
 	}

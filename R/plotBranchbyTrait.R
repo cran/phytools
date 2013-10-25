@@ -91,7 +91,7 @@ plotBranchbyTrait<-function(tree,x,mode=c("edges","tips","nodes"),palette="rainb
 # function to add color bar
 # written by Liam J. Revell 2013
 
-add.color.bar<-function(leg,cols,title=NULL,lims=c(0,1),digits=1,prompt=TRUE,...){
+add.color.bar<-function(leg,cols,title=NULL,lims=c(0,1),digits=1,prompt=TRUE,lwd=4,outline=TRUE,...){
 	if(prompt){
 		cat("Click where you want to draw the bar\n")
 		x<-unlist(locator(1))
@@ -109,8 +109,8 @@ add.color.bar<-function(leg,cols,title=NULL,lims=c(0,1),digits=1,prompt=TRUE,...
 	else subtitle<-NULL
 	X<-x+cbind(0:(length(cols)-1)/length(cols),1:length(cols)/length(cols))*(leg)
 	Y<-cbind(rep(y,length(cols)),rep(y,length(cols))) 		
-	lines(c(X[1,1],X[nrow(X),2]),c(Y[1,1],Y[nrow(Y),2]),lwd=4+2,lend=2) 
-	for(i in 1:length(cols)) lines(X[i,],Y[i,],col=cols[i],lwd=4,lend=2)
+	if(outline) lines(c(X[1,1],X[nrow(X),2]),c(Y[1,1],Y[nrow(Y),2]),lwd=lwd+2,lend=2) 
+	for(i in 1:length(cols)) lines(X[i,],Y[i,],col=cols[i],lwd=lwd,lend=2)
 	text(x=x,y=y,round(lims[1],digits),pos=3,cex=fsize)
 	text(x=x+leg,y=y,round(lims[2],digits),pos=3,cex=fsize)
 	if(is.null(title)) title<-"P(state=1)"

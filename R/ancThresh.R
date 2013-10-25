@@ -1,10 +1,13 @@
 # function performs ancestral character estimation under the threshold model
-# written by Liam J. Revell 2012,2013
+# written by Liam J. Revell 2012, 2013
 
-ancThresh<-function(tree,x,ngen=1000,sequence=NULL,method="mcmc",control=list(),...){
+ancThresh<-function(tree,x,ngen=1000,sequence=NULL,method="mcmc",model=c("BM","OU"),control=list(),...){
 	
 	# check method
 	if(method!="mcmc") stop(paste(c("do not recognize method =",method,",quitting")))
+
+	# get model for the evolution of liability
+	model<-model[1]
 
 	# check x
 	if(is.data.frame(x)) x<-as.matrix(x)
@@ -30,11 +33,13 @@ ancThresh<-function(tree,x,ngen=1000,sequence=NULL,method="mcmc",control=list(),
 	th<-c(1:length(seq))-1; names(th)<-seq
 	x<-to.vector(X)
 	l<-sapply(x,function(x) runif(n=1,min=th[x]-1,max=th[x])) # set plausible starting liability
+	if(model=="OU") alpha<-0.1*max(nodeHeights(tree))
 
 	# for MCMC
 	n<-length(tree$tip)
 	m<-length(th)
-	npar<-tree$Nnode+n+m-2
+	npar<-if(model=="BM") tree$Nnode+n+m-2 else if(model=="OU") tree$Nnode+n+m-1
+	
 
 	# populate control list
 	PrA<-matrix(1/m,tree$Nnode,m,dimnames=list(1:tree$Nnode+n,seq))
@@ -51,13 +56,15 @@ ancThresh<-function(tree,x,ngen=1000,sequence=NULL,method="mcmc",control=list(),
 	con=list(sample=1000,
 		propliab=0.5*max(nodeHeights(tree)),
 		propthresh=0.05*max(nodeHeights(tree)),
+		propalpha=0.1*max(nodeHeights(tree)),
 		pr.anc=PrA,
 		pr.th=0.01,
 		burnin=round(0.2*ngen),
 		plot=TRUE,
 		print=TRUE,
-		piecol=NULL,
-		tipcol="input")
+		piecol=setNames(palette()[1:length(seq)],seq),
+		tipcol="input",
+		quiet=FALSE)
 	con[(namc<-names(control))]<-control
 	con<-con[!sapply(con,is.null)]
 
@@ -80,19 +87,23 @@ ancThresh<-function(tree,x,ngen=1000,sequence=NULL,method="mcmc",control=list(),
 	
 	# store
 	A<-matrix(NA,ngen/con$sample+1,tree$Nnode,dimnames=list(NULL,n+1:tree$Nnode))
-	B<-matrix(NA,ngen/con$sample+1,m+2,dimnames=list(NULL,c("gen",names(th),"logLik")))
+	B<-if(model=="BM") matrix(NA,ngen/con$sample+1,m+2,dimnames=list(NULL,c("gen",names(th),"logLik")))
+	   else if(model=="OU") matrix(NA,ngen/con$sample+1,m+3,dimnames=list(NULL,c("gen",names(th),"alpha","logLik")))
 	C<-matrix(NA,ngen/con$sample+1,tree$Nnode+n,dimnames=list(NULL,c(tree$tip.label,1:tree$Nnode+n)))
 	A[1,]<-sapply(a,threshState,thresholds=th)
-	B[1,]<-c(0,th,lik1)
+	B[1,]<-if(model=="BM") c(0,th,lik1) else if(model=="OU") c(0,th,alpha,lik1)
 	C[1,]<-c(l[tree$tip.label],a[as.character(1:tree$Nnode+n)])
 
 	# run MCMC
 	message("MCMC starting....")
+	logL<-lik1<-likLiab(l,a,V,invV,detV)+log(probMatch(X,l,th,seq))
 	for(i in 1:ngen){
-		lik1<-likLiab(l,a,V,invV,detV)+log(probMatch(X,l,th,seq))
+		lik1<-logL
 		d<-i%%npar
 		if(ngen>=1000) if(i%%1000==0) if(con$print) message(paste("gen",i))
 		ap<-a; lp<-l; thp<-th
+		if(model=="OU") alphap<-alpha
+		Vp<-V; invVp<-invV; detVp<-detV
 		if(d<=tree$Nnode&&d!=0){
 			# update node liabilities
 			ind<-d%%tree$Nnode; if(ind==0) ind<-tree$Nnode
@@ -103,23 +114,31 @@ ancThresh<-function(tree,x,ngen=1000,sequence=NULL,method="mcmc",control=list(),
 				if(d==0) ind<-n
 				else { ind<-(d-tree$Nnode)%%n; if(ind==0) ind<-n }
 				lp[ind]<-l[ind]+rnorm(n=1,sd=sqrt(con$propliab))
-			} else {
+			} else if(d>(tree$Nnode+n)&&d<=(tree$Nnode+n+m-2)||(npar==(tree$Nnode+n+m-2)&&d==0)) {
 				# update thresholds
 				if(d) ind<-(d-tree$Nnode-n)%%m+1
 				else ind<-m-1
 				thp[ind]<-bounce(th[ind],rnorm(n=1,sd=sqrt(con$propthresh)),c(th[ind-1],th[ind+1]))
+			} else {
+				# model=="OU"
+				alphap<-bounce(alpha,rnorm(n=1,sd=sqrt(con$propalpha)),c(0,Inf))
+				Vp<-vcvPhylo(tree,model="OU",alpha=alphap)
+				invVp<-solve(Vp)
+				detVp<-determinant(Vp,logarithm=TRUE)$modulus[1]
 			}
 		}
-		lik2<-likLiab(lp,ap,V,invV,detV)+log(probMatch(X,lp,thp,seq))
+		lik2<-likLiab(lp,ap,Vp,invVp,detVp)+log(probMatch(X,lp,thp,seq))
 		p.odds<-min(c(1,exp(lik2+logPrior(sapply(ap,threshState,thresholds=thp),thp,con)-lik1-logPrior(sapply(a,threshState,thresholds=th),th,con))))
 
 		if(p.odds>runif(n=1)){
 			a<-ap; l<-lp; th<-thp
+			V<-Vp; detV<-detVp; invV<-invVp
+			if(model=="OU") alpha<-alphap
 			logL<-lik2
 		} else logL<-lik1
 		if(i%%con$sample==0){ 
 			A[i/con$sample+1,]<-sapply(a,threshState,thresholds=th)
-			B[i/con$sample+1,]<-c(i,th[colnames(B)[1+1:m]],logL)
+			B[i/con$sample+1,]<-if(model=="BM") c(i,th[colnames(B)[1+1:m]],logL) else if(model=="OU") c(i,th[colnames(B)[1+1:m]],alpha,logL)
 			C[i/con$sample+1,]<-c(l[tree$tip.label],a[as.character(1:tree$Nnode+n)])
 		}
 	}
@@ -139,11 +158,25 @@ ancThresh<-function(tree,x,ngen=1000,sequence=NULL,method="mcmc",control=list(),
 # plots ancestral states from the threshold model
 # written by Liam J. Revell 2012
 
-plotThresh<-function(tree,x,mcmc,burnin=NULL,piecol,tipcol="input",...){
+plotThresh<-function(tree,x,mcmc,burnin=NULL,piecol,tipcol="input",legend=TRUE,...){
+
+	if(is.logical(legend)||is.vector(legend)){
+		if(is.logical(legend)&&legend==TRUE) leg<-setNames(names(piecol),names(piecol))
+		else if(is.vector(legend)){ 
+			leg<-legend[names(piecol)]
+			legend<-TRUE
+		}
+	}
 
 	# plot tree
-	plot(tree,no.margin=TRUE,edge.width=2,...)
-	
+	par(lend=2)
+	plot(tree,no.margin=TRUE,edge.width=2,y.lim=if(legend) c(-length(piecol),length(tree$tip.label)) else NULL,...)
+	if(legend){
+		zz<-par()$cex; par(cex=0.6)
+		for(i in 1:length(piecol))
+			add.simmap.legend(leg=leg[i],colors=piecol[i],prompt=FALSE,x=0.02*max(nodeHeights(tree)),y=-i,vertical=TRUE,shape="circle",fsize=1)
+		par(cex=zz)
+	}
 	# pull matrices from mcmc
 	ace<-mcmc$ace
 	liab<-mcmc$liab

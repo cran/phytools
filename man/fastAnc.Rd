@@ -21,7 +21,7 @@ fastAnc(tree, x, vars=FALSE, CI=FALSE)
 	\code{\link{ace}}, \code{\link{anc.Bayes}}, \code{\link{anc.ML}}, \code{\link{pic}}
 }
 \examples{
-tree<-rtree(50)
+tree<-pbtree(n=50)
 x<-fastBM(tree) # simulate using fastBM
 fastAnc(tree,x) # estimate states
 }

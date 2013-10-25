@@ -24,7 +24,7 @@ fancyTree(tree, type=c("extinction","traitgram3d","droptip","xkcd","densitymap",
 \examples{
 # plot tree with extinction
 set.seed(10)
-tree<-rlineage(1,0.5,4)
+tree<-pbtree(b=1,d=0.4,t=4)
 fancyTree(tree,type="extinction")
 
 \dontrun{

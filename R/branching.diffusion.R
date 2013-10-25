@@ -1,8 +1,7 @@
 # function animates branching random diffusion
-# written by Liam Revell 2011
+# written by Liam Revell 2011, 2013
 
 branching.diffusion<-function(sig2=1,b=0.0023,time.stop=1000,ylim=NULL,smooth=TRUE,pause=0.02,record=NULL,path=NULL){
-	if(!is.null(record)) if(!require(animation)) stop("must first install 'animation' package")
 	N<-1; Y<-matrix(0,1,N)
 	if(is.null(ylim)) ylim<-c(-2*sqrt(sig2*time.stop),2*sqrt(sig2*time.stop))
 	par(bg="white")

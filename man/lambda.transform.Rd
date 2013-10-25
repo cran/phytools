@@ -20,7 +20,7 @@ lambda.transform(lambda, C)
 \author{Liam Revell \email{liam.revell@umb.edu}}
 \examples{
 tree<-pbtree(n=100)
-V.lambda<-lambda.transform(0.7,vcv.phylo(tree))
+V.lambda<-lambda.transform(0.7,vcvPhylo(tree,FALSE))
 }
 \keyword{phylogenetics}
 \keyword{math}

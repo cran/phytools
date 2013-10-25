@@ -63,3 +63,28 @@ sim.history<-function(tree,Q,anc=NULL,nsim=1){
 	return(mtrees)
 }
 
+## simulate DNA sequence from a tree & model parameters
+## written by Liam J. Revell 2013
+
+genSeq<-function(tree,l=1000,Q=NULL,rate=1,format="DNAbin",...){
+	if(is.null(Q)){ 
+		Q<-matrix(1,4,4)
+		rownames(Q)<-colnames(Q)<-c("a","c","g","t")
+		diag(Q)<-0
+		diag(Q)<--colSums(Q)
+	}
+	if(length(rate)!=l){
+		if(length(rate)==1) rate<-rep(rate,l)
+		else {
+			cat("warning: length(rate) & l should match for length(rate)>1\n")
+			cat("         rate will be recycled.\n")
+			rate<-rep(rate,ceiling(l/length(rate)))[1:l]
+		}
+	}
+	cat("simulating sequences....\n")
+	X<-sapply(rate,function(a,b,c) sim.history(b,a*c)$states,b=tree,c=Q)
+	if(format=="DNAbin") return(as.DNAbin(X))
+	else if(format=="phyDat") return(as.phyDat(X))
+	else if(format=="matrix") return(X)
+}
+

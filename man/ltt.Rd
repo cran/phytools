@@ -34,7 +34,7 @@ ltt(tree, plot=TRUE, drop.extinct=FALSE, log.lineages=TRUE, gamma=TRUE)
 \examples{
 trees<-pbtree(n=100,scale=100,nsim=10)
 ltt(trees,log.lineages=FALSE)
-tree<-rlineage(birth=1,death=0.25,Tmax=4)
+tree<-pbtree(b=1,d=0.25,t=4)
 ltt(tree,gamma=FALSE)
 }
 \keyword{phylogenetics}

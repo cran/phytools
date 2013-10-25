@@ -1,17 +1,14 @@
 # function plots xkcd style (i.e., cartoonish with a hand drawn look) trees
-# written by Liam J. Revell 2012
+# written by Liam J. Revell 2012, 2013
 
 xkcdTree<-function(tree,file=NULL,gsPath=NULL,fsize=2,lwd=7,color="blue",dim=c(8.5,11),jitter=0.001,waver=c(0.1,0.1),tilt=0,right=TRUE){
 	margin<-0.1
 	message(paste(c("**** NOTE: use in Windows requires the installation of Ghostscript to\n", 
 					"**** embed 'xkcd' font in PDF plot")))
 	# if gsPath not specified
-	if(is.null(gsPath)) gsPath="C:/Program Files/gs/gs9.06/bin/gswin32c.exe"
-	if(.Platform$OS.type=="windows") Sys.setenv(R_GSCMD="C:/Program Files/gs/gs9.06/bin/gswin32c.exe")
+	if(is.null(gsPath)) gsPath="C:/Program Files/gs/gs9.10/bin/gswin32.exe"
+	if(.Platform$OS.type=="windows") Sys.setenv(R_GSCMD=gsPath)
 	# try to load extrafont
-	if(!require(extrafont)) stop(paste(c("\n",
-								"**** function needs 'extrafont' package\n",
-								"**** install package 'extrafont' and font 'xkcd' to continue")))
 	if(is.na(match("xkcd",fonts()))){
 		message(paste(c("**** cannot find 'xkcd' font, searching for 'xkcd.ttf'\n",
 						"**** (this may take a moment)\n",
@@ -96,6 +93,7 @@ xkcdTree<-function(tree,file=NULL,gsPath=NULL,fsize=2,lwd=7,color="blue",dim=c(8
 	dev.off()
 	message(paste(c("**** NOTE: an 'embed_fonts' error most likely means that Ghostscript\n",
 					"**** is not installed or that the path is incorrect")))
+	embedFonts(file)
 	embed_fonts(file)
 	# reset margin
 	par(mar=c(5,4,4,2)+0.1)

@@ -14,7 +14,8 @@ pgls.Ives<-function(tree,X,y,Vx=NULL,Vy=NULL,Cxy=NULL,lower=c(1e-8,1e-8)){
 		Psi[n+1:n,n+1:n]<-b1^2*sig2x*C+sig2y*C+diag(My)
 		z<-c(X,y)
 		D<-kronecker(diag(rep(1,2)),matrix(rep(1,n)))
-		L<--2*n/2*log(2*pi)-(1/2)*determinant(Psi,logarithm=TRUE)$modulus[1]-(1/2)*t(z-D%*%a)%*%solve(Psi)%*%(z-D%*%a)
+		## L<--2*n/2*log(2*pi)-(1/2)*determinant(Psi,logarithm=TRUE)$modulus[1]-(1/2)*t(z-D%*%a)%*%solve(Psi)%*%(z-D%*%a)
+		L<-dmnorm(z,(D%*%a)[,1],Psi,log=TRUE)
 		return(-L)
 	}
 
@@ -71,7 +72,7 @@ pgls.Ives<-function(tree,X,y,Vx=NULL,Vy=NULL,Cxy=NULL,lower=c(1e-8,1e-8)){
 	Cxy<-Cxy[tree$tip.label]
 	
 	# get some reasonable starting values for optimization
-	b<-runif(n=1,min=0,max=2)*lm(pic(X,tree)~pic(y,tree))$coefficients[2]; names(b)<-NULL
+	b<-runif(n=1,min=0,max=2)*lm(pic(y,tree)~pic(X,tree))$coefficients[2]; names(b)<-NULL
 	sig2x<-runif(n=1,min=0,max=2)*mean(pic(X,tree)^2)
 	sig2y<-runif(n=1,min=0,max=2)*mean(pic(y,tree)^2)
 	a<-runif(n=2,min=-1,max=1)*c(mean(X),mean(y))

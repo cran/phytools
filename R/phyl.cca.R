@@ -62,6 +62,7 @@ phyl.cca<-function(tree,X,Y,lambda=1.0,fixed=TRUE){
 	aV<-colSums(invC%*%V)/sum(invC)
 	Ccv<-round(t(cbind(U,V))%*%invC%*%cbind(U,V)/(n-1),10)
 	ccs<-diag(Ccv[1:min(mX,mY),(1+min(mX,mY)):(2*min(mX,mY))])
+	if(all(Im(ccs)==0)) ccs<-Re(ccs)
 	pos<-2*(as.numeric(ccs>0)-0.5)
 	ccs<-ccs*pos
 	# reorient variables, reorient & rescale coefficents

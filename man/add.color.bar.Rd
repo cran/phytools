@@ -2,7 +2,8 @@
 \alias{add.color.bar}
 \title{Add color bar to a plot}
 \usage{
-add.color.bar(leg, cols, title=NULL, lims=c(0,1), digits=1, prompt=TRUE, ...)
+add.color.bar(leg, cols, title=NULL, lims=c(0,1), digits=1, prompt=TRUE,
+	lwd=4, outline=TRUE, ...)
 }
 \arguments{
 	\item{leg}{numerical value for the length of the legend.}
@@ -11,10 +12,12 @@ add.color.bar(leg, cols, title=NULL, lims=c(0,1), digits=1, prompt=TRUE, ...)
 	\item{lims}{range for the bar.}
 	\item{digits}{digits for plotted numbers.}
 	\item{prompt}{logical value indicating whether the location of the legend should be obtained interactively.}
+	\item{lwd}{width of the plotted bar.}
+	\item{outline}{logical value indicated whether or not to outline the plotted color bar with a 1 pt line.}
 	\item{...}{optional arguments including: \code{x} x-coordinate of the legend (if \code{prompt=FALSE}); \code{y} y-coordinate of the legend; \code{subtitle} optional legend subtitle.}
 }
 \description{
-	This function adds a color bar to a plot created by \code{\link{plotBranchbyTrait}}. The only way to add the color bar at present is by clicking on the desired location within your plot. It is also used internally by \code{contMap(...,type="fan")} and \code{densityMap(...,type="fan")}.
+	This function adds a color bar to a plot created by \code{\link{plotBranchbyTrait}}. The only way to add the color bar at present is by clicking on the desired location within your plot. It is also used internally by \code{plot.contMap} and \code{plot.densityMap}.
 }
 \author{Liam Revell \email{liam.revell@umb.edu}}
 \seealso{
