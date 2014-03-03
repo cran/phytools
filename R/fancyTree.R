@@ -3,21 +3,20 @@
 # "extinction" in which all branches leading to extinct taxa (or prior to the MRCA of extant species) are plotted with red dashed lines;
 # "traitgram3d" which creates a 3D graph projecting the tree into two-dimensional morphospace (with time as the third axis)
 # "droptip" creates a two panel plot with the tips to be pruned marked (panel 1) and then removed, and returns the pruned tree
-# "xkcd" creates an xkcd-comic style phylogeny
+# "xkcd" creates an xkcd-comic style phylogeny [no longer an option]
 # "densitymap" maps the posterior density of a binary stochastic character mapping
 # "contmap" maps reconstructed trait evolution for a continuous character on the tree
 # "phenogram95" plots a 95% CI phenogram
 # "scattergram" plots a phylogenetic scatterplot matrix
-# written by Liam J. Revell 2012, 2013
+# written by Liam J. Revell 2012, 2013, 2014
 
-fancyTree<-function(tree,type=c("extinction","traitgram3d","droptip","xkcd","densitymap","contmap","phenogram95","scattergram"),...,control=list()){
-	type<-matchType(type,c("extinction","traitgram3d","droptip","xkcd","densitymap","contmap","phenogram95","scattergram"))
-	if(class(tree)!="phylo"&&type%in%c("extinction","traitgram3d","droptip","xkcd")) stop("tree should be an object of class 'phylo'")
+fancyTree<-function(tree,type=c("extinction","traitgram3d","droptip","densitymap","contmap","phenogram95","scattergram"),...,control=list()){
+	type<-matchType(type,c("extinction","traitgram3d","droptip","densitymap","contmap","phenogram95","scattergram"))
+	if(class(tree)!="phylo"&&type%in%c("extinction","traitgram3d","droptip")) stop("tree should be an object of class 'phylo'")
 	else if(class(tree)!="multiPhylo"&&type=="densitymap") stop("for type='densitymap' tree should be an object of class 'multiPhylo'")
 	if(type=="extinction") extinctionTree(tree)
 	else if(type=="traitgram3d") invisible(traitgram3d(tree,...,control=control))
 	else if(type=="droptip") return(droptipTree(tree,...))
-	else if(type=="xkcd") plotXkcdTree(tree,...)
 	else if(type=="densitymap") plotDensityMap(tree,...)
 	else if(type=="contmap") plotContMap(tree,...)
 	else if(type=="phenogram95") phenogram95(tree,...)
@@ -185,33 +184,6 @@ droptipTree<-function(tree,...){
 	dtree<-drop.tip(tree,tip); dtree$root.edge<-max(nodeHeights(tree))-max(nodeHeights(dtree))
 	plot.phylo(dtree,edge.width=2,no.margin=TRUE,root.edge=TRUE)
 	return(dtree)
-}
-
-# plotXkcdTree internal function
-# written by Liam J. Revell 2012
-
-plotXkcdTree<-function(tree,...){
-	if(hasArg(file)) file<-list(...)$file
-	else file<-NULL
-	if(hasArg(gsPath)) gsPath<-list(...)$gsPath
-	else gsPath<-NULL
-	if(hasArg(fsize)) fsize<-list(...)$fsize
-	else fsize<-2
-	if(hasArg(lwd)) lwd<-list(...)$lwd
-	else lwd<-7
-	if(hasArg(color)) color<-list(...)$color
-	else color<-"blue"
-	if(hasArg(dim)) dim<-list(...)$dim
-	else dim<-c(8.5,11)
-	if(hasArg(jitter)) jitter<-list(...)$jitter
-	else jitter<-0.001
-	if(hasArg(waver)) waver<-list(...)$waver
-	else waver<-c(0.1,0.1)
-	if(hasArg(tilt)) tilt<-list(...)$tilt
-	else tilt<-0
-	if(hasArg(right)) right<-list(...)$right
-	else right<-TRUE
-	xkcdTree(tree,file,gsPath,fsize,lwd,color,dim,jitter,waver,tilt,right)
 }
 
 # plotDensityMap internal function

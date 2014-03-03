@@ -1,5 +1,139 @@
 # some utility functions
-# written by Liam J. Revell 2011, 2012, 2013
+# written by Liam J. Revell 2011, 2012, 2013, 2014
+
+## function for midpoint rooting
+## written by Liam J. Revell 2014
+midpoint.root<-function(tree){
+	D<-cophenetic(tree)
+	dd<-max(D)
+	ii<-which(D==dd)[1]
+	ii<-c(ceiling(ii/nrow(D)),ii%%nrow(D))
+	if(ii[2]==0) ii[2]<-nrow(D)
+	spp<-rownames(D)[ii]
+	nn<-which(tree$tip.label==spp[2])
+	tree<-reroot(tree,nn,tree$edge.length[which(tree$edge[,2]==nn)])
+	aa<-getAncestors(tree,which(tree$tip.label==spp[1]))
+	D<-c(0,dist.nodes(tree)[which(tree$tip.label==spp[1]),aa])
+	names(D)[1]<-which(tree$tip.label==spp[1])
+	i<-0
+	while(D[i+1]<(dd/2)) i<-i+1
+	tree<-reroot(tree,as.numeric(names(D)[i]),D[i+1]-dd/2)
+	tree
+}
+
+## function gets ancestor node numbers, to be used internally by 
+## written by Liam J. Revell 2014
+getAncestors<-function(tree,node,type=c("all","parent")){
+	type<-type[1]
+	if(type=="all"){
+		aa<-vector()
+		rt<-length(tree$tip.label)+1
+		currnode<-node
+		while(currnode!=rt){
+			currnode<-getAncestors(tree,currnode,"parent")
+			aa<-c(aa,currnode)
+		}
+		return(aa)
+	} else if(type=="parent"){
+		aa<-tree$edge[which(tree$edge[,2]==node),1]
+		return(aa)
+	} else stop("do not recognize type")
+}
+
+# function computes phylogenetic variance-covariance matrix, including for internal nodes
+# written by Liam J. Revell 2011, 2013, 2014
+vcvPhylo<-function(tree,anc.nodes=TRUE,...){
+	# get & set optional arguments
+	if(hasArg(internal)) internal<-list(...)$internal
+	else internal<-anc.nodes
+	if(internal!=anc.nodes){ 
+		message(paste("arguments \"internal\" and \"anc.nodes\" are synonyms; setting internal =",anc.nodes))
+		internal<-anc.nodes
+	}
+	if(hasArg(model)) model<-list(...)$model
+	else model<-"BM"
+	if(hasArg(tol)) tol<-list(...)$tol
+	else tol<-1e-12
+	if(model=="OU"){
+		if(hasArg(alpha)) alpha<-list(...)$alpha
+		else alpha<-0
+	}
+	if(model=="OU"&&alpha<tol) model<-"BM"
+	if(model=="lambda"){
+		if(hasArg(lambda)){ 
+			lambda<-list(...)$lambda
+			tree<-lambdaTree(tree,lambda)
+		} else model<-"BM"
+		model<-"BM"
+	}	
+	# done settings
+	n<-length(tree$tip.label)
+	h<-nodeHeights(tree)[order(tree$edge[,2]),2]
+	h<-c(h[1:n],0,h[(n+1):length(h)])
+	M<-mrca(tree,full=internal)[c(1:n,internal*(n+2:tree$Nnode)),c(1:n,internal*(n+2:tree$Nnode))]
+	C<-matrix(h[M],nrow(M),ncol(M))
+	if(internal) rownames(C)<-colnames(C)<-c(tree$tip.label,n+2:tree$Nnode)
+	else rownames(C)<-colnames(C)<-tree$tip.label
+	if(model=="OU"){
+		D<-dist.nodes(tree)
+		rownames(D)[1:n]<-colnames(D)[1:n]<-tree$tip.label
+		D<-D[rownames(C),colnames(C)]
+		# not sure 
+		C<-(1-exp(-2*alpha*C))*exp(-alpha*D)/(2*alpha) # Hansen (2007)
+		# C<-(1-exp(-2*alpha*C))*exp(-2*alpha*(1-C))/(2*alpha) # Butler & King (2004)
+	}
+	return(C)
+}
+
+## simplified lambdaTree to be used internally by vcvPhylo
+## written by Liam J. Revell 2014
+lambdaTree<-function(tree,lambda){
+	ii<-which(tree$edge[,2]>length(tree$tip.label))
+	H1<-nodeHeights(tree)
+	tree$edge.length[ii]<-lambda*tree$edge.length[ii]
+	H2<-nodeHeights(tree)
+	tree$edge.length[-ii]<-tree$edge.length[-ii]+     H1[-ii,2]-H2[-ii,2]
+	tree
+}
+
+## di2multi method for tree with mapped state
+## written by Liam J. Revell 2013
+di2multi.simmap<-function(tree,tol=1e-08){
+	if(class(tree)!="phylo") stop("tree should be object of class 'phylo'.")
+	if(is.null(tree$maps)){
+		cat("Warning: tree does not contain mapped state. Using di2multi.\n")
+		return(di2multi(tree,tol))
+	}
+	N<-length(tree$tip.label)
+	n<-length(intersect(which(tree$edge.length<tol),which(tree$edge[,2]>N)))
+	if(n==0) return(tree)
+	edge<-tree$edge
+	edge[edge>N]<--edge[edge>N]+N
+	edge.length<-tree$edge.length
+	maps<-tree$maps
+	Nnode<-tree$Nnode
+	for(i in 1:n){
+		ii<-intersect(which(edge.length<tol),which(edge[,2]<0))[1]
+		node<-edge[ii,2]
+		edge[edge==node]<-edge[ii,1]
+		jj<-which(apply(edge,1,function(x) x[1]==x[2]))[1]
+		edge<-edge[-jj,]
+		edge.length<-edge.length[-jj]
+		maps<-maps[-jj]	
+		Nnode<-Nnode-1
+	}
+	nn<-sort(unique(edge[edge<0]),decreasing=TRUE)
+	mm<-1:Nnode+N
+	for(i in 1:length(edge)) if(edge[i]%in%nn) edge[i]<-mm[which(nn==edge[i])]
+	mapped.edge<-makeMappedEdge(edge,maps)
+	tt<-list(edge=edge,Nnode=Nnode,tip.label=tree$tip.label,edge.length=edge.length,
+		maps=maps,mapped.edge=mapped.edge)
+	class(tt)<-"phylo"
+	if(!is.null(attr(tree,"order"))) attr(tt,"order")<-attr(tree,"order")
+	if(!is.null(tree$node.states)) tt$node.states<-getStates(tt,"nodes")
+	if(!is.null(tree$states)) tt$states<-getStates(tt,"tips")
+	return(tt)
+}
 
 # returns the heights of each node
 # written by Liam J. Revell 2011, 2012, 2013
@@ -21,44 +155,6 @@ nodeHeights<-function(tree){
 		o<-apply(matrix(tree$edge[,2]),1,function(x,y) which(x==y),y=t$edge[,2])
 	else o<-1:nrow(t$edge)
 	return(X[o,])
-}
-
-# function computes phylogenetic variance-covariance matrix, including for internal nodes
-# written by Liam J. Revell 2011, 2013
-vcvPhylo<-function(tree,anc.nodes=TRUE,...){
-	# get & set optional arguments
-	if(hasArg(internal)) internal<-list(...)$internal
-	else internal<-anc.nodes
-	if(internal!=anc.nodes){ 
-		message(paste("arguments \"internal\" and \"anc.nodes\" are synonyms; setting internal =",anc.nodes))
-		internal<-anc.nodes
-	}
-	if(hasArg(model)) model<-list(...)$model
-	else model<-"BM"
-	if(hasArg(tol)) tol<-list(...)$tol
-	else tol<-1e-12
-	if(model=="OU"){
-		if(hasArg(alpha)) alpha<-list(...)$alpha
-		else alpha<-0
-	}
-	if(model=="OU"&&alpha<tol) model<-"BM"
-	# done settings
-	n<-length(tree$tip.label)
-	h<-nodeHeights(tree)[order(tree$edge[,2]),2]
-	h<-c(h[1:n],0,h[(n+1):length(h)])
-	M<-mrca(tree,full=internal)[c(1:n,internal*(n+2:tree$Nnode)),c(1:n,internal*(n+2:tree$Nnode))]
-	C<-matrix(h[M],nrow(M),ncol(M))
-	if(internal) rownames(C)<-colnames(C)<-c(tree$tip.label,n+2:tree$Nnode)
-	else rownames(C)<-colnames(C)<-tree$tip.label
-	if(model=="OU"){
-		D<-dist.nodes(tree)
-		rownames(D)[1:n]<-colnames(D)[1:n]<-tree$tip.label
-		D<-D[rownames(C),colnames(C)]
-		# not sure 
-		C<-(1-exp(-2*alpha*C))*exp(-alpha*D)/(2*alpha) # Hansen (2007)
-		# C<-(1-exp(-2*alpha*C))*exp(-2*alpha*(1-C))/(2*alpha) # Butler & King (2004)
-	}
-	return(C)
 }
 
 ## function drops all the leaves from the tree & collapses singleton nodes
@@ -198,6 +294,7 @@ sampleFrom<-function(xbar=0,xvar=1,n=1,randn=NULL,type="norm"){
 	if(!is.null(randn))
 		for(i in 1:length(xbar)) n[i]<-floor(runif(n=1,min=randn[1],max=(randn[2]+1)))
 	x<-vector()
+
 	for(i in 1:length(xbar)){
 		y<-rnorm(n=n[i],mean=xbar[i],sd=sqrt(xvar[i]))
    		names(y)<-rep(names(xbar)[i],length(y))

@@ -1,7 +1,7 @@
 # function performs ancestral character estimation under the threshold model
-# written by Liam J. Revell 2012, 2013
+# written by Liam J. Revell 2012, 2013, 2014
 
-ancThresh<-function(tree,x,ngen=1000,sequence=NULL,method="mcmc",model=c("BM","OU"),control=list(),...){
+ancThresh<-function(tree,x,ngen=1000,sequence=NULL,method="mcmc",model=c("BM","OU","lambda"),control=list(),...){
 	
 	# check method
 	if(method!="mcmc") stop(paste(c("do not recognize method =",method,",quitting")))
@@ -34,11 +34,12 @@ ancThresh<-function(tree,x,ngen=1000,sequence=NULL,method="mcmc",model=c("BM","O
 	x<-to.vector(X)
 	l<-sapply(x,function(x) runif(n=1,min=th[x]-1,max=th[x])) # set plausible starting liability
 	if(model=="OU") alpha<-0.1*max(nodeHeights(tree))
+	if(model=="lambda") lambda<-1.0
 
 	# for MCMC
 	n<-length(tree$tip)
 	m<-length(th)
-	npar<-if(model=="BM") tree$Nnode+n+m-2 else if(model=="OU") tree$Nnode+n+m-1
+	npar<-if(model=="BM") tree$Nnode+n+m-2 else tree$Nnode+n+m-1
 	
 
 	# populate control list
@@ -57,6 +58,7 @@ ancThresh<-function(tree,x,ngen=1000,sequence=NULL,method="mcmc",model=c("BM","O
 		propliab=0.5*max(nodeHeights(tree)),
 		propthresh=0.05*max(nodeHeights(tree)),
 		propalpha=0.1*max(nodeHeights(tree)),
+		proplambda=0.01,
 		pr.anc=PrA,
 		pr.th=0.01,
 		burnin=round(0.2*ngen),
@@ -77,7 +79,9 @@ ancThresh<-function(tree,x,ngen=1000,sequence=NULL,method="mcmc",model=c("BM","O
 	th[length(th)]<-Inf
 
 	# compute some matrices & values
-	V<-vcvPhylo(tree)
+	V<-if(model=="BM") vcvPhylo(tree) 
+	   else if(model=="OU") vcvPhylo(tree,model="OU",alpha=alpha) 
+	   else if(model=="lambda") vcvPhylo(tree,model="lambda",lambda=lambda)
 	# check to make sure that V will be non-singular
 	if(any(tree$edge.length<=(10*.Machine$double.eps)))
 		stop("some branch lengths are 0 or nearly zero")
@@ -89,9 +93,11 @@ ancThresh<-function(tree,x,ngen=1000,sequence=NULL,method="mcmc",model=c("BM","O
 	A<-matrix(NA,ngen/con$sample+1,tree$Nnode,dimnames=list(NULL,n+1:tree$Nnode))
 	B<-if(model=="BM") matrix(NA,ngen/con$sample+1,m+2,dimnames=list(NULL,c("gen",names(th),"logLik")))
 	   else if(model=="OU") matrix(NA,ngen/con$sample+1,m+3,dimnames=list(NULL,c("gen",names(th),"alpha","logLik")))
+	   else if(model=="lambda") matrix(NA,ngen/con$sample+1,m+3,dimnames=list(NULL,c("gen",names(th),"lambda","logLik")))
+
 	C<-matrix(NA,ngen/con$sample+1,tree$Nnode+n,dimnames=list(NULL,c(tree$tip.label,1:tree$Nnode+n)))
 	A[1,]<-sapply(a,threshState,thresholds=th)
-	B[1,]<-if(model=="BM") c(0,th,lik1) else if(model=="OU") c(0,th,alpha,lik1)
+	B[1,]<-if(model=="BM") c(0,th,lik1) else if(model=="OU") c(0,th,alpha,lik1) else if(model=="lambda") c(0,th,lambda,lik1)
 	C[1,]<-c(l[tree$tip.label],a[as.character(1:tree$Nnode+n)])
 
 	# run MCMC
@@ -103,6 +109,7 @@ ancThresh<-function(tree,x,ngen=1000,sequence=NULL,method="mcmc",model=c("BM","O
 		if(ngen>=1000) if(i%%1000==0) if(con$print) message(paste("gen",i))
 		ap<-a; lp<-l; thp<-th
 		if(model=="OU") alphap<-alpha
+		if(model=="lambda") lambdap<-lambda
 		Vp<-V; invVp<-invV; detVp<-detV
 		if(d<=tree$Nnode&&d!=0){
 			# update node liabilities
@@ -120,9 +127,13 @@ ancThresh<-function(tree,x,ngen=1000,sequence=NULL,method="mcmc",model=c("BM","O
 				else ind<-m-1
 				thp[ind]<-bounce(th[ind],rnorm(n=1,sd=sqrt(con$propthresh)),c(th[ind-1],th[ind+1]))
 			} else {
-				# model=="OU"
-				alphap<-bounce(alpha,rnorm(n=1,sd=sqrt(con$propalpha)),c(0,Inf))
-				Vp<-vcvPhylo(tree,model="OU",alpha=alphap)
+				if(model=="OU"){
+					alphap<-bounce(alpha,rnorm(n=1,sd=sqrt(con$propalpha)),c(0,Inf))
+					Vp<-vcvPhylo(tree,model="OU",alpha=alphap)
+				} else if(model=="lambda"){
+					lambdap<-bounce(lambda,rnorm(n=1,sd=sqrt(con$proplambda)),c(0,1))
+					Vp<-vcvPhylo(tree,model="lambda",lambda=lambdap)
+				}
 				invVp<-solve(Vp)
 				detVp<-determinant(Vp,logarithm=TRUE)$modulus[1]
 			}
@@ -134,11 +145,12 @@ ancThresh<-function(tree,x,ngen=1000,sequence=NULL,method="mcmc",model=c("BM","O
 			a<-ap; l<-lp; th<-thp
 			V<-Vp; detV<-detVp; invV<-invVp
 			if(model=="OU") alpha<-alphap
+			if(model=="lambda") lambda<-lambdap
 			logL<-lik2
 		} else logL<-lik1
 		if(i%%con$sample==0){ 
 			A[i/con$sample+1,]<-sapply(a,threshState,thresholds=th)
-			B[i/con$sample+1,]<-if(model=="BM") c(i,th[colnames(B)[1+1:m]],logL) else if(model=="OU") c(i,th[colnames(B)[1+1:m]],alpha,logL)
+			B[i/con$sample+1,]<-if(model=="BM") c(i,th[colnames(B)[1+1:m]],logL) else if(model=="OU") c(i,th[colnames(B)[1+1:m]],alpha,logL) else if(model=="lambda") c(i,th[colnames(B)[1+1:m]],lambda,logL)
 			C[i/con$sample+1,]<-c(l[tree$tip.label],a[as.character(1:tree$Nnode+n)])
 		}
 	}
@@ -156,7 +168,7 @@ ancThresh<-function(tree,x,ngen=1000,sequence=NULL,method="mcmc",model=c("BM","O
 }
 
 # plots ancestral states from the threshold model
-# written by Liam J. Revell 2012
+# written by Liam J. Revell 2012, 2014
 
 plotThresh<-function(tree,x,mcmc,burnin=NULL,piecol,tipcol="input",legend=TRUE,...){
 
@@ -170,11 +182,11 @@ plotThresh<-function(tree,x,mcmc,burnin=NULL,piecol,tipcol="input",legend=TRUE,.
 
 	# plot tree
 	par(lend=2)
-	plot(tree,no.margin=TRUE,edge.width=2,y.lim=if(legend) c(-length(piecol),length(tree$tip.label)) else NULL,...)
+	plotTree(tree,ftype="i",lwd=1,ylim=if(legend) c(-0.1*length(tree$tip.label),length(tree$tip.label)) else NULL,...)
 	if(legend){
 		zz<-par()$cex; par(cex=0.6)
 		for(i in 1:length(piecol))
-			add.simmap.legend(leg=leg[i],colors=piecol[i],prompt=FALSE,x=0.02*max(nodeHeights(tree)),y=-i,vertical=TRUE,shape="circle",fsize=1)
+			add.simmap.legend(leg=leg[i],colors=piecol[i],prompt=FALSE,x=0.02*max(nodeHeights(tree)),y=-0.1*length(tree$tip.label),vertical=FALSE,shape="square",fsize=1)
 		par(cex=zz)
 	}
 	# pull matrices from mcmc
@@ -210,10 +222,13 @@ plotThresh<-function(tree,x,mcmc,burnin=NULL,piecol,tipcol="input",legend=TRUE,.
 }
 
 # computes DIC for threshold model
-# written by Liam J. Revell 2012
+# written by Liam J. Revell 2012, 2014
 
 threshDIC<-function(tree,x,mcmc,burnin=NULL,sequence=NULL,method="pD"){
-
+	## identify model
+	if(any(colnames(mcmc$par)=="alpha")) model<-"OU"
+	else if(any(colnames(mcmc$par)=="lambda")) model<-"lambda"
+	else model<-"BM"
 	# check x
 	if(is.data.frame(x)) x<-as.matrix(x)
 	if(is.matrix(x)){
@@ -233,15 +248,17 @@ threshDIC<-function(tree,x,mcmc,burnin=NULL,sequence=NULL,method="pD"){
 	# row scale X
 	X<-X/apply(X,1,sum)
 	X<-X[,seq] # order columns by seq
-
 	# convert burnin to starting row
 	if(is.null(burnin)) burnin<-0.2*max(mcmc$par[,"gen"])
 	start<-which(mcmc$par[,"gen"]==burnin)+1
-
 	# compute
-	thBar<-colMeans(mcmc$par[start:nrow(mcmc$par),2:(ncol(mcmc$par)-1)])
+	k<-if(model=="BM") 1 else 2
+	thBar<-colMeans(mcmc$par[start:nrow(mcmc$par),2:(ncol(mcmc$par)-k)])
 	liabBar<-colMeans(mcmc$liab[start:nrow(mcmc$liab),])
-	Dtheta<--2*(likLiab(liabBar[tree$tip.label],liabBar[as.character(1:tree$Nnode+length(tree$tip))],vcvPhylo(tree),solve(vcvPhylo(tree)),determinant(vcvPhylo(tree),logarithm=TRUE)$modulus[1])+log(probMatch(X[tree$tip.label,],liabBar[tree$tip.label],thBar,seq)))
+	if(model=="BM")	V<-vcvPhylo(tree)
+	else if(model=="OU") V<-vcvPhylo(tree,model="OU",alpha=mean(mcmc$par[start:nrow(mcmc$par),"alpha"]))
+	else if(model=="lambda") V<-vcvPhylo(tree,model="lambda",lambda=mean(mcmc$par[start:nrow(mcmc$par),"lambda"]))
+	Dtheta<--2*(likLiab(liabBar[tree$tip.label],liabBar[as.character(1:tree$Nnode+length(tree$tip))],V,solve(V),determinant(V,logarithm=TRUE)$modulus[1])+log(probMatch(X[tree$tip.label,],liabBar[tree$tip.label],thBar,seq)))
 	D<--2*mcmc$par[start:nrow(mcmc$par),"logLik"]
 	Dbar<-mean(D)
 	if(method=="pD"){		

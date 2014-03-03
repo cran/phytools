@@ -1,23 +1,27 @@
 \name{phyl.pca}
 \alias{phyl.pca}
+\alias{biplot.phyl.pca}
 \title{Phylogenetic principal components analysis}
 \usage{
 phyl.pca(tree, Y, method="BM", mode="cov")
+\method{biplot}{phyl.pca}(x, ...)
 }
 \arguments{
 	\item{tree}{phylogeny as an object of class \code{"phylo"}.}
 	\item{Y}{data matrix with traits in columns.}
 	\item{method}{method to obtain the correlation structure: can be \code{"BM"} or \code{"lambda"}.}
 	\item{mode}{is the mode for the PCA: can be \code{"cov"} or \code{"corr"}.}
+	\item{x}{object of class \code{"phyl.pca"} for \code{biplot.phyl.pca}.}
+	\item{...}{for S3 plotting method \code{biplot.phyl.pca}, other arguments to be passed to \code{\link{biplot}}.}
 }
 \description{
 	This function performs phylogenetic PCA (e.g., Revell 2009; \emph{Evolution}).
 }
 \details{
-	If \code{method="lambda"} \eqn{\lambda} is optimized on the interval (0,1) using \code{\link{optimize}}.
+	If \code{method="lambda"} \eqn{\lambda} is optimized on the interval (0,1) using \code{\link{optimize}}. S3 methods (\code{print}, \code{summary}, and \code{biplot} are modified from code provided by Joan Maspons and are based on the same methods for objects of class \code{"prcomp"}.
 }
 \value{
-	A list with the following components:
+	An object of class \code{phyl.pca} which is a list with some or all of the following components:
 	\item{Eval}{diagonal matrix of eigenvalues.}
 	\item{Evec}{matrix with eigenvectors in columns.}
 	\item{S}{matrix with scores.}
@@ -28,7 +32,7 @@ phyl.pca(tree, Y, method="BM", mode="cov")
 \references{
 	Revell, L. J. (2009) Size-correction and principal components for interspecific comparative studies. \emph{Evolution}, \bold{63}, 3258--3268.
 }
-\author{Liam Revell \email{liam.revell@umb.edu}}
+\author{Liam Revell \email{liam.revell@umb.edu}, Joan Maspons}
 \seealso{
 	\code{\link{phyl.cca}}, \code{\link{phyl.resid}}
 }

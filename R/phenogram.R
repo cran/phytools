@@ -36,7 +36,7 @@ phenogram<-function(tree,x,fsize=1.0,ftype="reg",colors=NULL,axes=list(),add=FAL
 	if(hasArg(spread.labels)) spread.labels<-list(...)$spread.labels
 	else spread.labels<-FALSE
 	if(hasArg(spread.cost)) spread.cost<-list(...)$spread.cost
-	else spread.cost<-c(1,1)
+	else spread.cost<-c(1,0.4)
 	if(hasArg(link)) link<-list(...)$link
 	else link<-if(spread.labels) 0.1*max(nodeHeights(tree)) else 0 
 	## end optional arguments
@@ -67,7 +67,7 @@ phenogram<-function(tree,x,fsize=1.0,ftype="reg",colors=NULL,axes=list(),add=FAL
 		if(is.null(colors)) colors<-"black"
 		if(!add){ 
 			plot(H[1,],X[1,],type=type,lwd=lwd,lty=lty,col=colors,xlim=xlim,ylim=ylim,log=log,asp=asp,xlab="",ylab="",frame=FALSE, axes=FALSE)
-			if(spread.labels) tt<-spreadlabels(tree,x[1:length(tree$tip)],fsize=fsize,cost=spread.cost) else tt<-x[1:length(tree$tip)]
+			if(spread.labels) tt<-spreadlabels(tree,x,fsize=fsize,cost=spread.cost) else tt<-x[1:length(tree$tip)]
 			if(tree$edge[1,2]<=length(tree$tip)){
 				if(fsize&&!add){
 					text(tree$tip.label[tree$edge[1,2]],x=H[1,2]+link,y=tt[tree$edge[1,2]],cex=fsize,font=ftype,pos=4,offset=offset)
@@ -131,7 +131,10 @@ spreadlabels<-function(tree,x,fsize=1,cost=c(1,1)){
 	}
 	mo<-ff(yy,zz,cost=c(1,0))
 	ms<-ff(yy,zz,cost=c(0,1))
-	rr<-optim(zz,ff,yy=yy,mo=mo,ms=ms,cost=cost,method="L-BFGS-B",lower=rep(min(yy),length(yy)),upper=rep(max(yy),length(yy)))
-	return(rr$par)
+	if(mo==0&&ms==0) return(yy)
+	else {
+		rr<-optim(zz,ff,yy=yy,mo=mo,ms=ms,cost=cost,method="L-BFGS-B",lower=rep(min(x),length(yy)),upper=rep(max(x),length(yy)))
+		return(rr$par)
+	}
 }
 

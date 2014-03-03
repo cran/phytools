@@ -2,7 +2,7 @@
 # the function does not require a tree that is ultrametric.  Optionally, the function can remove extinct
 # species from the phylogeny
 # if the input tree is an object of class "multiPhylo" then the function will simultaneously plot all ltts
-# written by Liam J. Revell 2010, 2011, 2012
+# written by Liam J. Revell 2010, 2011, 2012, 2013, 2014
 
 ltt<-function(tree,plot=TRUE,drop.extinct=FALSE,log.lineages=TRUE,gamma=TRUE){
 	# set tolerance
@@ -24,55 +24,64 @@ ltt<-function(tree,plot=TRUE,drop.extinct=FALSE,log.lineages=TRUE,gamma=TRUE){
 	} else {
 		# reorder the tree
 		tree<-reorder.phylo(tree,order="cladewise")
-		# internal functions
-		# drop extinct tips
-		drop.extinct.tips<-function(phy){
-			temp<-diag(vcv(phy))
-			if(length(temp[temp<(max(temp)-tol)])>0)
-				pruned.phy<-drop.tip(phy,names(temp[temp<(max(temp)-tol)]))
-			else
-				pruned.phy<-phy
-			return(pruned.phy)
-		}
-		# first, if drop.extinct==TRUE
-		if(drop.extinct==TRUE)
-			tree<-drop.extinct.tips(tree)
-		# compute node heights
-		root<-length(tree$tip)+1
-		node.height<-matrix(NA,nrow(tree$edge),2)
-		for(i in 1:nrow(tree$edge)){
-			if(tree$edge[i,1]==root){
-				node.height[i,1]<-0.0
-				node.height[i,2]<-tree$edge.length[i]
-			} else {
-				node.height[i,1]<-node.height[match(tree$edge[i,1],tree$edge[,2]),2]
-				node.height[i,2]<-node.height[i,1]+tree$edge.length[i]
+		## check if tree is ultrametric & if yes, then make *precisely* ultrametric
+		if(is.ultrametric(tree)){
+			h<-max(nodeHeights(tree))
+			time<-c(0,h-sort(branching.times(tree),decreasing=TRUE),h)
+			nodes<-as.numeric(names(time)[2:(length(time)-1)])
+			ltt<-c(cumsum(c(1,sapply(nodes,function(x,y) sum(y==x)-1,y=tree$edge[,1]))),length(tree$tip.label))
+			names(ltt)<-names(time)
+		} else {
+			# internal functions
+			# drop extinct tips
+			drop.extinct.tips<-function(phy){
+				temp<-diag(vcv(phy))
+				if(length(temp[temp<(max(temp)-tol)])>0)
+					pruned.phy<-drop.tip(phy,names(temp[temp<(max(temp)-tol)]))
+				else
+					pruned.phy<-phy
+				return(pruned.phy)
 			}
-		}
-		ltt<-vector()
-		tree.length<-max(node.height) # tree length
-		n.extinct<-sum(node.height[tree$edge[,2]<=length(tree$tip),2]<(tree.length-tol))
-		# fudge things a little bit
-		node.height[tree$edge[,2]<=length(tree$tip),2]<-node.height[tree$edge[,2]<=length(tree$tip),2]+1.1*tol
-		time<-c(0,node.height[,2]); names(time)<-as.character(c(root,tree$edge[,2]))
-		temp<-vector()
-		time<-time[order(time)]
-		time<-time[1:(tree$Nnode+n.extinct+1)] # times
-		# get numbers of lineages
-		for(i in 1:(length(time)-1)){
-			ltt[i]<-0
+			# first, if drop.extinct==TRUE
+			if(drop.extinct==TRUE)
+				tree<-drop.extinct.tips(tree)
+			# compute node heights
+			root<-length(tree$tip)+1
+			node.height<-matrix(NA,nrow(tree$edge),2)
+			for(i in 1:nrow(tree$edge)){
+				if(tree$edge[i,1]==root){
+					node.height[i,1]<-0.0
+					node.height[i,2]<-tree$edge.length[i]
+				} else {
+					node.height[i,1]<-node.height[match(tree$edge[i,1],tree$edge[,2]),2]
+					node.height[i,2]<-node.height[i,1]+tree$edge.length[i]
+				}
+			}
+			ltt<-vector()
+			tree.length<-max(node.height) # tree length
+			n.extinct<-sum(node.height[tree$edge[,2]<=length(tree$tip),2]<(tree.length-tol))
+			# fudge things a little bit
+			node.height[tree$edge[,2]<=length(tree$tip),2]<-node.height[tree$edge[,2]<=length(tree$tip),2]+1.1*tol
+			time<-c(0,node.height[,2]); names(time)<-as.character(c(root,tree$edge[,2]))
+			temp<-vector()
+			time<-time[order(time)]
+			time<-time[1:(tree$Nnode+n.extinct+1)] # times
+			# get numbers of lineages
+			for(i in 1:(length(time)-1)){
+				ltt[i]<-0
+				for(j in 1:nrow(node.height))
+					ltt[i]<-ltt[i]+(time[i]>=(node.height[j,1]-tol)&&time[i]<=(node.height[j,2]-tol))
+			}
+			ltt[i+1]<-0
 			for(j in 1:nrow(node.height))
-				ltt[i]<-ltt[i]+(time[i]>=(node.height[j,1]-tol)&&time[i]<=(node.height[j,2]-tol))
+				ltt[i+1]<-ltt[i+1]+(time[i+1]<=(node.height[j,2]+tol))
+			# set names (these are the node indices)
+			names(ltt)<-names(time)
+			# append 0,1 for time 0
+			ltt<-c(1,ltt); time<-c(0,time)
+			# subtract fudge factor
+			time[length(time)]<-time[length(time)]-1.1*tol
 		}
-		ltt[i+1]<-0
-		for(j in 1:nrow(node.height))
-			ltt[i+1]<-ltt[i+1]+(time[i+1]<=(node.height[j,2]+tol))
-		# set names (these are the node indices)
-		names(ltt)<-names(time)
-		# append 0,1 for time 0
-		ltt<-c(1,ltt); time<-c(0,time)
-		# subtract fudge factor
-		time[length(time)]<-time[length(time)]-1.1*tol
 		# plot ltt
 		if(plot==TRUE){
 			if(log.lineages==TRUE)
