@@ -36,7 +36,7 @@ importFrom(ape, .PlotPhyloEnv, .uncompressTipLabel, ace, all.equal.phylo, as.DNA
 importFrom(ape, compute.brlen, cophenetic.phylo, di2multi, dist.dna, dist.nodes, drop.tip, extract.clade, is.binary.tree, is.rooted)
 importFrom(ape, is.ultrametric, matexpo, mrca, multi2di, neworder_phylo, neworder_pruningwise, nodelabels, pic, plot.phylo, prop.part)
 importFrom(ape, read.tree, reorder.phylo, root, rotate, rtree, stree, tiplabels, unroot, vcv, vcv.phylo, write.tree)
-importFrom(extrafont, embed_fonts, font_import, fonts, loadfonts)
+#importFrom(extrafont, embed_fonts, font_import, fonts, loadfonts)
 importFrom(maps, map)
 importFrom(mnormt, dmnorm)
 importFrom(msm, MatrixExp)
