@@ -1,9 +1,21 @@
 # this function fits the model of Revell & Collar (2009; Evolution)
-# written by Liam J. Revell 2010, 2011, 2013
+# written by Liam J. Revell 2010, 2011, 2013, 2014
 
-evol.vcv<-function(tree,X,maxit=2000,vars=FALSE){
+evol.vcv<-function(tree,X,maxit=2000,vars=FALSE,...){
 	n<-nrow(X) # number of species
 	m<-ncol(X) # number of traits
+	if(hasArg(se)){ 
+		se<-list(...)$se
+		se<-se[tree$tip.label]
+	} else { 
+		se<-replicate(n,matrix(0,m,m),simplify=FALSE)
+		names(se)<-tree$tip.label
+	}
+	SE<-matrix(0,n*m,n*m)
+	for(i in 1:n){
+		ii<-0:(m-1)*n+i
+		SE[ii,ii]<-se[[i]]
+	}
 	p<-ncol(tree$mapped.edge) # number of states
 	D<-matrix(0,n*m,m)
 	for(i in 1:(n*m)) for(j in 1:m) if((j-1)*n<i&&i<=j*n) D[i,j]=1.0
@@ -15,7 +27,7 @@ evol.vcv<-function(tree,X,maxit=2000,vars=FALSE){
 	# likelihood for a single matrix
 	lik1<-function(rr,y,D,a,C,n,mm){
 		R<-to.symmetric(rr)
-		return(-t(y-D%*%t(a))%*%solve(kronecker(R,C))%*%(y-D%*%t(a))/2-n*m*log(2*pi)/2-determinant(kronecker(R,C))$modulus[1]/2)
+		return(-t(y-D%*%t(a))%*%solve(kronecker(R,C))%*%(y-D%*%t(a))/2-n*mm*log(2*pi)/2-determinant(kronecker(R,C))$modulus[1]/2)
 	}
 	logL1<-lik1(to.upper(R),y,D,a,C,n,m)
 	if(vars){
@@ -83,10 +95,12 @@ evol.vcv<-function(tree,X,maxit=2000,vars=FALSE){
 	}
 	# report convergence
 	if(r$convergence==0) converged<-"Optimization has converged."
-	else converged<-"Optimization may not have converged.  Consider increasing maxit."
+	else converged<-"Optimization may not have converged. Consider increasing maxit."
 	# return results
-	if(vars) return(list(R.single=R,vars.single=vars.single,logL1=as.numeric(logL1),k1=m*(m+1)/2+m,R.multiple=R.i,vars.multiple=Vars,logL.multiple=logL2,k2=p*m*(m+1)/2+m,P.chisq=pchisq(2*(logL2-as.numeric(logL1)),(p-1)*m*(m+1)/2,lower.tail=FALSE),convergence=converged))
-	else return(list(R.single=R,logL1=as.numeric(logL1),k1=m*(m+1)/2+m,R.multiple=R.i,logL.multiple=logL2,k2=p*m*(m+1)/2+m,P.chisq=pchisq(2*(logL2-as.numeric(logL1)),(p-1)*m*(m+1)/2,lower.tail=FALSE),convergence=converged))
+	if(vars) obj<-list(R.single=R,vars.single=vars.single,logL1=as.numeric(logL1),k1=m*(m+1)/2+m,R.multiple=R.i,vars.multiple=Vars,logL.multiple=logL2,k2=p*m*(m+1)/2+m,P.chisq=pchisq(2*(logL2-as.numeric(logL1)),(p-1)*m*(m+1)/2,lower.tail=FALSE),convergence=converged)
+	else obj<-list(R.single=R,logL1=as.numeric(logL1),k1=m*(m+1)/2+m,R.multiple=R.i,logL.multiple=logL2,k2=p*m*(m+1)/2+m,P.chisq=pchisq(2*(logL2-as.numeric(logL1)),(p-1)*m*(m+1)/2,lower.tail=FALSE),convergence=converged)
+	class(obj)<-"evol.vcv"
+	obj
 }
 
 # function puts the upper triangle of a square matrix in a vector, by row
@@ -109,4 +123,28 @@ to.symmetric<-function(x){
 	for(i in 2:nrow(X)) for(j in 1:(i-1)) X[i,j]<-X[j,i]
 	X
 }
+
+## S3 print method for object of class "evol.vcv"
+## written by Liam J. Revell 2013
+print.evol.vcv<-function(x,...){
+	if(hasArg(digits)) digits<-list(...)$digits
+	else digits<-4
+	x<-lapply(x,function(a,b) if(is.numeric(a)) round(a,b) else a,b=digits)
+	cat("ML single-matrix model:\n")
+	nn<-paste("R[",t(sapply(1:ncol(x$R.single),paste,1:ncol(x$R.single),sep=","))[upper.tri(x$R.single,diag=TRUE)],"]",sep="")
+	cat(paste("\t",paste(nn,collapse="\t"),"\tk\tlog(L)","\n",sep=""))
+	cat(paste("fitted",paste(x$R.single[upper.tri(x$R.single,diag=TRUE)],collapse="\t"),x$k1,x$logL1,"\n",sep="\t"))
+	cat("\n")
+	cat("ML multi-matrix model:\n")
+	cat(paste("\t",paste(nn,collapse="\t"),"\tk\tlog(L)","\n",sep=""))
+	for(i in 1:dim(x$R.multiple)[3]){
+		if(i==1) cat(paste(dimnames(x$R.multiple)[[3]][i],paste(x$R.multiple[,,i][upper.tri(x$R.single,diag=TRUE)],collapse="\t"),x$k2,x$logL.multiple,"\n",sep="\t"))
+		else cat(paste(dimnames(x$R.multiple)[[3]][i],paste(x$R.multiple[,,i][upper.tri(x$R.single,diag=TRUE)],collapse="\t"),"\n",sep="\t"))
+	}
+	cat("\n")
+	cat(paste("P-value (based on X^2):",x$P.chisq,"\n\n"))
+	if(x$convergence[1]=="Optimization has converged.") cat("R thinks it has found the ML solution.\n\n")
+	else cat("Optimization may not have converged.\n\n")
+}
+
 

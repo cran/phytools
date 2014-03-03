@@ -1,8 +1,10 @@
 # function creates a mapped tree in which the mappings are based on eras defined by "limits"
-# written by Liam J. Revell 2011
+# written by Liam J. Revell 2011, 2013
 
-make.era.map<-function(tree,limits){
-	tol<-10e-6 # set tolerance
+make.era.map<-function(tree,limits,...){
+	## set tolerance
+	if(hasArg(tol)) tol<-list(...)$tol
+	else tol<-1e-5
 	# check
 	if(class(tree)!="phylo") warning("tree should be a \"phylo\" object.")
 	H<-nodeHeights(tree) # compute node heights

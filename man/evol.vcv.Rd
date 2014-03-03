@@ -2,13 +2,14 @@
 \alias{evol.vcv}
 \title{Likelihood test for variation in the evolutionary VCV matrix}
 \usage{
-evol.vcv(tree, X, maxit=2000, vars=FALSE)
+evol.vcv(tree, X, maxit=2000, vars=FALSE, ...)
 }
 \arguments{
 	\item{tree}{a phylogenetic tree in modified \code{"phylo"} format (see \code{\link{read.simmap}}).}
 	\item{X}{an \code{n} x \code{m} matrix of tip values for \code{m} continuously valued traits in \code{n} species - row names should be species names.}
 	\item{maxit}{an optional integer value indicating the maximum number of iterations for optimization - may need to be increased for large trees.}
 	\item{vars}{an optional logical value indicating whether or not to estimate the variances of the parameter estimates from the Hessian matrix.}
+	\item{...}{optional arguments.}
 }
 \description{
 	This function takes a modified \code{"phylo"} object with a mapped binary or multistate trait and data for an arbitrary number of continuously valued character. It then fits the multiple evolutionary variance-covariance matrix (rate matrix) model of Revell & Collar (2009; \emph{Evolution}).

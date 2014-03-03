@@ -2,7 +2,7 @@
 \alias{fastBM}
 \title{Fast Brownian simulation}
 \usage{
-fastBM(tree, a=0, mu=0, sig2=1, bounds=c(-Inf,Inf), internal=FALSE, nsim=1)
+fastBM(tree, a=0, mu=0, sig2=1, bounds=c(-Inf,Inf), internal=FALSE, nsim=1, ...)
 }
 \arguments{
 	\item{tree}{is a phylogenetic tree in \code{"phylo"} format.}
@@ -12,9 +12,10 @@ fastBM(tree, a=0, mu=0, sig2=1, bounds=c(-Inf,Inf), internal=FALSE, nsim=1)
 	\item{bounds}{a vector with the lower and upper bounds (respectively) for bounded Brownian simulation - by default simulation is unbounded.}
 	\item{internal}{logical value indicating whether or not to return states for internal nodes.}
 	\item{nsim}{number of simulations.}
+	\item{...}{optional arguments \code{alpha} and \code{theta} used for OU simulation. If \code{alpha} is set then \code{mu} and \code{bounds} are ignored with a warning.}
 }
 \description{
-	This function conducts fast quantitative trait simulation on a phylogeny under several different models: Brownian motion (default), BM with a trend (for \code{mu!=0}), and bounds (for \code{bounds!=c(-Inf,Inf)}). 
+	This function conducts fast quantitative trait simulation on a phylogeny under several different models: Brownian motion (default), BM with a trend (for \code{mu!=0}), bounds (for \code{bounds!=c(-Inf,Inf)}), and OU. 
 }
 \value{
 	A vector (for \code{nsim=1}) or matrix containing the tip states for the \code{n} species in the tree, and (optionally) the ancestral states for internal nodes.

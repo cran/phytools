@@ -2,11 +2,12 @@
 \alias{make.era.map}
 \title{Create "era" map on a phylogenetic tree}
 \usage{
-make.era.map(tree, limits)
+make.era.map(tree, limits, ...)
 }
 \arguments{
 	\item{tree}{a phylogenetic tree as an object of class \code{"phylo"}.}
 	\item{limits}{a vector containing the temporal limits, in time since the root node of the tree, for the mappings.}
+	\item{...}{optional arguments.}
 }
 \description{
 	This function creates a temporal map on the tree based on \code{limits} provided by the user.

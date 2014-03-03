@@ -2,7 +2,9 @@
 # based on O'Meara et al. (2006)
 # written by Liam J. Revell 2011/2012
 
-brownie.lite<-function(tree,x,maxit=2000,test="chisq",nsim=100,se=NULL){
+brownie.lite<-function(tree,x,maxit=2000,test="chisq",nsim=100,se=NULL,...){
+	if(hasArg(quiet)) quiet<-list(...)$quiet
+	else quiet<-FALSE
 	# some minor error checking
 	if(class(tree)!="phylo") stop("tree object must be of class 'phylo.'")
 	x<-matchDatatoTree(tree,x,"x")
@@ -30,7 +32,7 @@ brownie.lite<-function(tree,x,maxit=2000,test="chisq",nsim=100,se=NULL){
 	model2<-optim(s,fn=lik.multiple,y=x,C=C2,se=se,control=list(maxit=maxit),hessian=TRUE,method="L-BFGS-B",lower=l)	
 	logL2<--model2$value
 	while(logL2<logL1){
-		message("False convergence on first try; trying again with new starting values.")
+		if(!quiet) message("False convergence on first try; trying again with new starting values.")
 		model2<-optim(s*2*runif(n=length(s)),fn=lik.multiple,y=x,C=C2,se=se,control=list(maxit=maxit),hessian=TRUE,method="L-BFGS-B",lower=l)
 		logL2<--model2$value
 	}
@@ -40,7 +42,7 @@ brownie.lite<-function(tree,x,maxit=2000,test="chisq",nsim=100,se=NULL){
 	if(model2$convergence==0) converged<-"Optimization has converged."
 	else converged<-"Optimization may not have converged.  Consider increasing maxit."
 	if(test=="chisq")
-		return(list(sig2.single=sig1,a.single=a1,var.single=vcv1[1,1],logL1=logL1,k1=2,sig2.multiple=sig.i,a.multiple=a2,vcv.multiple=vcv2[1:p,1:p],logL.multiple=logL2,k2=p+1,P.chisq=pchisq(2*(logL2-as.numeric(logL1)),p-1,lower.tail=FALSE),convergence=converged))
+		xx<-list(sig2.single=sig1,a.single=a1,var.single=vcv1[1,1],logL1=logL1,k1=2,sig2.multiple=sig.i,a.multiple=a2,vcv.multiple=vcv2[1:p,1:p],logL.multiple=logL2,k2=p+1,P.chisq=pchisq(2*(logL2-as.numeric(logL1)),p-1,lower.tail=FALSE),convergence=converged)
 	else if(test=="simulation"){
 		LR<-2*(logL2-logL1)
 		X<-fastBM(tree,a=a1,sig2=sig1,nsim=(nsim-1))
@@ -55,9 +57,33 @@ brownie.lite<-function(tree,x,maxit=2000,test="chisq",nsim=100,se=NULL){
 			}
 			Psim<-Psim+(LR<=2*(sim$logL.multiple-sim$logL1))/nsim
 		}
-		return(list(sig2.single=sig1,a.single=a1,var.single=vcv1[1,1],logL1=logL1,k1=2,sig2.multiple=sig.i,a.multiple=a2,vcv.multiple=vcv2[1:p,1:p],logL.multiple=logL2,k2=p+1,P.sim=Psim,convergence=converged))
+		xx<-list(sig2.single=sig1,a.single=a1,var.single=vcv1[1,1],logL1=logL1,k1=2,sig2.multiple=sig.i,a.multiple=a2,vcv.multiple=vcv2[1:p,1:p],logL.multiple=logL2,k2=p+1,P.sim=Psim,convergence=converged)
 	}
+	class(xx)<-"brownie.lite"
+	return(xx)
 }
+
+## S3 print method for object of class "brownie.lite"
+## written by Liam J. Revell 2013
+
+print.brownie.lite<-function(x, ...){
+	if(hasArg(digits)) digits<-list(...)$digits
+	else digits<-4
+	x<-lapply(x,function(a,b) if(is.numeric(a)) round(a,b) else a,b=digits)
+	cat("ML single-rate model:\n")
+	cat("\ts^2\tse\ta\tk\tlogL\n")
+	cat(paste("value",x$sig2.single,round(sqrt(x$var.single),digits),x$a.single,x$k1,x$logL1,"\n\n",sep="\t"))
+	cat("ML multi-rate model:\n")
+	cat(paste(c("",paste("s^2(",names(x$sig2.multiple),")","\tse(",names(x$sig2.multiple),")",sep=""),
+		"a","k","logL","\n"),collapse="\t"))
+	cat(paste(paste(c("value",paste(x$sig2.multiple,round(sqrt(diag(x$vcv.multiple)),digits),sep="\t"),x$a.multiple,x$k2,
+		x$logL.multiple),collapse="\t"),"\n\n",sep=""))
+	if(!is.null(x$P.chisq)) cat(paste("P-value (based on X^2):",x$P.chisq,"\n\n"))
+	else if(!is.null(x$P.sim)) cat(paste("P-value (based on simulation):",x$P.sim,"\n\n"))
+	if(x$convergence[1]=="Optimization has converged.") cat("R thinks it has found the ML solution.\n\n")
+	else cat("Optimization may not have converged.\n\n")
+}
+
 
 # function computes the likelihood for a single rate with sampling error
 # written by Liam J. Revell 2012

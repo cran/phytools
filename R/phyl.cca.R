@@ -1,5 +1,5 @@
 # function does phylogenetic canonical correlation analysis (Revell & Harrison 2008)
-# written by Liam Revell 2011/2012
+# written by Liam Revell 2011, 2012, 2013
 
 phyl.cca<-function(tree,X,Y,lambda=1.0,fixed=TRUE){
 	# misc
@@ -24,8 +24,8 @@ phyl.cca<-function(tree,X,Y,lambda=1.0,fixed=TRUE){
 	}
 	# reorder Y & C by tree$tip.label
 	C<-C[tree$tip.label,tree$tip.label] # I think this is superfluous
-	X<-X[tree$tip.label,]
-	Y<-Y[tree$tip.label,]
+	X<-as.matrix(X[tree$tip.label,])
+	Y<-as.matrix(Y[tree$tip.label,])
 	# set or optimize lambda
 	if(fixed) logL<-likMlambda(lambda,cbind(X,Y),C)
 	else {
@@ -52,23 +52,23 @@ phyl.cca<-function(tree,X,Y,lambda=1.0,fixed=TRUE){
 	U<-X%*%A$vectors[,1:min(mX,mY)]
 	aU<-colSums(invC%*%U)/sum(invC)
 	vcvU<-t(U-one%*%aU)%*%invC%*%(U-one%*%aU)/(n-1)
-	U<-(U-one%*%aU)%*%diag(sqrt(diag(1/vcvU)))
+	U<-(U-one%*%aU)%*%Diag(sqrt(Diag(1/vcvU)))
 	V<-Y%*%B$vectors[,1:min(mX,mY)]
 	aV<-colSums(invC%*%V)/sum(invC)
 	vcvV<-t(V-one%*%aV)%*%invC%*%(V-one%*%aV)/(n-1)
-	V<-(V-one%*%aV)%*%diag(sqrt(diag(1/vcvV)))
+	V<-(V-one%*%aV)%*%Diag(sqrt(Diag(1/vcvV)))
 	# compute canonical correlations
 	aU<-colSums(invC%*%U)/sum(invC)
 	aV<-colSums(invC%*%V)/sum(invC)
 	Ccv<-round(t(cbind(U,V))%*%invC%*%cbind(U,V)/(n-1),10)
-	ccs<-diag(Ccv[1:min(mX,mY),(1+min(mX,mY)):(2*min(mX,mY))])
+	ccs<-Diag(Ccv[1:min(mX,mY),(1+min(mX,mY)):(2*min(mX,mY))])
 	if(all(Im(ccs)==0)) ccs<-Re(ccs)
 	pos<-2*(as.numeric(ccs>0)-0.5)
 	ccs<-ccs*pos
 	# reorient variables, reorient & rescale coefficents
 	U<-U*one%*%pos
-	xcoef<-A$vectors[,1:min(mX,mY)]*matrix(1,mX,1)%*%pos%*%diag(sqrt(diag(1/vcvU)))
-	ycoef<-B$vectors[,1:min(mX,mY)]%*%diag(sqrt(diag(1/vcvV)))
+	xcoef<-A$vectors[,1:min(mX,mY)]*matrix(1,mX,1)%*%pos%*%Diag(sqrt(Diag(1/vcvU)))
+	ycoef<-B$vectors[,1:min(mX,mY)]%*%Diag(sqrt(Diag(1/vcvV)))
 	# conduct hypothesis tests
 	W_lh<-rep(1,min(mX,mY))
 	chiSq<-vector()
@@ -93,5 +93,11 @@ phyl.cca<-function(tree,X,Y,lambda=1.0,fixed=TRUE){
 	return(list(cor=ccs,xcoef=xcoef,ycoef=ycoef,xscores=U,yscores=V,lambda=lambda,chisq=chiSq,p=pvalues))
 }
 
+## internal function replace Diag
+## modified from a suggestion by Travis Ingram 2013
+Diag<-function(X){
+	if(length(X)==1) X
+	else diag(X)
+}
 	
 	

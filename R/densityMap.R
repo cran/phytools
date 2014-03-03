@@ -129,3 +129,12 @@ plot.densityMap<-function(x,...){
 		}
 	}
 }
+
+## S3 print method for object of class 'densityMap'
+## written by Liam J. Revell 2013
+
+print.densityMap<-function(x,...){
+	cat("Object of class \"densityMap\" containing:\n\n")
+	cat(paste("(1) A phylogenetic tree with ",length(x$tree$tip.label)," tips and ",x$tree$Nnode," internal nodes.\n\n",sep=""))
+	cat("(2) The mapped posterior density of a discrete binary character with states (0, 1).\n\n") 
+}

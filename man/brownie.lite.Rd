@@ -2,7 +2,7 @@
 \alias{brownie.lite}
 \title{Likelihood test for rate variation in a continuous trait}
 \usage{
-brownie.lite(tree, x, maxit=2000, test="chisq", nsim=100, se=NULL)
+brownie.lite(tree, x, maxit=2000, test="chisq", nsim=100, se=NULL, ...)
 }
 \arguments{
 	\item{tree}{a phylogenetic tree in modified \code{"phylo"} format (see \code{\link{read.simmap}}, \code{\link{make.simmap}}, or \code{\link{paintSubTree}}).}
@@ -11,6 +11,7 @@ brownie.lite(tree, x, maxit=2000, test="chisq", nsim=100, se=NULL)
 	\item{test}{an optional string indicating the method for hypothesis testing - options are \code{"chisq"} or \code{"simulation"}.}
 	\item{nsim}{number of simulations (only used if \code{test="simulation"}).}
 	\item{se}{a vector containing the standard errors for each estimated mean in \code{x}.}
+	\item{...}{optional arguments.}
 }
 \description{
 	This function takes a modified \code{"phylo"} object with a mapped binary or multistate trait (see \code{\link{read.simmap}}) and data for a single continuously valued character.  It then fits the Brownian rate variation ("noncensored") model of O'Meara et al. (2006; \emph{Evolution}).  This is also the basic model implemented in Brian O'Meara's "Brownie" program.

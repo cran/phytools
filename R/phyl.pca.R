@@ -1,7 +1,7 @@
 # function to perform phylogenetic principal components analysis
 # multiple morphological traits in Y
 # also can use lambda transformation in which lambda is optimized by ML
-# written by Liam Revell 2010/2011, ref. Revell (2009; Evolution)
+# written by Liam Revell 2010, 2011, 2013 ref. Revell (2009; Evolution)
 
 phyl.pca<-function(tree,Y,method="BM",mode="cov"){
 	# check tree
@@ -62,8 +62,46 @@ phyl.pca<-function(tree,Y,method="BM",mode="cov"){
 		result$lambda<-lambda
 		result$logL.lambda<-logL
 	}
+	## assign class attribute (for S3 methods)
+	class(result)<-"phyl.pca"
 	# return result
 	return(result)
 }
 
+## S3 method for object of class "phyl.pca
+## modified from code provided by Joan Maspons
+
+## S3 print method for "phyl.pca"
+## modified from code provided by Joan Maspons
+print.phyl.pca<-function(x, ...){
+	cat("Phylogenetic pca\n")
+	cat("Starndard deviations:\n")
+	print(sqrt(diag(x$Eval)))
+	cat("Loads:\n")
+	print(x$L)
+	if("lambda" %in% names(x)){
+    		cat("lambda:\n")
+    		print(x$lambda)
+	}
+}
+
+## S3 summary method for "phyl.pca"
+## modified from code provided by Joan Maspons
+summary.phyl.pca<-function(object, ...){
+	cat("Importance of components:\n")
+	sd<-sqrt(diag(object$Eval))
+	varProp<- diag(object$Eval)/sum(object$Eval)
+	impp<-rbind("Standard deviation"=sd,"Proportion of Variance"=varProp,
+		"Cumulative Proportion"=cumsum(varProp))
+	print(impp)
+	xx<-list(sdev=sd,importance=impp)
+	class(xx)<-"summary.phyl.pca"
+	invisible(xx)
+}
+
+## S3 biplot method for "phyl.pca"
+## modified from code provided by Joan Maspons
+biplot.phyl.pca<- function(x, ...){
+	biplot(x$S, x$L, ...)
+}
 

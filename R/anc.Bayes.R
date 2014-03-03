@@ -28,7 +28,7 @@ anc.Bayes<-function(tree,x,ngen=10000,control=list()){
 	
 	# function returns the prior
 	log.prior<-function(pr.mean,pr.var,sig2,a,y)
-		pp<-dexp(sig2,rate=1/pr.mean[1],log=TRUE)+sum(dnorm(c(a,y),sd=sqrt(pr.var[1+1:tree$Nnode]),log=TRUE))
+		pp<-dexp(sig2,rate=1/pr.mean[1],log=TRUE)+sum(dnorm(c(a,y),mean=pr.mean[2:length(pr.mean)],sd=sqrt(pr.var[1+1:tree$Nnode]),log=TRUE))
 
 	# compute C
 	C<-vcvPhylo(tree)

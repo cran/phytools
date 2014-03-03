@@ -83,3 +83,11 @@ plot.contMap<-function(x,...){
 	plot(x,fsize=fsize,ftype=ftype,lwd=lwd,legend=legend,outline=outline,leg.txt=leg.txt,type=type,mar=mar,direction=direction)
 }
 
+## S3 print method for object of class 'contMap'
+## written by Liam J. Revell 2013
+
+print.contMap<-function(x,digits=6,...){
+	cat("Object of class \"contMap\" containing:\n\n")
+	cat(paste("(1) A phylogenetic tree with ",length(x$tree$tip.label)," tips and ",x$tree$Nnode," internal nodes.\n\n",sep=""))
+	cat(paste("(2) A mapped continuous trait on the range (",round(x$lims[1],digits),", ",round(x$lims[2],digits),").\n\n",sep="")) 
+}
