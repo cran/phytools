@@ -1,24 +1,185 @@
 # some utility functions
 # written by Liam J. Revell 2011, 2012, 2013, 2014
 
-## function for midpoint rooting
+## function to drop one or more tips from a tree but retain all ancestral nodes as singletons
 ## written by Liam J. Revell 2014
-midpoint.root<-function(tree){
-	D<-cophenetic(tree)
-	dd<-max(D)
-	ii<-which(D==dd)[1]
-	ii<-c(ceiling(ii/nrow(D)),ii%%nrow(D))
-	if(ii[2]==0) ii[2]<-nrow(D)
-	spp<-rownames(D)[ii]
-	nn<-which(tree$tip.label==spp[2])
-	tree<-reroot(tree,nn,tree$edge.length[which(tree$edge[,2]==nn)])
-	aa<-getAncestors(tree,which(tree$tip.label==spp[1]))
-	D<-c(0,dist.nodes(tree)[which(tree$tip.label==spp[1]),aa])
-	names(D)[1]<-which(tree$tip.label==spp[1])
-	i<-0
-	while(D[i+1]<(dd/2)) i<-i+1
-	tree<-reroot(tree,as.numeric(names(D)[i]),D[i+1]-dd/2)
+drop.tip.singleton<-function(tree,tip){
+	N<-length(tree$tip.label)
+	m<-length(tip)
+	ii<-sapply(tip,function(x,y) which(y==x),y=tree$tip.label)
+	tree$tip.label<-tree$tip.label[-ii]
+	ii<-sapply(ii,function(x,y) which(y==x),y=tree$edge[,2])
+	tree$edge<-tree$edge[-ii,]
+	tree$edge.length<-tree$edge.length[-ii]
+	tree$edge[tree$edge<=N]<-as.integer(rank(tree$edge[tree$edge<=N]))
+	tree$edge[tree$edge>N]<-tree$edge[tree$edge>N]-m
+	N<-N-m
+	if(any(sapply(tree$edge[tree$edge[,2]>N,2],"%in%",tree$edge[,1])==FALSE)) internal<-TRUE
+	else internal<-FALSE
+	while(internal){
+		ii<-which(sapply(tree$edge[,2],"%in%",c(1:N,tree$edge[,1]))==FALSE)[1]
+		nn<-tree$edge[ii,2]
+		tree$edge<-tree$edge[-ii,]
+		tree$edge.length<-tree$edge.length[-ii]
+		tree$edge[tree$edge>nn]<-tree$edge[tree$edge>nn]-1
+		tree$Nnode<-tree$Nnode-length(ii)
+		if(any(sapply(tree$edge[tree$edge[,2]>N,2],"%in%",tree$edge[,1])==FALSE)) internal<-TRUE
+		else internal<-FALSE
+	}
 	tree
+}
+
+## S3 print method for object of class 'describe.simmap'
+## written by Liam J. Revell 2014
+print.describe.simmap<-function(x,...){
+	if(class(x$tree)=="multiPhylo"){
+		cat(paste(length(x$tree),"trees with a mapped discrete character with states:\n",paste(colnames(x$ace),collapse=", "),"\n\n"))
+		cat(paste("trees have",colMeans(x$count)["N"],"changes between states on average\n\n"))
+		cat(paste("changes are of the following types:\n"))
+		aa<-t(as.matrix(colMeans(x$count)[2:ncol(x$count)]))
+		rownames(aa)<-"x->y"
+		print(aa)
+		cat(paste("\nmean total time spent in each state is:\n"))
+		print(matrix(c(colMeans(x$times),colMeans(x$times[,1:ncol(x$times)]/x$times[,ncol(x$times)])),2,ncol(x$times),byrow=TRUE,
+			dimnames=list(c("raw","prop"),c(colnames(x$times)))))
+		cat("\n")
+	} else if(class(x$tree)=="phylo"){
+		cat(paste("1 tree with a mapped discrete character with states:\n",paste(colnames(x$Tr),collapse=", "),"\n\n"))
+		cat(paste("tree has",x$N,"changes between states\n\n"))
+		cat(paste("changes are of the following types:\n"))
+		print(x$Tr)
+		cat(paste("\nmean total time spent in each state is:\n"))
+		print(x$times)
+		cat("\n")
+	}
+}
+
+## S3 plot method for object of class 'describe.simmap'
+## written by Liam J. Revell 2014
+plot.describe.simmap<-function(x,...){
+	if(hasArg(lwd)) lwd<-list(...)$lwd
+	else lwd<-2
+	if(hasArg(cex)) cex<-list(...)$cex
+	else cex<-c(0.6,0.4)
+	if(length(cex)==1) cex<-rep(cex,2)
+	if(hasArg(type)) type<-list(...)$type
+	else type<-"phylogram"
+	if(class(x$tree)=="multiPhylo"){
+		states<-colnames(x$ace)
+		if(hasArg(colors)) colors<-list(...)$colors
+		else colors<-setNames(palette()[1:length(states)],states)
+		plotTree(x$tree[[1]],lwd=lwd,offset=0.15*max(nodeHeights(x$tree[[1]])),...)
+		nodelabels(pie=x$ace,piecol=1:length(states),cex=cex[1])
+		if(!is.null(x$tips)) tips<-x$tips else tips<-to.matrix(getStates(x$tree[[1]],"tips"),seq=states) 
+		tiplabels(pie=tips,piecol=1:length(states),cex=cex[2])
+	} else if(class(x$tree)=="phylo"){
+		states<-colnames(x$Tr)
+		if(hasArg(colors)) colors<-list(...)$colors
+		else colors<-setNames(palette()[1:length(states)],states)
+		plotSimmap(x$tree,lwd=lwd,colors=colors,type=type)
+	}
+}
+
+
+# function to summarize the results of stochastic mapping
+# written by Liam J. Revell 2013, 2014
+describe.simmap<-function(tree,...){
+	if(hasArg(plot)) plot<-list(...)$plot
+	else plot<-FALSE
+	if(hasArg(check.equal)) check.equal<-list(...)$check.equal
+	else check.equal<-FALSE
+	if(hasArg(message)) message<-list(...)$message
+	else message<-FALSE
+	if(class(tree)=="multiPhylo"){
+		if(check.equal){
+			TT<-sapply(tree,function(x,y) sapply(y,all.equal.phylo,x),y=tree)
+			check<-all(TT)
+			if(!check) warning("some trees not equal")
+		}
+		YY<-getStates(tree)
+		states<-sort(unique(as.vector(YY)))
+		ZZ<-t(apply(YY,1,function(x,levels,Nsim) summary(factor(x,levels))/Nsim,levels=states,Nsim=length(tree)))
+		XX<-countSimmap(tree,states,FALSE)
+		XX<-XX[,-(which(as.vector(diag(-1,length(states)))==-1)+1)]
+		AA<-t(sapply(unclass(tree),function(x) c(colSums(x$mapped.edge),sum(x$edge.length))))
+		colnames(AA)[ncol(AA)]<-"total"
+		BB<-getStates(tree,type="tips")
+		CC<-t(apply(BB,1,function(x,levels,Nsim) summary(factor(x,levels))/Nsim,levels=states,Nsim=length(tree)))
+		x<-list(count=XX,times=AA,ace=ZZ,tips=CC,tree=tree)
+		class(x)<-"describe.simmap"
+	} else if(class(tree)=="phylo"){
+		XX<-countSimmap(tree,message=FALSE)
+		YY<-getStates(tree)
+		states<-sort(unique(YY))
+		AA<-setNames(c(colSums(tree$mapped.edge),sum(tree$edge.length)),c(colnames(tree$mapped.edge),"total"))
+		AA<-rbind(AA,AA/AA[length(AA)]); rownames(AA)<-c("raw","prop")
+		x<-list(N=XX$N,Tr=XX$Tr,times=AA,states=YY,tree=tree)
+		class(x)<-"describe.simmap"
+	}
+	if(message) print(x)
+	if(plot) plot(x)
+	x
+}
+
+## function finds the height of a given node
+## written by Liam Revell 2014
+nodeheight<-function(tree,node){
+	if(node==(length(tree$tip.label)+1)) h<-0
+	else {
+		a<-setdiff(c(getAncestors(tree,node),node),length(tree$tip.label)+1)
+		h<-sum(tree$edge.length[sapply(a,function(x,e) which(e==x),e=tree$edge[,2])])
+	}
+	h
+}
+
+# function splits tree at split
+# written by Liam Revell 2011, 2014
+splitTree<-function(tree,split){
+	if(split$node>length(tree$tip.label)){
+		# first extract the clade given by shift$node
+		tr2<-extract.clade(tree,node=split$node)
+		tr2$root.edge<-tree$edge.length[which(tree$edge[,2]==split$node)]-split$bp
+		#now remove tips in tr2 from tree
+		tr1<-drop.clade(tree,tr2$tip.label)
+		tr1$edge.length[match(which(tr1$tip.label=="NA"),tr1$edge[,2])]<-split$bp
+	} else {
+		# first extract the clade given by shift$node
+		tr2<-list(edge=matrix(c(2L,1L),1,2),tip.label=tree$tip.label[split$node],edge.length=tree$edge.length[which(tree$edge[,2]==split$node)]-split$bp,Nnode=1L)
+		class(tr2)<-"phylo"
+		# now remove tip in tr2 from tree
+		tr1<-tree
+		tr1$edge.length[match(which(tr1$tip.label==tr2$tip.label[1]),tr1$edge[,2])]<-split$bp
+		tr1$tip.label[which(tr1$tip.label==tr2$tip.label[1])]<-"NA"
+	}
+	trees<-list(tr1,tr2)
+	class(trees)<-"multiPhylo"
+	trees
+}
+
+# fast pairwise MRCA function
+# written by Liam Revell 2012, 2014
+fastMRCA<-function(tree,sp1,sp2){
+	x<-match(sp1,tree$tip.label)
+	y<-match(sp2,tree$tip.label)
+	a<-c(x,getAncestors(tree,x))
+	b<-c(y,getAncestors(tree,y))
+	z<-a%in%b
+	return(a[min(which(z))])
+}
+
+## function to find the height of the MRCA of sp1 & sp2
+## written by Liam J. Revell 2014
+fastHeight<-function(tree,sp1,sp2){
+	sp1<-which(tree$tip.label==sp1)
+	sp2<-which(tree$tip.label==sp2)
+	a1<-c(sp1,getAncestors(tree,sp1))
+	a2<-c(sp2,getAncestors(tree,sp2))
+	a12<-intersect(a1,a2)
+	if(length(a12)>1){ 
+		a12<-a12[2:length(a12)-1]
+		h<-sapply(a12,function(i,tree) tree$edge.length[which(tree$edge[,2]==i)],tree=tree)
+		return(sum(h))
+	} else return(0)
 }
 
 ## function gets ancestor node numbers, to be used internally by 
@@ -38,6 +199,68 @@ getAncestors<-function(tree,node,type=c("all","parent")){
 		aa<-tree$edge[which(tree$edge[,2]==node),1]
 		return(aa)
 	} else stop("do not recognize type")
+}
+
+## function to label clades
+## written by Liam J. Revell 2014
+cladelabels<-function(tree=NULL,text,node,offset=NULL,wing.length=NULL,cex=1){
+	lastPP<-get("last_plot.phylo",envir=.PlotPhyloEnv)
+	if(is.null(tree)){
+		wing.length<-1
+		if(is.null(offset)) offset<-8
+		tree<-list(edge=lastPP$edge,
+			tip.label=1:lastPP$Ntip,
+			Nnode=lastPP$Nnode)
+		H<-matrix(lastPP$xx[tree$edge],nrow(tree$edge),2)
+		tree$edge.length<-H[,2]-H[,1]
+		class(tree)<-"phylo"
+	}
+	if(is.null(offset)) offset<-0.5
+	xx<-mapply(labelSubTree,node,text,
+		MoreArgs=list(tree=tree,pp=lastPP,offset=offset,wl=wing.length,cex=cex))
+}
+
+## internal function used by cladelabels
+## written by Liam J. Revell 2014
+labelSubTree<-function(tree,nn,label,pp,offset,wl,cex){
+	if(is.null(wl)) wl<-1
+	tree<-reorder(tree)
+	tips<-getDescendants(tree,nn)
+	tips<-tips[tips<=length(tree$tip.label)]
+	ec<-0.7 ## expansion constant
+	sw<-pp$cex*max(strwidth(tree$tip.label[tips]))
+	sh<-pp$cex*max(strheight(tree$tip.label))
+	cw<-mean(strwidth(LETTERS))	
+	h<-max(sapply(tips,function(x,tree)
+		nodeHeights(tree)[which(tree$edge[,2]==x),2],
+		tree=tree))+sw+offset*cw
+	lines(c(h,h),range(tips)+ec*c(-sh,sh))
+	lines(c(h-wl*cw,h),
+		c(range(tips)[1]-ec*sh,range(tips)[1]-ec*sh))
+	lines(c(h-wl*cw,h),
+		c(range(tips)[2]+ec*sh,range(tips)[2]+ec*sh))
+	text(h+cw,mean(range(tips)),
+		label,srt=90,pos=1,cex=cex)
+}
+
+## function for midpoint rooting
+## written by Liam J. Revell 2014
+midpoint.root<-function(tree){
+	D<-cophenetic(tree)
+	dd<-max(D)
+	ii<-which(D==dd)[1]
+	ii<-c(ceiling(ii/nrow(D)),ii%%nrow(D))
+	if(ii[2]==0) ii[2]<-nrow(D)
+	spp<-rownames(D)[ii]
+	nn<-which(tree$tip.label==spp[2])
+	tree<-reroot(tree,nn,tree$edge.length[which(tree$edge[,2]==nn)])
+	aa<-getAncestors(tree,which(tree$tip.label==spp[1]))
+	D<-c(0,dist.nodes(tree)[which(tree$tip.label==spp[1]),aa])
+	names(D)[1]<-which(tree$tip.label==spp[1])
+	i<-0
+	while(D[i+1]<(dd/2)) i<-i+1
+	tree<-reroot(tree,as.numeric(names(D)[i]),D[i+1]-dd/2)
+	tree
 }
 
 # function computes phylogenetic variance-covariance matrix, including for internal nodes
@@ -158,13 +381,13 @@ nodeHeights<-function(tree){
 }
 
 ## function drops all the leaves from the tree & collapses singleton nodes
-## written by Liam J. Revell 2013
+## written by Liam J. Revell 2013, 2014
 drop.leaves<-function(tree,...){
 	## optional arguments
 	if(hasArg(keep.tip.labels)) keep.tip.labels<-list(...)$keep.tip.labels
 	else keep.tip.labels<-FALSE
 	## end optional arguments
-	n<-length(tree$tip)
+	n<-length(tree$tip.label)
 	edge<-tree$edge
 	edge[edge>n]<--edge[edge>n]+n
 	ii<-which(edge[,2]>0)
@@ -304,9 +527,9 @@ sampleFrom<-function(xbar=0,xvar=1,n=1,randn=NULL,type="norm"){
 }
 
 # function adds a new tip to the tree
-# written by Liam J. Revell 2012, 2013
+# written by Liam J. Revell 2012, 2013, 2014
 bind.tip<-function(tree,tip.label,edge.length=NULL,where=NULL,position=0){
-	if(is.null(where)) where<-length(tree$tip)+1
+	if(is.null(where)) where<-length(tree$tip.label)+1
 	if(where<=length(tree$tip.label)&&position==0){
 		pp<-1e-12
 		if(tree$edge.length[which(tree$edge[,2]==where)]<=1e-12){
@@ -316,7 +539,7 @@ bind.tip<-function(tree,tip.label,edge.length=NULL,where=NULL,position=0){
 	} else pp<-position
 	if(is.null(edge.length)&&is.ultrametric(tree)){
 		H<-nodeHeights(tree)
-		if(where==(length(tree$tip)+1)) edge.length<-max(H)
+		if(where==(length(tree$tip.label)+1)) edge.length<-max(H)
 		else edge.length<-max(H)-H[tree$edge[,2]==where,2]+position
 	}
 	tip<-list(edge=matrix(c(2,1),1,2),
@@ -361,17 +584,6 @@ findMRCA<-function(tree,tips=NULL,type=c("node","height")){
 		Y<-apply(X,c(1,2),function(x,y,z) y[which(z==x)[1]],y=H,z=tree$edge)
 		if(type=="height") return(Y[which.min(Y)]) else return(X[which.min(Y)])
 	}
-}
-
-# fast pairwise MRCA function
-# written by Liam Revell 2012
-fastMRCA<-function(tree,sp1,sp2){
-	x<-match(sp1,tree$tip.label)
-	y<-match(sp2,tree$tip.label)
-	a<-Ancestors(tree,x)
-	b<-Ancestors(tree,y)
-	z<-a%in%b
-	return(a[min(which(z))])
 }
 
 # function reorders simmap tree
@@ -439,78 +651,8 @@ rescaleSimmap<-function(tree,totalDepth=1.0){
 	} else message("tree should be an object of class \"phylo\" or \"multiPhylo\"")
 }
 
-# function to summarize the results of stochastic mapping
-# written by Liam J. Revell 2013
-describe.simmap<-function(tree,...){
-	if(hasArg(plot)) plot<-list(...)$plot
-	else plot<-FALSE
-	if(hasArg(check.equal)) check.equal<-list(...)$check.equal
-	else check.equal<-FALSE
-	if(hasArg(message)) message<-list(...)$message
-	else message<-TRUE
-	if(class(tree)=="multiPhylo"){
-		if(check.equal){
-			TT<-sapply(tree,function(x,y) sapply(y,all.equal.phylo,x),y=tree)
-			check<-all(TT)
-			if(!check) warning("some trees not equal")
-		}
-		YY<-getStates(tree)
-		states<-sort(unique(as.vector(YY)))
-		ZZ<-t(apply(YY,1,function(x,levels,Nsim) summary(factor(x,levels))/Nsim,levels=states,Nsim=length(tree)))
-		XX<-countSimmap(tree,states,FALSE)
-		XX<-XX[,-(which(as.vector(diag(-1,length(states)))==-1)+1)]
-		AA<-t(sapply(unclass(tree),function(x) c(colSums(x$mapped.edge),sum(x$edge.length))))
-		colnames(AA)[ncol(AA)]<-"total"
-		BB<-getStates(tree,type="tips")
-		CC<-t(apply(BB,1,function(x,levels,Nsim) summary(factor(x,levels))/Nsim,levels=states,Nsim=length(tree)))
-		if(message){
-			cat(paste(length(tree),"trees with a mapped discrete character with states:\n",paste(states,collapse=", "),"\n\n"))
-			cat(paste("trees have",colMeans(XX)["N"],"changes between states on average\n\n"))
-			cat(paste("changes are of the following types:\n"))
-			aa<-t(as.matrix(colMeans(XX)[2:ncol(XX)])); rownames(aa)<-"x->y"; print(aa)
-			cat(paste("\nmean total time spent in each state is:\n"))
-			print(matrix(c(colMeans(AA),colMeans(AA[,1:ncol(AA)]/AA[,ncol(AA)])),2,ncol(AA),byrow=TRUE,dimnames=list(c("raw","prop"),c(colnames(AA)))))
-			cat("\n")
-		}
-		if(plot){
-			plot(tree[[1]],edge.width=2,no.margin=TRUE,label.offset=0.015*max(nodeHeights(tree[[1]])),...)
-			nodelabels(pie=ZZ,piecol=1:length(states),cex=0.6)
-			tips<-CC
-			tiplabels(pie=tips,piecol=1:length(states),cex=0.5)
-			L<-list(count=XX,times=AA,tips=tips,ace=ZZ,legend=setNames(states,palette()[1:length(states)]))
-			if(message) invisible(L) else return(L)
-		} else {
-			L<-list(count=XX,times=AA,ace=ZZ)
-			if(message) invisible(L) else return(L)
-		}
-	} else if(class(tree)=="phylo"){
-		XX<-countSimmap(tree,message=FALSE)
-		YY<-getStates(tree)
-		states<-sort(unique(YY))
-		AA<-setNames(c(colSums(tree$mapped.edge),sum(tree$edge.length)),c(colnames(tree$mapped.edge),"total"))
-		AA<-rbind(AA,AA/AA[length(AA)]); rownames(AA)<-c("raw","prop")
-		if(message){
-			cat(paste("1 tree with a mapped discrete character with states:\n",paste(states,collapse=", "),"\n\n"))
-			cat(paste("tree has",XX$N,"changes between states\n\n"))
-			cat(paste("changes are of the following types:\n"))
-			print(XX$Tr)
-			cat(paste("\nmean total time spent in each state is:\n"))
-			print(AA)
-			cat("\n")
-		}
-		if(plot){
-			plotSimmap(tree,colors=setNames(palette()[1:length(states)],states),pts=FALSE)
-			L<-list(N=XX$N,Tr=XX$Tr,times=AA,states=YY,legend=setNames(states,palette()[1:length(states)]))
-			if(message) invisible(L) else return(L)
-		} else { 
-			L<-list(N=XX$N,Tr=XX$Tr,times=AA,states=YY)
-			if(message) invisible(L) else return(L)
-		}
-	}
-}
-
 # function to get states at internal nodes from simmap style trees
-# written by Liam J. Revell 2013
+# written by Liam J. Revell 2013, 2014
 getStates<-function(tree,type=c("nodes","tips")){
 	type<-type[1]
 	if(class(tree)=="multiPhylo"){
@@ -519,7 +661,7 @@ getStates<-function(tree,type=c("nodes","tips")){
 	} else if(class(tree)=="phylo"){ 
 		if(type=="nodes"){
 			y<-setNames(sapply(tree$maps,function(x) names(x)[1]),tree$edge[,1])
-			y<-y[as.character(length(tree$tip)+1:tree$Nnode)]
+			y<-y[as.character(length(tree$tip.label)+1:tree$Nnode)]
 		} else if(type=="tips"){
 			y<-setNames(sapply(tree$maps,function(x) names(x)[length(x)]),tree$edge[,2])
 			y<-setNames(y[as.character(1:length(tree$tip.label))],tree$tip.label)
@@ -712,7 +854,7 @@ likMlambda<-function(lambda,X,C){
 matchDatatoTree<-function(tree,x,name){
 	if(is.matrix(x)) x<-x[,1]
 	if(is.null(names(x))){
-		if(length(x)==length(tree$tip)){
+		if(length(x)==length(tree$tip.label)){
 			print(paste(name,"has no names; assuming x is in the same order as tree$tip.label"))
 			names(x)<-tree$tip.label
 		} else
@@ -799,13 +941,13 @@ getSisters<-function(tree,node,mode=c("number","label")){
 }
 
 # gets descendant node numbers
-# written by Liam Revell 2012, 2013
+# written by Liam Revell 2012, 2013, 2014
 getDescendants<-function(tree,node,curr=NULL){
 	if(is.null(curr)) curr<-vector()
 	daughters<-tree$edge[which(tree$edge[,1]==node),2]
 	curr<-c(curr,daughters)
 	if(length(curr)==0&&node<=length(tree$tip.label)) curr<-node
-	w<-which(daughters>=length(tree$tip))
+	w<-which(daughters>=length(tree$tip.label))
 	if(length(w)>0) for(i in 1:length(w)) 
 		curr<-getDescendants(tree,daughters[w[i]],curr)
 	return(curr)
@@ -814,7 +956,8 @@ getDescendants<-function(tree,node,curr=NULL){
 # function computes vcv for each state, and stores in array
 # written by Liam J. Revell 2011/2012
 multiC<-function(tree){
-	n<-length(tree$tip); m<-ncol(tree$mapped.edge)
+	n<-length(tree$tip.label)
+	m<-ncol(tree$mapped.edge)
 	# compute separate C for each state
 	mC<-list()
 	for(i in 1:m){

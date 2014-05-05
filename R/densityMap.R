@@ -1,9 +1,11 @@
 # function plots posterior density of mapped states from stochastic mapping
-# written by Liam J. Revell 2012-2013
+# written by Liam J. Revell 2012, 2013, 2014
 
 densityMap<-function(trees,res=100,fsize=NULL,ftype=NULL,lwd=3,check=FALSE,legend=NULL,outline=FALSE,type="phylogram",direction="rightwards",plot=TRUE,...){
 	if(hasArg(mar)) mar<-list(...)$mar
 	else mar<-rep(0.3,4)
+	if(hasArg(offset)) offset<-list(...)$offset
+	else offset<-NULL
 	tol<-1e-10
 	if(class(trees)!="multiPhylo") stop("trees not 'multiPhylo' object; just use plotSimmap")
 	h<-sapply(unclass(trees),function(x) max(nodeHeights(x)))
@@ -47,12 +49,12 @@ densityMap<-function(trees,res=100,fsize=NULL,ftype=NULL,lwd=3,check=FALSE,legen
 	tree$mapped.edge<-makeMappedEdge(tree$edge,tree$maps)
 	tree$mapped.edge<-tree$mapped.edge[,order(as.numeric(colnames(tree$mapped.edge)))]
 	x<-list(tree=tree,cols=cols); class(x)<-"densityMap"
-	if(plot) plot.densityMap(x,fsize=fsize,ftype=ftype,lwd=lwd,legend=legend,outline=outline,type=type,mar=mar,direction=direction)
+	if(plot) plot.densityMap(x,fsize=fsize,ftype=ftype,lwd=lwd,legend=legend,outline=outline,type=type,mar=mar,direction=direction,offset=offset)
 	invisible(x)
 }
 
 # function
-# written by Liam J. Revell 2012-2013
+# written by Liam J. Revell 2012, 2013, 2014
 
 plot.densityMap<-function(x,...){
 	if(class(x)=="densityMap"){
@@ -79,6 +81,8 @@ plot.densityMap<-function(x,...){
 	else mar<-rep(0.3,4)
 	if(hasArg(direction)) direction<-list(...)$direction
 	else direction<-"rightwards"
+	if(hasArg(offset)) offset<-list(...)$offset
+	else offset<-NULL
 	if(is.null(legend)) legend<-0.5*max(H)
 	if(is.null(fsize)) fsize<-c(1,1)
 	if(length(fsize)==1) fsize<-rep(fsize,2)
@@ -97,11 +101,11 @@ plot.densityMap<-function(x,...){
 		else ylim<-NULL
 		if(outline){
 			par(col="white")
-			plotTree(tree,fsize=fsize[1],lwd=lwd+2,offset=0.2*lwd/3+0.2/3,ftype=ftype[1],ylim=ylim,mar=mar,direction=direction)
+			plotTree(tree,fsize=fsize[1],lwd=lwd+2,offset=offset+0.2*lwd/3+0.2/3,ftype=ftype[1],ylim=ylim,mar=mar,direction=direction)
 			par(col="black")
 			add<-TRUE
 		} else add<-FALSE
-		plotSimmap(tree,cols,pts=FALSE,lwd=lwd,fsize=fsize[1],mar=mar,ftype=ftype[1],add=add,ylim=ylim,direction=direction)
+		plotSimmap(tree,cols,pts=FALSE,lwd=lwd,fsize=fsize[1],mar=mar,ftype=ftype[1],add=add,ylim=ylim,direction=direction,offset=offset)
 		if(legend){
 			ff<-function(dd){
 				if(!("."%in%dd)) dig<-0

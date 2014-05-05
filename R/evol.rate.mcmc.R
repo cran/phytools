@@ -374,28 +374,6 @@ ave.rates<-function(tree,shift,tips,sig1,sig2,ave.shift,showTree=TRUE){
 	return(list(sig1=sig1,sig2=sig2))
 }
 
-# function splits tree at split
-# written by Liam Revell 2011
-splitTree<-function(tree,split){
-	if(split$node>length(tree$tip)){
-		# first extract the clade given by shift$node
-		tr2<-extract.clade(tree,node=split$node)
-		tr2$root.edge<-tree$edge.length[which(tree$edge[,2]==split$node)]-split$bp
-		#now remove tips in tr2 from tree
-		tr1<-drop.clade(tree,tr2$tip.label)
-		tr1$edge.length[match(which(tr1$tip.label=="NA"),tr1$edge[,2])]<-split$bp
-	} else {
-		# first extract the clade given by shift$node
-		tr2<-list(edge=matrix(c(2L,1L),1,2),tip.label=tree$tip.label[split$node],edge.length=tree$edge.length[which(tree$edge[,2]==split$node)]-split$bp,Nnode=1L)
-		class(tr2)<-"phylo"
-		# now remove tip in tr2 from tree
-		tr1<-tree
-		tr1$edge.length[match(which(tr1$tip.label==tr2$tip.label[1]),tr1$edge[,2])]<-split$bp
-		tr1$tip.label[which(tr1$tip.label==tr2$tip.label[1])]<-"NA"
-	}
-	trees<-list(tr1,tr2); class(trees)<-"multiPhylo"
-	return(trees)
-}
 
 
 

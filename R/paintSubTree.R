@@ -1,3 +1,23 @@
+## paint branch(es)
+## written by Liam J. Revell 2014
+
+paintBranches<-function(tree,edge,state,anc.state="1"){
+	if(is.null(tree$maps)) maps<-lapply(tree$edge.length,function(x) setNames(x,anc.state))
+	else maps<-tree$maps
+	ii<-sapply(edge,function(x,y) which(y==x),y=tree$edge[,2])
+	for(i in 1:length(ii)) maps[[ii[i]]]<-setNames(tree$edge.length[[ii[i]]],state)
+	## build mapped.edge matrix
+	s<-vector()
+	for(i in 1:nrow(tree$edge)) s<-c(s,names(maps[[i]]))
+	s<-unique(s)
+	mapped.edge<-matrix(0,length(tree$edge.length),length(s),dimnames=list(edge=apply(tree$edge,1,function(x) paste(x,collapse=",")),state=s))
+	for(i in 1:length(maps)) for(j in 1:length(maps[[i]])) mapped.edge[i,names(maps[[i]])[j]]<-mapped.edge[i,names(maps[[i]])[j]]+maps[[i]][j]
+	## add attributes to the tree
+	tree$mapped.edge<-mapped.edge
+	tree$maps<-maps
+	tree
+}
+
 # function paints a subtree
 # written by Liam Revell 2012, 2013
 

@@ -1,5 +1,5 @@
-607e738355e779fef8362e42b58cf53f *DESCRIPTION
-c83149473af73ea955cacb3b96a3bc63 *NAMESPACE
+1171494595c7a39b8a76e820bbc0bed8 *DESCRIPTION
+08324d49454acb64188cf62623a1e0cb *NAMESPACE
 8f41acffe68735aa7449b5e66a9812b1 *R/add.everywhere.R
 34423edfd64ed1b237c63a0364288bdf *R/add.random.R
 17eb477b7b99dbdf228b0694b6ed01f4 *R/add.species.to.genus.R
@@ -13,11 +13,11 @@ a6e7c12432775c0db331677fb7161d07 *R/backbonePhylo.R
 0d03bcd21044ddeee058865f32156f3d *R/branching.diffusion.R
 2ad5f3aa5021c7cc67269d6cb21e4ffd *R/brownie.lite.R
 6c3bf1e39384f5e24d711ec7ac0d0a2c *R/brownieREML.R
-bc0c97e2e006f1310ef70c2a4c3a3d6c *R/contMap.R
-be7af8d9b3c64c681fad25234fafbee9 *R/densityMap.R
+fe5f6324e28faf554ce2eb9fb9787ea0 *R/contMap.R
+de2967fe371b7ed8797c822f2272aecf *R/densityMap.R
 b707fc247b889daacea864a75e0915ed *R/drop.tip.simmap.R
 bd862cef57b58a4221f0c761d4284d88 *R/estDiversity.R
-7469de53938ca9c617c767bc7ad5b807 *R/evol.rate.mcmc.R
+0919b8e73cf8c0ed1c84a1033cc933a5 *R/evol.rate.mcmc.R
 3d4680366f8b1b63b8a196f7372ca299 *R/evol.vcv.R
 b645683560ce499323142e5bb8917e3e *R/evolvcv.lite.R
 164c5aba763c4823fae1a2747cbbdde8 *R/exhaustiveMP.R
@@ -30,7 +30,7 @@ de4661e9387e345e11ba6a96f6dfb690 *R/fastBM.R
 984fab2bf406a04876c19b8d4d6e4ec7 *R/fitDiversityModel.R
 845b53ce3f60f6ed7d3728a67da0ecfc *R/getExtant.R
 b16b9534c1eb7d1757a070d7c58e5aaa *R/ltt.R
-f7087031d627e16e1c82a5d57ef621d9 *R/ltt95.R
+5a03095333cdc6926135e17a06b5718b *R/ltt95.R
 429a79ff1742fc3a8f628d441df34710 *R/make.era.map.R
 cfc2877bc3d81794be29d6b97bfaa683 *R/make.simmap.R
 23b9e915f9fc8b9c46d81c573afbbedc *R/map.overlap.R
@@ -42,7 +42,7 @@ b040e1eaf64ad302cdbbc1c0cb742cd7 *R/mrp.supertree.R
 7e33687b42d9ee02d52ae36834f4c122 *R/multi.mantel.R
 33b3968d9f4a82d3faaee75dae4ebdec *R/multiRF.R
 af3ee4b2e3a749a9d0040ca6fceb40a5 *R/optim.phylo.ls.R
-39dcfe7cb658f1d4cf9ad3f8fb0fbd0d *R/paintSubTree.R
+32cf021867e184c4d17912a931b8d2e5 *R/paintSubTree.R
 952ff55370bb3fa70c3351bc342bd473 *R/pbtree.R
 0432d301015fb3848dbab54f3740d56e *R/pgls.Ives.R
 b4c4bd523ed7b6e4742cf3eacdcc681e *R/phenogram.R
@@ -63,6 +63,7 @@ eb798ee8249519bd2afc6c132f24a065 *R/ratebystate.R
 02f63bb9101ed6bf2e655d1d16a86033 *R/read.newick.R
 3efb9fb72cf2e6d517750dd34647606c *R/read.simmap.R
 70c86da3b51847705f3114ff102e4df2 *R/rerootingMethod.R
+54a7286b38ed9310390c726c151a25af *R/roundPhylogram.R
 a734b9387333dc2d9a5ece1f8ee06f98 *R/sim.corrs.R
 ba0d663181e5969c26c5135138eedf06 *R/sim.history.R
 f21071a47bc22c9c76ef3136ff4fe821 *R/sim.rates.R
@@ -72,7 +73,7 @@ c8bfa07dd3238d97fcaafe5a369e5e89 *R/starTree.R
 8340c2be787b0b7ac420ff68140d1267 *R/strahlerNumber.R
 ae99c9aeb8f0553d3addf1475ea35562 *R/threshBayes.R
 a38bac98b4681cee859750b8193a9a9b *R/treeSlice.R
-942d52ec0a61cc26e57ce6078876d841 *R/utilities.R
+a8b02380b0ee49f4355bc0a9ad4e0e8e *R/utilities.R
 7282f87b3143db28b7e982e86d90b6e5 *R/write.simmap.R
 8a960b2dfaa3924ae71d485d68ea66b3 *R/writeAncestors.R
 c6d9cb0dbedb17c4cc0d4e16032da623 *R/writeNexus.R
@@ -96,6 +97,7 @@ be9b74c16aa2e5b807d2bc2762ffdae3 *man/bmPlot.Rd
 09bece048a76feb211b379e6139ffe97 *man/branching.diffusion.Rd
 c13330bd2cea720f9caece9a3b05164c *man/brownie.lite.Rd
 b21b76c3d3787cd73da1c6f6283d6cfb *man/brownieREML.Rd
+cf2391807768f91b9f19becdaaebd2d4 *man/cladelabels.Rd
 97e5990f8b2789fcc27b6058a310c886 *man/collapse.to.star.Rd
 358c0386dcb07f18292948bb84cae6a2 *man/contMap.Rd
 4c4d9f203ae18b5805942ecf94515c17 *man/countSimmap.Rd
@@ -115,7 +117,7 @@ e0d8835c85d1b8c03fad9696682e38f2 *man/exhaustiveMP.Rd
 89b0dee30744fd6363d05e218fbd8851 *man/fancyTree.Rd
 962c8406a853f4c5843b0fec1cf4149d *man/fastAnc.Rd
 1789096481f8a8b0857a698b4e400b29 *man/fastBM.Rd
-fb6f80835997cf23124484ffd5b45219 *man/fastMRCA.Rd
+d2968b412b8600c8e4008ecad9dda8e9 *man/fastMRCA.Rd
 e3ccd18c21589980d10bf8e2cbf9ce9c *man/findMRCA.Rd
 ed24dfe4b7441a978351684a245204ee *man/fitBayes.Rd
 762119d9f7e0daa449e37731b54ff6a8 *man/fitDiversityModel.Rd
@@ -130,11 +132,11 @@ ed24dfe4b7441a978351684a245204ee *man/fitBayes.Rd
 fe9a9a76cd0531668fad334181fedea9 *man/likMlambda.Rd
 3e82e41fa5770ec7fc4214a008f148fd *man/ls.tree.Rd
 87e0268d5d46dbb80d32c1e4f35f86ab *man/ltt.Rd
-f31ebdbe4ddfcfd97d7dc2b37858a139 *man/ltt95.Rd
+bf2ac0ea6ede63069881da5305131cfb *man/ltt95.Rd
 56614733ddcbbb9a9de8e38645fb7d59 *man/make.era.map.Rd
 aae86ee706ba77f950f5d2b948eb5ed1 *man/make.simmap.Rd
 c9a96a78b07076a8d752910470d196a2 *man/map.overlap.Rd
-bdb7780372b2f5c8164ab76a75482591 *man/map.to.singleton.Rd
+fa1ad00dd05e5acd305fdcc5dab4faf7 *man/map.to.singleton.Rd
 8cd9aadd82908d074d3d62acb457b1bd *man/matchNodes.Rd
 a3bbb218c0230eb8be0eaa9d5aabb139 *man/mergeMappedStates.Rd
 93e7b59862521d72f35a54f2be7b3619 *man/midpoint.root.Rd
@@ -144,10 +146,10 @@ b0ff2fdf11c1fb0044739612bc38c917 *man/minRotate.Rd
 9dab37745b43bebceda793a36c257c44 *man/multi.mantel.Rd
 258317bbd7c01316d28b843b24daacba *man/multiC.Rd
 35b03386697acfd98b825131d32ca16e *man/multiRF.Rd
-95474133e7fd552e1de43c94bf4664ae *man/nodeHeights.Rd
+6cd73556390217fff031d37c8a394fe7 *man/nodeHeights.Rd
 75e285f060c4d1ffb60d561d49f7a2b4 *man/optim.phylo.ls.Rd
 85272eebb2bd1404fe8784395b719a1e *man/orderMappedEdge.Rd
-c56488ff498531eaf2457ad1a3daaed0 *man/paintSubTree.Rd
+ec68d41500027bce18ab7c644f92b695 *man/paintSubTree.Rd
 8a879df9dafcf215d94307752af00e25 *man/paste.tree.Rd
 d28292e9b29295bbfc883deb399a05c7 *man/pbtree.Rd
 2d9761aa536e62bf1a40a51236ab51e3 *man/pgls.Ives.Rd
@@ -185,6 +187,7 @@ f4414980d69db5b1724dfd8d46cd1adf *man/read.simmap.Rd
 a9bd507ac70c35c02224fec4cab27de5 *man/rescaleSimmap.Rd
 f022e7f0bf06903fc78194ee70af9198 *man/rotateNodes.Rd
 70a72b27cfccf685aaca42e65799aa04 *man/roundBranches.Rd
+ba1fb42069fbb5d893db3732bc28ebdd *man/roundPhylogram.Rd
 0b1ccbcfbb14fa214e973f95ad5ddf93 *man/rstate.Rd
 bf5a2cb9ba17f6a012194fe6a0ea7302 *man/sampleFrom.Rd
 eea0368c67af7475f9b0ae5139e99795 *man/sim.corrs.Rd

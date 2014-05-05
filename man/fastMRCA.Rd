@@ -1,8 +1,10 @@
 \name{fastMRCA}
 \alias{fastMRCA}
-\title{Get the MRCA of a pair of tip taxa}
+\alias{fastHeight}
+\title{Get the MRCA (or height above the root of the MRCA) of a pair of tip taxa}
 \usage{
 fastMRCA(tree, sp1, sp2)
+fastHeight(tree, sp1, sp2)
 }
 \arguments{
 	\item{tree}{a phylogenetic tree as an object of class \code{"phylo"}.}
@@ -10,17 +12,17 @@ fastMRCA(tree, sp1, sp2)
 	\item{sp2}{species name.}
 }
 \description{
-	This function returns the most recent common ancestor (node number) for a pair of taxa. 
+	This function returns the most recent common ancestor (node number) for a pair of taxa; or, in the case of \code{fastHeight}, the height above the root of the MRCA of a pair of taxa. 
 }
 \details{
-	This function is mostly redundant with \code{\link{findMRCA}} but for very large trees will be considerably faster. Function uses \code{\link{Ancestors}} in the phangorn package.
+	This function is mostly redundant with \code{\link{findMRCA}} (or \code{findMRCA(...,type="height")} in the case of \code{fastHeight}) but for very large trees will be considerably faster.
 }
 \value{
-	The node number of the MRCA.
+	The node number of the MRCA or the height above the root (for \code{fastHeight}).
 }
 \author{Liam Revell \email{liam.revell@umb.edu}}
 \seealso{
-	\code{\link{Ancestors}}, \code{\link{findMRCA}}, \code{\link{mrca}}
+	\code{\link{findMRCA}}, \code{\link{mrca}}
 }
 \examples{
 tree<-pbtree(n=2000)

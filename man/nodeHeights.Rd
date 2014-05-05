@@ -1,24 +1,27 @@
 \name{nodeHeights}
 \alias{nodeHeights}
+\alias{nodeheight}
 \title{Compute the heights above the root of each node}
 \usage{
 nodeHeights(tree)
+nodeheight(tree, node)
 }
 \arguments{
 	\item{tree}{a phylogeny as an object of class \code{"phylo"}.}
+	\item{node}{for \code{nodeheight}, the node for which we want to compute a height above the root.}
 }
 \description{
-	This function computes node heights.
+	\code{nodeHeights} computes the height above the root for all nodes in the tree. \code{nodeheight} computes the height above the root for a single node.
 }
 \details{
-	The function also gives a handy way to get the total length of the tree from the root to the heighest tip which will be given by \code{max(nodeHeights(tree))}.
+	The function \code{nodeHeights} also gives a handy way to get the total length of the tree from the root to the heighest tip which will be given by \code{max(nodeHeights(tree))}.
 }
 \value{
-	A matrix of the same dimensions as \code{tree$edge} containing the height above the root of each node in \code{edge}.
+	Either a matrix of the same dimensions as \code{tree$edge} containing the height above the root of each node in \code{edge} (for \code{nodeHeights}); or a single positive number (for \code{nodeheight}).
 }
 \author{Liam Revell \email{liam.revell@umb.edu}}
 \seealso{
-	\code{\link{estDiversity}}, \code{\link{fitDiversityModel}}
+	\code{\link{vcvPhylo}}
 }
 \examples{
 tree<-rtree(10)

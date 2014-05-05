@@ -1,9 +1,11 @@
 # function plots reconstructed values for ancestral characters along the edges of the tree
-# written by Liam J. Revell 2012-2013
+# written by Liam J. Revell 2012, 2013, 2014
 
 contMap<-function(tree,x,res=100,fsize=NULL,ftype=NULL,lwd=4,legend=NULL,lims=NULL,outline=TRUE,sig=3,type="phylogram",direction="rightwards",plot=TRUE,...){
 	if(hasArg(mar)) mar<-list(...)$mar
 	else mar<-rep(0.3,4)
+	if(hasArg(offset)) offset<-list(...)$offset
+	else offset<-NULL
 	h<-max(nodeHeights(tree))
 	steps<-0:res/res*max(h)
 	H<-nodeHeights(tree)
@@ -28,7 +30,7 @@ contMap<-function(tree,x,res=100,fsize=NULL,ftype=NULL,lwd=4,legend=NULL,lims=NU
 	tree$mapped.edge<-tree$mapped.edge[,order(as.numeric(colnames(tree$mapped.edge)))]
 	xx<-list(tree=tree,cols=cols,lims=lims)
 	class(xx)<-"contMap"
-	if(plot) plot.contMap(xx,fsize=fsize,ftype=ftype,lwd=lwd,legend=legend,outline=outline,sig=sig,type=type,mar=mar,direction=direction)
+	if(plot) plot.contMap(xx,fsize=fsize,ftype=ftype,lwd=lwd,legend=legend,outline=outline,sig=sig,type=type,mar=mar,direction=direction,offset=offset)
 	invisible(xx)
 }
 
@@ -45,7 +47,7 @@ getState<-function(x,trans){
 }
 
 # function
-# written by Liam J. Revell 2012-2013
+# written by Liam J. Revell 2012, 2013, 2014
 
 plot.contMap<-function(x,...){
 	if(class(x)=="contMap"){
@@ -73,6 +75,8 @@ plot.contMap<-function(x,...){
 	else mar<-rep(0.3,4)
 	if(hasArg(direction)) direction<-list(...)$direction
 	else direction<-"rightwards"
+	if(hasArg(offset)) offset<-list(...)$offset
+	else offset<-NULL
 	if(is.null(legend)) legend<-0.5*max(H)
 	if(is.null(fsize)) fsize<-c(1,1)
 	if(length(fsize)==1) fsize<-rep(fsize,2)
@@ -80,7 +84,7 @@ plot.contMap<-function(x,...){
 	if(length(ftype)==1) ftype<-c(ftype,"reg")
 	# done optional arguments
 	leg.txt<-c(round(lims[1],sig),"trait value",round(lims[2],sig))
-	plot(x,fsize=fsize,ftype=ftype,lwd=lwd,legend=legend,outline=outline,leg.txt=leg.txt,type=type,mar=mar,direction=direction)
+	plot(x,fsize=fsize,ftype=ftype,lwd=lwd,legend=legend,outline=outline,leg.txt=leg.txt,type=type,mar=mar,direction=direction,offset=offset)
 }
 
 ## S3 print method for object of class 'contMap'
