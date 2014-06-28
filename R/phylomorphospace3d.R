@@ -1,11 +1,12 @@
 # phylomorphospace3d: projection of a tree into three dimensional morphospace
-# written by Liam J. Revell 2012, 2013
+# written by Liam J. Revell 2012, 2013, 2014
 
 phylomorphospace3d<-function(tree,X,A=NULL,label=TRUE,control=list(),method=c("dynamic","static"),...){
 	method<-method[1]
 	if(class(tree)!="phylo") stop("tree object must be of class 'phylo.'")
 	# control list
-	con=list(spin=TRUE,axes=TRUE,box=TRUE,simple.axes=FALSE,lwd=1,ftype="reg")
+	con=list(spin=TRUE,axes=TRUE,box=TRUE,simple.axes=FALSE,lwd=1,ftype="reg",
+		col.edge=rep("black",nrow(tree$edge)))
 	con[(namc<-names(control))]<-control
 	if(con$simple.axes) con$box<-con$axes<-FALSE
 	con$ftype<-which(c("off","reg","b","i","bi")==con$ftype)-1
@@ -25,10 +26,20 @@ phylomorphospace3d<-function(tree,X,A=NULL,label=TRUE,control=list(),method=c("d
 	}
 	if(is.null(colnames(X))) colnames(X)<-c("x","y","z")
 	if(method=="dynamic"){
+		chk<-.check.pkg("rgl")
+		if(!chk){
+			cat("  method = \"dynamic\" requires the package \"rgl\"\n  Defaulting to method = \"static\"\n\n")
+			method<-"static"
+			lines3d<-play3d<-plot3d<-segments3d<-spheres3d<-spin3d<-text3d<-function(...) NULL
+		}
+	}
+	if(method=="dynamic"){
 		params<-get("r3dDefaults")
-		plot3d(rbind(X,A),xlab=colnames(X)[1],ylab=colnames(X)[2],zlab=colnames(X)[3],axes=con$axes,box=con$box,params=params)
+		plot3d(rbind(X,A),xlab=colnames(X)[1],ylab=colnames(X)[2],zlab=colnames(X)[3],
+			axes=con$axes,box=con$box,params=params)
 		spheres3d(X,radius=0.02*mean(apply(X,2,max)-apply(X,2,min)))
-		for(i in 1:nrow(tree$edge)) segments3d(x[i,],y[i,],z[i,],lwd=con$lwd)
+		for(i in 1:nrow(tree$edge)) segments3d(x[i,],y[i,],z[i,],lwd=con$lwd,
+			col=con$col.edge[i])
 		ms<-colMeans(X)
 		rs<-apply(rbind(X,A),2,range)
 		if(con$simple.axes){
@@ -56,17 +67,29 @@ phylomorphospace3d<-function(tree,X,A=NULL,label=TRUE,control=list(),method=c("d
 		else ylim<-NULL
 		if(hasArg(zlim)) zlim<-list(...)$zlim
 		else zlim=NULL
-		xx<-scatterplot3d(X,xlab=colnames(X)[1],zlab=colnames(X)[3],pch=19,angle=angle,ylab=colnames(X)[2],asp=1,cex.symbols=1.3,xlim=xlim,ylim=ylim,zlim=zlim)
+		xx<-scatterplot3d(X,xlab=colnames(X)[1],zlab=colnames(X)[3],pch=19,angle=angle,
+			ylab=colnames(X)[2],asp=1,cex.symbols=1.3,xlim=xlim,ylim=ylim,zlim=zlim)
 		aa<-xx$xyz.convert(A)
 		points(aa$x,aa$y,pch=19,cex=0.8)
 		for(i in 1:nrow(tree$edge)){
 			aa<-xx$xyz.convert(x[i,],y[i,],z[i,])
-			lines(aa$x,aa$y,lwd=2)
+			lines(aa$x,aa$y,lwd=2,col=con$col.edge[i])
 		}
 		for(i in 1:length(tree$tip.label)){
-			aa<-xx$xyz.convert(x[which(tree$edge[,2]==i),2],y[which(tree$edge[,2]==i),2],z[which(tree$edge[,2]==i),2])
+			aa<-xx$xyz.convert(x[which(tree$edge[,2]==i),2],y[which(tree$edge[,2]==i),2],
+				z[which(tree$edge[,2]==i),2])
 			text(tree$tip.label[i],x=aa$x,y=aa$y,pos=2)
 		}
 		invisible(xx)
 	}
-}	
+}
+
+## check for a package (modified from 'geiger')
+## primarily used for rgl
+## written by Liam J. Revell 2014
+.check.pkg<-function(pkg){
+	if(pkg%in%rownames(installed.packages())){
+		require(pkg,character.only=TRUE)
+		return(TRUE)
+	} else return(FALSE)
+}

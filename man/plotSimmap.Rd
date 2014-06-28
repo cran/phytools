@@ -4,7 +4,8 @@
 \usage{
 plotSimmap(tree, colors=NULL, fsize=1.0, ftype="reg", lwd=2, pts=FALSE, 
 	node.numbers=FALSE, mar=NULL, add=FALSE, offset=NULL, direction="rightwards",
-	type="phylogram", setEnv=TRUE, part=1.0, xlim=NULL, ylim=NULL)
+	type="phylogram", setEnv=TRUE, part=1.0, xlim=NULL, ylim=NULL, 
+	nodes="intermediate")
 }
 \arguments{
  	\item{tree}{a modified object of class "phylo" or "multiPhylo" containing a stochastic mapping or set of mappings (e.g., see \code{\link{read.simmap}} & \code{\link{make.simmap}}).}
@@ -23,6 +24,7 @@ plotSimmap(tree, colors=NULL, fsize=1.0, ftype="reg", lwd=2, pts=FALSE,
 	\item{part}{value between 0 and 1 for \code{type="fan"} indicating what fraction of the full circular tree to use as plotting area. For instance, \code{part=0.5} will plot a half fan phylogeny. It also affects the axis scaling used.}
 	\item{xlim}{x-limits for the plot.}
 	\item{ylim}{y-limits for the plot.}
+	\item{nodes}{node placement following Felsenstein (2004; pp. 574-576). Can be \code{"intermediate"}, \code{"centered"}, \code{"weighted"}, or \code{"inner"}. So far only works for \code{type="phylogram"}.}
 }
 \description{
 	Function plots one or multiple stochastic character mapped trees.
@@ -34,9 +36,12 @@ plotSimmap(tree, colors=NULL, fsize=1.0, ftype="reg", lwd=2, pts=FALSE,
 	Plots a tree.
 }
 \references{
+	Bollback, J. P. (2006) Stochastic character mapping of discrete traits on phylogenies. \emph{BMC Bioinformatics}, \bold{7}, 88.
+
+	Felsenstein, J. (2004) \emph{Inferring Phylogenies}. Sinauer.
+
 	Huelsenbeck, J. P., R. Neilsen, and J. P. Bollback. (2003) Stochastic mapping of morphological characters. \emph{Systematic Biology}, \bold{52}, 131-138. 
 
-	Bollback, J. P. (2006) Stochastic character mapping of discrete traits on phylogenies. \emph{BMC Bioinformatics}, \bold{7}, 88.
 }
 \author{Liam Revell \email{liam.revell@umb.edu}}
 \seealso{

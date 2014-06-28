@@ -6,10 +6,17 @@ contMap<-function(tree,x,res=100,fsize=NULL,ftype=NULL,lwd=4,legend=NULL,lims=NU
 	else mar<-rep(0.3,4)
 	if(hasArg(offset)) offset<-list(...)$offset
 	else offset<-NULL
+	if(hasArg(method)) method<-list(...)$method
+	else method<-"fastAnc"
 	h<-max(nodeHeights(tree))
 	steps<-0:res/res*max(h)
 	H<-nodeHeights(tree)
-	a<-fastAnc(tree,x)
+	if(method=="fastAnc") a<-fastAnc(tree,x) 
+	else { 
+		fit<-anc.ML(tree,x)
+		a<-fit$ace
+		if(!is.null(fit$missing.x)) x<-c(x,fit$missing.x)
+	}
 	y<-c(a,x[tree$tip.label]); names(y)[1:length(tree$tip)+tree$Nnode]<-1:length(tree$tip)
 	A<-matrix(y[as.character(tree$edge)],nrow(tree$edge),ncol(tree$edge))
 	cols<-rainbow(1001,start=0,end=0.7); names(cols)<-0:1000
@@ -19,9 +26,11 @@ contMap<-function(tree,x,res=100,fsize=NULL,ftype=NULL,lwd=4,legend=NULL,lims=NU
 		XX<-cbind(c(H[i,1],steps[intersect(which(steps>H[i,1]),which(steps<H[i,2]))]),
 			c(steps[intersect(which(steps>H[i,1]),which(steps<H[i,2]))],H[i,2]))-H[i,1]
 		YY<-rowMeans(XX)
-		b<-vector()
-		for(j in 1:length(YY))
-			b[j]<-(A[i,1]/YY[j]+A[i,2]/(max(XX)-YY[j]))/(1/YY[j]+1/(max(XX)-YY[j]))
+		if(!all(YY==0)){
+			b<-vector()
+			for(j in 1:length(YY))
+				b[j]<-(A[i,1]/YY[j]+A[i,2]/(max(XX)-YY[j]))/(1/YY[j]+1/(max(XX)-YY[j]))
+		} else b<-A[i,1]
 		d<-sapply(b,getState,trans=trans)
 		tree$maps[[i]]<-XX[,2]-XX[,1]
 		names(tree$maps[[i]])<-d

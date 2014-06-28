@@ -1,10 +1,10 @@
 ## functions plot stochastic character mapped trees
 ## written by Liam Revell 2011, 2013
 
-plotSimmap<-function(tree,colors=NULL,fsize=1.0,ftype="reg",lwd=2,pts=FALSE,node.numbers=FALSE,mar=NULL,add=FALSE,offset=NULL,direction="rightwards",type="phylogram",setEnv=TRUE,part=1.0,xlim=NULL,ylim=NULL){
+plotSimmap<-function(tree,colors=NULL,fsize=1.0,ftype="reg",lwd=2,pts=FALSE,node.numbers=FALSE,mar=NULL,add=FALSE,offset=NULL,direction="rightwards",type="phylogram",setEnv=TRUE,part=1.0,xlim=NULL,ylim=NULL,nodes="intermediate"){
 	if(class(tree)=="multiPhylo"){
 		par(ask=TRUE)
-		for(i in 1:length(tree)) plotSimmap(tree[[i]],colors=colors,fsize=fsize,ftype=ftype,lwd=lwd,pts=pts,node.numbers=node.numbers,mar,add,offset,direction,type,setEnv,part,xlim,ylim)
+		for(i in 1:length(tree)) plotSimmap(tree[[i]],colors=colors,fsize=fsize,ftype=ftype,lwd=lwd,pts=pts,node.numbers=node.numbers,mar,add,offset,direction,type,setEnv,part,xlim,ylim,nodes)
 	} else {
 		# check font
 		ftype<-which(c("off","reg","b","i","bi")==ftype)-1
@@ -27,7 +27,7 @@ plotSimmap<-function(tree,colors=NULL,fsize=1.0,ftype="reg",lwd=2,pts=FALSE,node
 		# get margin
 		if(is.null(mar)) mar=rep(0.1,4)
 		if(type=="phylogram"){
-			plotPhylogram(tree,colors,fsize,ftype,lwd,pts,node.numbers,mar,add,offset,direction,setEnv,xlim,ylim)
+			plotPhylogram(tree,colors,fsize,ftype,lwd,pts,node.numbers,mar,add,offset,direction,setEnv,xlim,ylim,nodes)
 		} else if(type=="fan"){
 			plotFan(tree,colors,fsize,ftype,lwd,mar,add,part,setEnv,xlim,ylim)
 		}
@@ -36,7 +36,7 @@ plotSimmap<-function(tree,colors=NULL,fsize=1.0,ftype="reg",lwd=2,pts=FALSE,node
 
 # function to plot simmap tree in type "phylogram"
 # written by Liam J. Revell 2011, 2013
-plotPhylogram<-function(tree,colors,fsize,ftype,lwd,pts,node.numbers,mar,add,offset,direction,setEnv,xlim,ylim){
+plotPhylogram<-function(tree,colors,fsize,ftype,lwd,pts,node.numbers,mar,add,offset,direction,setEnv,xlim,ylim,placement){
 	# set offset fudge (empirically determined)
 	offsetFudge<-1.37
 	# reorder
@@ -51,8 +51,27 @@ plotPhylogram<-function(tree,colors,fsize,ftype,lwd,pts,node.numbers,mar,add,off
 	# get Y coordinates of the nodes
 	nodes<-unique(pw$edge[,1])
 	for(i in 1:m){
-		desc<-pw$edge[which(pw$edge[,1]==nodes[i]),2]
-		Y[nodes[i]]<-(min(Y[desc])+max(Y[desc]))/2
+		if(placement=="intermediate"){ 
+			desc<-pw$edge[which(pw$edge[,1]==nodes[i]),2]
+			Y[nodes[i]]<-(min(Y[desc])+max(Y[desc]))/2
+		} else if(placement=="centered"){
+			desc<-getDescendants(tree,nodes[i])
+			desc<-desc[desc<=Ntip(tree)]
+			Y[nodes[i]]<-(min(Y[desc])+max(Y[desc]))/2
+		} else if(placement=="weighted"){
+			desc<-pw$edge[which(pw$edge[,1]==nodes[i]),2]
+			n1<-desc[which(Y[desc]==min(Y[desc]))]
+			n2<-desc[which(Y[desc]==max(Y[desc]))]
+			v1<-tree$edge.length[which(tree$edge[,2]==n1)]
+			v2<-tree$edge.length[which(tree$edge[,2]==n2)]
+			Y[nodes[i]]<-((1/v1)*Y[n1]+(1/v2)*Y[n2])/(1/v1+1/v2)
+		} else if(placement=="inner"){
+			desc<-getDescendants(tree,nodes[i])
+			desc<-desc[desc<=Ntip(tree)]
+			mm<-which(abs(Y[desc]-median(Y[1:Ntip(tree)]))==min(abs(Y[desc]-median(Y[1:Ntip(tree)]))))
+			if(length(mm>1)) mm<-mm[which(Y[desc][mm]==min(Y[desc][mm]))]
+			Y[nodes[i]]<-Y[desc][mm]
+		}
 	}
 	# compute node heights
 	H<-nodeHeights(cw)
@@ -249,16 +268,18 @@ plotTree<-function(tree,...){
 	else xlim<-NULL
 	if(hasArg(ylim)) ylim<-list(...)$ylim
 	else ylim<-NULL
+	if(hasArg(nodes)) nodes<-list(...)$nodes
+	else nodes<-"intermediate"
 	if(class(tree)=="multiPhylo"){
 		par(ask=TRUE)
 		if(!is.null(color)) names(color)<-"1"
-		for(i in 1:length(tree)) plotTree(tree[[i]],color=color,fsize=fsize,ftype=ftype,lwd=lwd,pts=pts,node.numbers=node.numbers,mar=mar,add=add,offset=offset,direction=direction,type=type,setEnv=setEnv,part=part,xlim=xlim,ylim=ylim)
+		for(i in 1:length(tree)) plotTree(tree[[i]],color=color,fsize=fsize,ftype=ftype,lwd=lwd,pts=pts,node.numbers=node.numbers,mar=mar,add=add,offset=offset,direction=direction,type=type,setEnv=setEnv,part=part,xlim=xlim,ylim=ylim,nodes=nodes)
 	} else {
 		if(is.null(tree$edge.length)) tree<-compute.brlen(tree)
 		tree$maps<-as.list(tree$edge.length)
 		for(i in 1:length(tree$maps)) names(tree$maps[[i]])<-c("1")
 		if(!is.null(color)) names(color)<-"1"
-		plotSimmap(tree,colors=color,fsize=fsize,ftype=ftype,lwd=lwd,pts=pts,node.numbers=node.numbers,mar=mar,add=add,offset=offset,direction=direction,type=type,setEnv=setEnv,part=part,xlim=xlim,ylim=ylim)
+		plotSimmap(tree,colors=color,fsize=fsize,ftype=ftype,lwd=lwd,pts=pts,node.numbers=node.numbers,mar=mar,add=add,offset=offset,direction=direction,type=type,setEnv=setEnv,part=part,xlim=xlim,ylim=ylim,nodes=nodes)
 	}
 }
 

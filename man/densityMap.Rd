@@ -9,7 +9,7 @@ densityMap(trees, res=100, fsize=NULL, ftype=NULL, lwd=3, check=FALSE,
 \method{plot}{densityMap}(x, ...)
 }
 \arguments{
- 	\item{trees}{set of phylogenetic trees in a modified \code{"multiPhylo"} object. Values for a discrete character are mapped on the tree. See \code{\link{make.simmap}} and \code{\link{read.simmap}} for details.}
+ 	\item{trees}{set of phylogenetic trees in a modified \code{"multiPhylo"} object. Values for a two-state discrete character are mapped on the tree. See \code{\link{make.simmap}} and \code{\link{read.simmap}} for details.}
 	\item{res}{resolution for gradient plotting. Larger numbers indicate a finer (smoother) gradient.}
 	\item{fsize}{relative font size - can be a vector with the second element giving the font size for the legend.}
 	\item{ftype}{font type - see options in \code{\link{plotSimmap}}. As with \code{fsize}, can be a vector with the second element giving font type for the legend.}
@@ -30,7 +30,7 @@ densityMap(trees, res=100, fsize=NULL, ftype=NULL, lwd=3, check=FALSE,
 	Plots a tree and returns an object of class \code{"densityMap"} invisibly.
 }
 \references{
-	Revell, L. J. \emph{In press.} Two new graphical methods for mapping trait evolution on phylogenies. \emph{Methods in Ecology and Evolution}.
+	Revell, L. J. 2013. Two new graphical methods for mapping trait evolution on phylogenies. \emph{Methods in Ecology and Evolution}, \bold{4}, 754-759.
 
 	Huelsenbeck, J. P., R. Neilsen, and J. P. Bollback. 2003. Stochastic mapping of morphological characters. \emph{Systematic Biology}, \bold{52}, 131-138. 
 

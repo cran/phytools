@@ -2,17 +2,17 @@
 \alias{rescaleSimmap}
 \title{Rescale SIMMAP style tree}
 \usage{
-rescaleSimmap(tree, totalDepth=1.0)
+rescaleSimmap(tree, ...)
 }
 \arguments{
 	\item{tree}{a phylogenetic tree in modified \code{"phylo"} format with a discrete character mapping (e.g., see \code{\link{read.simmap}} or \code{\link{make.simmap}}).}
-	\item{totalDepth}{a new desired value for the total depth (height) of the tree. If the tree is not ultrametric this is the maximum height.}
+	\item{...}{other arguments, such as \code{depth}.}
 }
 \description{
 	This function scales a tree with a mapped discrete character to an arbitrary total height, preserving the relative time spent in each state along each edge.
 }
 \details{
-	Replaces \code{rescaleTree} in the 'geiger' package for SIMMAP style trees.
+	Replaces \code{rescaleTree} (now \code{rescale.phylo}) in the 'geiger' package for SIMMAP style trees.
 }
 \value{
 	A phylogenetic tree in modified \code{"phylo"} format.

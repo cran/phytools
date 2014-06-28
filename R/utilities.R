@@ -1,6 +1,66 @@
 # some utility functions
 # written by Liam J. Revell 2011, 2012, 2013, 2014
 
+## multivariate normal density function
+## written by Liam J. Revell 2014
+
+dmnorm<-function(x,mean=rep(0,d),varcov,log=FALSE){
+	d<-length(x)
+	invC<-pd.solve(varcov,log.det=TRUE)
+	pd <- -t(x-mean)%*%invC%*%(x-mean)/2-attr(invC,"log.det")/2-d*log(2*pi)/2
+	if(log) pd[1,1] else exp(pd[1,1])
+}
+
+## S3 method rep for objects of class "phylo" and "multiPhylo"
+## written by Liam J. Revell 2014
+
+rep.phylo<-function(x,...){
+	if(hasArg(times)) times<-list(...)$times
+	else times<-(...)[[1]]
+	for(i in 1:times) obj<-if(i==1) x else if(i==2) c(obj,x) else c(obj,list(x))
+	class(obj)<-"multiPhylo"
+	obj
+}
+
+rep.multiPhylo<-function(x,...){
+	if(hasArg(times)) times<-list(...)$times
+	else times<-(...)[[1]]
+	for(i in 1:times) obj<-if(i==1) x else if(i>=2) c(obj,x)
+	class(obj)<-"multiPhylo"
+	obj
+}
+
+## function to rescale simmap style trees
+## written by Liam J. Revell 2012, 2013, 2014
+rescaleSimmap<-function(tree,...){
+	if(class(tree)=="multiPhylo"){
+		trees<-unclass(tree)
+		trees<-lapply(trees,rescaleSimmap,...)
+		class(trees)<-"multiPhylo"
+		return(trees)
+	} else if(class(tree)=="phylo"){
+		if(hasArg(lambda)) lambda<-list(...)$lambda
+		else lambda<-1
+		if(hasArg(totalDepth)) depth<-totalDepth<-list(...)$totalDepth
+		else if(hasArg(depth)) depth<-totalDepth<-list(...)$depth
+		else depth<-totalDepth<-max(nodeHeights(tree))
+		if(lambda!=1){
+			e<-lambdaTree(tree,lambda)$edge.length/tree$edge.length
+			tree$edge.length<-tree$edge.length*e
+			tree$maps<-mapply(function(x,y) x*y,tree$maps,e)
+			tree$mapped.edge<-tree$mapped.edge*matrix(rep(e,ncol(tree$mapped.edge)),length(e),ncol(tree$mapped.edge))
+		}
+		if(depth!=max(nodeHeights(tree))){
+			h<-max(nodeHeights(tree))
+			s<-depth/h
+			tree$edge.length<-tree$edge.length*s
+			tree$maps<-lapply(tree$maps,"*",s)
+			tree$mapped.edge<-tree$mapped.edge*s
+		}
+		return(tree)
+	} else message("tree should be an object of class \"phylo\" or \"multiPhylo\"")
+}
+
 ## function to drop one or more tips from a tree but retain all ancestral nodes as singletons
 ## written by Liam J. Revell 2014
 drop.tip.singleton<-function(tree,tip){
@@ -632,25 +692,6 @@ getCladesofSize<-function(tree,clade.size=2){
 	return(trees)
 }
 
-# function to rescale simmap style trees
-# written by Liam J. Revell 2012, 2013
-rescaleSimmap<-function(tree,totalDepth=1.0){
-	if(class(tree)=="multiPhylo"){
-		trees<-unclass(tree)
-		trees<-lapply(trees,rescaleSimmap,totalDepth)
-		class(trees)<-"multiPhylo"
-		return(trees)
-	} else if(class(tree)=="phylo"){
-		h<-max(nodeHeights(tree))
-		s<-totalDepth/h
-		tree$edge.length<-tree$edge.length*s
-		maps<-lapply(tree$maps,"*",s)
-		tree$maps<-maps
-		tree$mapped.edge<-tree$mapped.edge*s
-		return(tree)
-	} else message("tree should be an object of class \"phylo\" or \"multiPhylo\"")
-}
-
 # function to get states at internal nodes from simmap style trees
 # written by Liam J. Revell 2013, 2014
 getStates<-function(tree,type=c("nodes","tips")){
@@ -947,7 +988,7 @@ getDescendants<-function(tree,node,curr=NULL){
 	daughters<-tree$edge[which(tree$edge[,1]==node),2]
 	curr<-c(curr,daughters)
 	if(length(curr)==0&&node<=length(tree$tip.label)) curr<-node
-	w<-which(daughters>=length(tree$tip.label))
+	w<-which(daughters>length(tree$tip.label))
 	if(length(w)>0) for(i in 1:length(w)) 
 		curr<-getDescendants(tree,daughters[w[i]],curr)
 	return(curr)

@@ -191,7 +191,7 @@ mcmcQ<-function(bt,xx,model,tree,tol,m,burnin,samplefreq,nsim,vQ,prior){
 getPars<-function(bt,xx,model,Q,tree,tol,m,liks=TRUE){
 	XX<-apeAce(bt,xx,model,fixedQ=Q,output.liks=liks)
 	N<-length(bt$tip.label)
-	II<-XX$index.matrix
+	II<-XX$index.matrix+1
 	lvls<-XX$states
 	if(liks){
 		L<-XX$lik.anc
@@ -208,7 +208,7 @@ getPars<-function(bt,xx,model,Q,tree,tol,m,liks=TRUE){
 		message(paste("\nWarning: some elements of Q not numerically distinct from 0; setting to",tol,"\n"))
 		XX$rates[XX$rates<tol]<-tol
 	}
-	Q<-matrix(XX$rates[II],m,m,dimnames=list(lvls,lvls))
+	Q<-matrix(c(0,XX$rates)[II],m,m,dimnames=list(lvls,lvls))
 	diag(Q)<--rowSums(Q,na.rm=TRUE)
 	return(list(Q=Q,L=L,loglik=XX$loglik))
 }

@@ -2,15 +2,17 @@
 \alias{anc.ML}
 \title{Ancestral character estimation using likelihood}
 \usage{
-anc.ML(tree, x, maxit=2000)
+anc.ML(tree, x, maxit=2000, model=c("BM","OU"), ...)
 }
 \arguments{
 	\item{tree}{an object of class \code{"phylo"}.}
 	\item{x}{a vector of tip values for species; \code{names(x)} should be the species names.}
 	\item{maxit}{an optional integer value indicating the maximum number of iterations for optimization.}
+	\item{model}{model of continuous character evolution ont he tree. It's possible that only \code{model="BM"} works in the present version as \code{model="OU"} has not be thoroughly tested & some bugs were reported for an earlier version.}
+	\item{...}{other arguments.}
 }
 \description{
-	This function estimates the evolutionary parameters and ancestral states for Brownian evolution using likelihood.
+	This function estimates the evolutionary parameters and ancestral states for Brownian evolution using likelihood. It is also possible (for \code{model="BM"}) to allow for missing data for some tip taxa.
 }
 \details{
 	Because this function relies on a high dimensional numerical optimization of the likelihood function, \code{\link{fastAnc}} should probably be preferred for most purposes. If using \code{\link{anc.ML}}, users should be cautious to ensure convergence. This has been ameliorated in phytools>=0.2-48 by seeding the ML optimization with the result from \code{\link{fastAnc}}.

@@ -17,9 +17,18 @@ densityMap<-function(trees,res=100,fsize=NULL,ftype=NULL,lwd=3,check=FALSE,legen
 		if(!all(X)) stop("some of the trees don't match in topology or relative branch lengths")
 	}
 	tree<-trees[[1]]
+	trees<-unclass(trees)
+	ss<-sort(unique(c(getStates(tree,"nodes"),getStates(tree,"tips"))))
+	if(!all(ss==c("0","1"))){
+		c1<-paste(sample(c(letters,LETTERS),6),collapse="")
+		c2<-paste(sample(c(letters,LETTERS),6),collapse="")
+		trees<-lapply(trees,mergeMappedStates,ss[1],c1)
+		trees<-lapply(trees,mergeMappedStates,ss[2],c2)
+		trees<-lapply(trees,mergeMappedStates,c1,"0")
+		trees<-lapply(trees,mergeMappedStates,c2,"1")
+	}	
 	H<-nodeHeights(tree)
 	message("sorry - this might take a while; please be patient")
-	trees<-unclass(trees)
 	for(i in 1:nrow(tree$edge)){
 		YY<-cbind(c(H[i,1],steps[intersect(which(steps>H[i,1]),which(steps<H[i,2]))]),
 			c(steps[intersect(which(steps>H[i,1]),which(steps<H[i,2]))],H[i,2]))-H[i,1]
@@ -37,8 +46,10 @@ densityMap<-function(trees,res=100,fsize=NULL,ftype=NULL,lwd=3,check=FALSE,legen
 				lower<-which(XX[,1]<=YY[k,1]); lower<-lower[length(lower)]
 				upper<-which(XX[,2]>=(YY[k,2]-tol))[1]; AA<-0
 				names(lower)<-names(upper)<-NULL
-				for(l in lower:upper) 
-					AA<-AA+(min(XX[l,2],YY[k,2])-max(XX[l,1],YY[k,1]))/(YY[k,2]-YY[k,1])*as.numeric(rownames(XX)[l])
+				if(!all(XX==0)){
+					for(l in lower:upper) 
+						AA<-AA+(min(XX[l,2],YY[k,2])-max(XX[l,1],YY[k,1]))/(YY[k,2]-YY[k,1])*as.numeric(rownames(XX)[l])
+				} else AA<-as.numeric(rownames(XX)[1])
 				ZZ[k]<-ZZ[k]+AA/length(trees)
 			}
 		}
@@ -48,7 +59,7 @@ densityMap<-function(trees,res=100,fsize=NULL,ftype=NULL,lwd=3,check=FALSE,legen
 	cols<-rainbow(1001,start=0.7,end=0); names(cols)<-0:1000
 	tree$mapped.edge<-makeMappedEdge(tree$edge,tree$maps)
 	tree$mapped.edge<-tree$mapped.edge[,order(as.numeric(colnames(tree$mapped.edge)))]
-	x<-list(tree=tree,cols=cols); class(x)<-"densityMap"
+	x<-list(tree=tree,cols=cols,states=ss); class(x)<-"densityMap"
 	if(plot) plot.densityMap(x,fsize=fsize,ftype=ftype,lwd=lwd,legend=legend,outline=outline,type=type,mar=mar,direction=direction,offset=offset)
 	invisible(x)
 }
@@ -74,7 +85,7 @@ plot.densityMap<-function(x,...){
 	if(hasArg(lwd)) lwd<-list(...)$lwd
 	else lwd<-3
 	if(hasArg(leg.txt)) leg.txt<-list(...)$leg.txt
-	else leg.txt<-c("0","PP(state=1)","1")
+	else leg.txt<-c("0",paste("PP(state=",x$states[2],")",sep=""),"1")
 	if(hasArg(type)) type<-list(...)$type
 	else type<-"phylogram"
 	if(hasArg(mar)) mar<-list(...)$mar
@@ -140,5 +151,14 @@ plot.densityMap<-function(x,...){
 print.densityMap<-function(x,...){
 	cat("Object of class \"densityMap\" containing:\n\n")
 	cat(paste("(1) A phylogenetic tree with ",length(x$tree$tip.label)," tips and ",x$tree$Nnode," internal nodes.\n\n",sep=""))
-	cat("(2) The mapped posterior density of a discrete binary character with states (0, 1).\n\n") 
+	cat(paste("(2) The mapped posterior density of a discrete binary character with states (",x$states[1],", ",x$states[2],").\n\n",sep="")) 
+}
+
+## set new color map for object of class 'densityMap' or 'contMap'
+## written by Liam J. Revell 2014
+
+setMap<-function(x,...){
+	n<-length(x$cols)
+	x$cols[1:n]<-colorRampPalette(...)(n)
+	x
 }

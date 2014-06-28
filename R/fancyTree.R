@@ -25,7 +25,7 @@ fancyTree<-function(tree,type=c("extinction","traitgram3d","droptip","densitymap
 }
 
 # phyloScattergram internal function
-# written by Liam J. Revell 2013
+# written by Liam J. Revell 2013, 2014
 
 phyloScattergram<-function(tree,...){
 	if(hasArg(X)) X<-list(...)$X
@@ -45,7 +45,7 @@ phyloScattergram<-function(tree,...){
 	for(i in 1:m) for(j in 1:m){
 		if(i==j) contMap(tree,X[,i],legend=FALSE,lwd=2,outline=F,fsize=fsize)
 		else { 
-			phylomorphospace(tree,X[,c(j,i)],lwd=1,node.by.map=TRUE,axes=FALSE,node.size=c(0,1),colors=colors,label=label)
+			phylomorphospace(tree,X[,c(j,i)],lwd=1,node.by.map=TRUE,axes=FALSE,node.size=c(0,1),colors=colors,label=label,xlab="",ylab="")
 			if(i==1) axis(side=3) # top row
 			if(i==m) axis(side=1) # first column
 			if(j==1) axis(side=2) # bottom row

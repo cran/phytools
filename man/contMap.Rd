@@ -22,7 +22,7 @@ contMap(tree, x, res=100, fsize=NULL, ftype=NULL, lwd=4, legend=NULL,
 	\item{type}{type of plot desired. Options are \code{"phylogram"} for a rightward square phylogram; and \code{"fan"} for a circular phylogram.}
 	\item{direction}{plotting direction for \code{type="phylogram"}.}
 	\item{plot}{logical value indicating whether or not to plot the tree. If \code{plot=FALSE} then an object of class \code{"contMap"} will be returned without plotting.}
-	\item{...}{optional arguments for \code{plot.contMap} which include all the arguments of \code{contMap} except for \code{tree}, \code{x}, \code{res}, and \code{lims}.}
+	\item{...}{optional arguments for \code{plot.contMap} which include all the arguments of \code{contMap} except for \code{tree}, \code{x}, \code{res}, and \code{lims}. Also \code{method}, \code{"fastAnc"} or \code{"anc.ML"}, specifying which function to use for ancestral state estimation.}
 }
 \description{
 	Function plots a tree with a mapped continuous character. The mapping is accomplished by estimating states at internal nodes using ML with \code{\link{fastAnc}}, and the interpolating the states along each edge using equation [2] of Felsenstein (1985).
@@ -31,13 +31,13 @@ contMap(tree, x, res=100, fsize=NULL, ftype=NULL, lwd=4, legend=NULL,
 	Plots a tree. An object of class \code{"contMap"} is returned invisibly.
 }
 \references{
-	Revell, L. J. \emph{In press.} Two new graphical methods for mapping trait evolution on phylogenies. \emph{Methods in Ecology and Evolution}.
+	Revell, L. J. 2013. Two new graphical methods for mapping trait evolution on phylogenies. \emph{Methods in Ecology and Evolution}, \bold{4}, 754-759.
 
 	Felsenstein, J. 1985. Phylogenies and the comparative method. \emph{American Naturalist}, \bold{125}, 1-15. 
 }
 \author{Liam Revell \email{liam.revell@umb.edu}}
 \seealso{
-	\code{\link{densityMap}}, \code{\link{fastAnc}}, \code{\link{plotSimmap}}
+	\code{\link{anc.ML}}, \code{\link{densityMap}}, \code{\link{fastAnc}}, \code{\link{plotSimmap}}
 }
 \keyword{phylogenetics}
 \keyword{plotting}
