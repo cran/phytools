@@ -162,3 +162,11 @@ setMap<-function(x,...){
 	x$cols[1:n]<-colorRampPalette(...)(n)
 	x
 }
+
+## drop tips from an object of class 'densityMap'
+## written by Liam J. Revell 2014
+
+drop.tip.densityMap<-function(x,tip){
+	if(class(x)!="densityMap") cat("x should be an object of class \"densityMap\"\n")
+	else return(drop.tip.contMap(x,tip))
+}

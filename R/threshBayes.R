@@ -3,7 +3,7 @@
 # row names of X should match the species names of the tree
 # types=c("discrete","discrete"), c("discrete","continuous"), c("cont","disc") etc. should 
 # be used to indicate the data type of each column in X
-# written by Liam J. Revell 2012
+# written by Liam J. Revell 2012, 2014
 
 threshBayes<-function(tree,X,types=NULL,ngen=1000,control=list()){
 
@@ -68,7 +68,8 @@ threshBayes<-function(tree,X,types=NULL,ngen=1000,control=list()){
 			pr.mean=c(rep(1000,m),rep(0,m),0),
 			pr.liab=0,
 			pr.var=c(rep(1000,m)^2,rep(1000,m),4/12),
-			pr.vliab=1000)
+			pr.vliab=1000,
+			quiet=FALSE)
 	con[(namc<-names(control))]<-control
 	con<-con[!sapply(con,is.null)]
 	
@@ -87,7 +88,7 @@ threshBayes<-function(tree,X,types=NULL,ngen=1000,control=list()){
 	for(i in 1:ngen){
 		lik1<-lik(a,V,invV,detV,D,Y)+log(all(P[,disc]==X[,disc]))
 		d<-i%%npar
-		if(ngen>=1000) if(i%%1000==0) print(paste("gen",i))
+		if(ngen>=1000) if(i%%1000==0) if(!con$quiet) cat(paste("gen ",i,"\n",sep=""))
 		Yp<-Y; sig2p<-sig2; ap<-a; rp<-r
 		if(d<=length(Y[,disc])&&d>0){
 			# update liabilities

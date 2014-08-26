@@ -18,7 +18,7 @@ make.simmap<-function(tree,x,model="SYM",nsim=1,...){
 		if(hasArg(message)) pm<-list(...)$message
 		else pm<-TRUE
 		if(hasArg(tol)) tol<-list(...)$tol
-		else tol<-1e-8
+		else tol<-0
 		if(hasArg(Q)) Q<-list(...)$Q
 		else Q<-"empirical"
 		if(hasArg(burnin)) burnin<-list(...)$burnin
@@ -203,12 +203,13 @@ getPars<-function(bt,xx,model,Q,tree,tol,m,liks=TRUE){
 		}
 		L<-rbind(xx,L)
 		rownames(L)[1:N]<-1:N
-	} else L<-NULL
-	if(any(XX$rates<tol)){
-		message(paste("\nWarning: some elements of Q not numerically distinct from 0; setting to",tol,"\n"))
-		XX$rates[XX$rates<tol]<-tol
-	}
+	} else L<-NULL	
 	Q<-matrix(c(0,XX$rates)[II],m,m,dimnames=list(lvls,lvls))
+	if(any(rowSums(Q,na.rm=TRUE)<tol)){
+		message(paste("\nWarning: some rows of Q not numerically distinct from 0; setting to",tol,"\n"))
+		ii<-which(rowSums(Q,na.rm=TRUE)<tol)
+		for(i in 1:length(ii)) Q[ii[i],setdiff(1:ncol(Q),ii[i])]<-tol/(ncol(Q)-1)
+	}
 	diag(Q)<--rowSums(Q,na.rm=TRUE)
 	return(list(Q=Q,L=L,loglik=XX$loglik))
 }
@@ -253,13 +254,16 @@ smap<-function(tree,x,N,m,root,L,Q,pi,logL){
 # function generates a history along a branch
 # written by Liam J. Revell 2013
 sch<-function(start,t,Q){
+	tol<-t*1e-12
 	dt<-setNames(0,start)
-	while(sum(dt)<t){
+	while(sum(dt)<(t-tol)){
 		s<-names(dt)[length(dt)]
-		dt[length(dt)]<-rexp(n=1,rate=-Q[s,s])
-		if(sum(dt)<t){
+		dt[length(dt)]<-if(-Q[s,s]>0) rexp(n=1,rate=-Q[s,s]) else t-sum(dt)
+		if(sum(dt)<(t-tol)){
 			dt<-c(dt,0)
-			names(dt)[length(dt)]<-rstate(Q[,s][-match(s,rownames(Q))]/sum(Q[,s][-match(s,rownames(Q))]))
+			if(sum(Q[s,][-match(s,colnames(Q))])>0)
+				names(dt)[length(dt)]<-rstate(Q[s,][-match(s,colnames(Q))]/sum(Q[s,][-match(s,colnames(Q))]))
+			else names(dt)[length(dt)]<-s
 		} else dt[length(dt)]<-dt[length(dt)]-sum(dt)+t
 	}
 	return(dt)

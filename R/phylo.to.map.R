@@ -16,7 +16,8 @@ phylo.to.map<-function(tree,coords,rotate=TRUE,...){
 	# create a map
 	map<-map(database,regions,xlim=xlim,ylim=ylim,plot=FALSE,fill=TRUE,resolution=0)
 	# if rotate
-	if(rotate) tree<-minRotate(tree,coords[,2])
+	if(hasArg(type)) type<-list(...)$type else type<-"phylogram"
+	if(rotate&&type=="phylogram") tree<-minRotate(tree,coords[,2])
 	x<-list(tree=tree,map=map,coords=coords)
 	class(x)<-"phylo.to.map"
 	if(plot) plot.phylo.to.map(x,...)
@@ -24,7 +25,7 @@ phylo.to.map<-function(tree,coords,rotate=TRUE,...){
 }
 
 # function to plot object of class "phylo.to.map"
-# written by Liam J. Revell 2013
+# written by Liam J. Revell 2013, 2014
 
 plot.phylo.to.map<-function(x,type=c("phylogram","direct"),...){
 	type<-type[1]
@@ -48,6 +49,15 @@ plot.phylo.to.map<-function(x,type=c("phylogram","direct"),...){
 	else mar<-rep(0,4)
 	if(hasArg(asp)) asp<-list(...)$asp
 	else asp<-1.0
+	if(hasArg(ftype)) ftype<-list(...)$ftype
+	else ftype<-"reg"
+	ftype<-which(c("off","reg","b","i","bi")==ftype)-1
+	if(!ftype) fsize=0 
+	if(hasArg(from.tip)) from.tip<-list(...)$from.tip
+	else from.tip<-FALSE
+	if(hasArg(colors)) colors<-list(...)$colors
+	else colors<-"red"
+	if(length(colors)!=2) rep(colors[1],2)->colors
 	# recompute ylim to leave space for the tree
 	if(type=="phylogram") ylim<-c(ylim[1],ylim[2]+split[1]/split[2]*(ylim[2]-ylim[1]))
 	# open & size a new plot
@@ -61,8 +71,8 @@ plot.phylo.to.map<-function(x,type=c("phylogram","direct"),...){
 		rect(xlim[1]-1.04*dx,ylim[2]-split[1]*(ylim[2]-ylim[1]),xlim[2]+1.04*dx,ylim[2],col="white",border="white")
 		# rescale tree so it fits in the upper half of the plot
 		# with enough space for labels
-		sh<-max(fsize*strwidth(tree$tip.label))/(par()$usr[2]-par()$usr[1])*(par()$usr[4]-par()$usr[3])
-		tree$edge.length<-tree$edge.length/max(nodeHeights(tree))*(split[1]*(ylim[2]-ylim[1])-sh)
+		sh<-(fsize*strwidth(tree$tip.label))/(par()$usr[2]-par()$usr[1])*(par()$usr[4]-par()$usr[3])
+		tree$edge.length<-tree$edge.length/max(nodeHeights(tree))*(split[1]*(ylim[2]-ylim[1])-max(sh))
 		n<-length(tree$tip.label)
 		# reorder cladewise to assign tip positions
 		cw<-reorder(tree,"cladewise")
@@ -84,13 +94,15 @@ plot.phylo.to.map<-function(x,type=c("phylogram","direct"),...){
 		for(i in 1:tree$Nnode+n) lines(range(x[cw$edge[which(cw$edge[,1]==i),2]]),Y[which(cw$edge[,1]==i),1],lwd=2,lend=2)
 		# plot coordinates & linking lines
 		coords<-coords[tree$tip.label,2:1]
-		points(coords,pch=16,cex=psize,col="red")
-		for(i in 1:n) lines(c(x[i],coords[i,1]),c(Y[which(cw$edge[,2]==i),2],coords[i,2]),col="red",lty="dashed")
+		points(coords,pch=16,cex=psize,col=colors[2])
+		for(i in 1:n) lines(c(x[i],coords[i,1]),c(Y[which(cw$edge[,2]==i),2]-if(from.tip) 0 else sh[i],coords[i,2]),col=colors[1],lty="dashed")
 		# plot tip labels
-		for(i in 1:n) text(x[i],Y[which(cw$edge[,2]==i),2],tree$tip.label[i],pos=4,offset=0.1,srt=-90,cex=fsize)
+		for(i in 1:n) text(x[i],Y[which(cw$edge[,2]==i),2],sub("_"," ",tree$tip.label[i]),pos=4,offset=0.1,
+			srt=-90,cex=fsize,font=ftype)
 	} else if(type=="direct"){
-		tree<-paintSubTree(tree,length(tree$tip)+1,"1")
-		phylomorphospace(tree,coords[,2:1],colors=setNames("red",1),node.by.map=TRUE,add=TRUE,label="horizontal",node.size=c(0,psize),lwd=1)
+		phylomorphospace(tree,coords[,2:1],add=TRUE,label="horizontal",node.size=c(0,psize),lwd=1,
+			control=list(col.node=setNames(rep(colors[2],max(tree$edge)),1:max(tree$edge)),
+			col.edge=setNames(rep(colors[1],nrow(tree$edge)),tree$edge[,2])))
 	}
 }
 

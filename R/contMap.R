@@ -104,3 +104,14 @@ print.contMap<-function(x,digits=6,...){
 	cat(paste("(1) A phylogenetic tree with ",length(x$tree$tip.label)," tips and ",x$tree$Nnode," internal nodes.\n\n",sep=""))
 	cat(paste("(2) A mapped continuous trait on the range (",round(x$lims[1],digits),", ",round(x$lims[2],digits),").\n\n",sep="")) 
 }
+
+## drop tips from an object of class 'contMap'
+## written by Liam J. Revell 2014
+
+drop.tip.contMap<-function(x,tip){
+	if(class(x)!="contMap") cat("x should be an object of class \"contMap\"\n")
+	else {
+		x$tree<-drop.tip.simmap(x$tree,tip)
+		return(x)
+	}
+}

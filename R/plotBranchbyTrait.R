@@ -1,5 +1,5 @@
 # function to plot probability or trait value by branch
-# written by Liam J. Revell 2013
+# written by Liam J. Revell 2013, 2014
 
 plotBranchbyTrait<-function(tree,x,mode=c("edges","tips","nodes"),palette="rainbow",legend=TRUE,xlims=NULL,...){
 	mode<-mode[1]
@@ -46,11 +46,12 @@ plotBranchbyTrait<-function(tree,x,mode=c("edges","tips","nodes"),palette="rainb
 	if(hasArg(x.lim)) x.lim<-list(...)$x.lim
 	else x.lim<-NULL
 	if(hasArg(y.lim)) y.lim<-list(...)$y.lim
-	else y.lim<-if(legend&&!prompt) c(1-0.06*length(tree$tip.label),length(tree$tip.label)) else NULL
+	else y.lim<-if(legend&&!prompt&&type%in%c("phylogram","cladogram")) 
+		c(1-0.06*length(tree$tip.label),length(tree$tip.label)) else NULL
 	if(hasArg(direction)) direction<-list(...)$direction
 	else direction<-"rightwards"
 	if(hasArg(lab4ut)) lab4ut<-list(...)$lab4ut
-	else lab4ut<-"horizontal"
+	else lab4ut<-NULL
 	if(hasArg(tip.color)) tip.color<-list(...)$tip.color
 	else tip.color<-"black"
 	if(hasArg(plot)) plot<-list(...)$plot
@@ -83,7 +84,8 @@ plotBranchbyTrait<-function(tree,x,mode=c("edges","tips","nodes"),palette="rainb
 		else title<-"trait value"
 		if(hasArg(digits)) digits<-list(...)$digits
 		else digits<-1
-		add.color.bar(legend,cols,title,xlims,digits,prompt=prompt)
+		if(prompt) add.color.bar(legend,cols,title,xlims,digits,prompt=TRUE)
+		else add.color.bar(legend,cols,title,xlims,digits,prompt=FALSE,x=par()$usr[1]+0.05*(par()$usr[2]-par()$usr[1]),y=par()$usr[3]+0.05*(par()$usr[4]-par()$usr[3]))
 	}
 	invisible(xx)
 }

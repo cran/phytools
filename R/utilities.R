@@ -128,7 +128,7 @@ plot.describe.simmap<-function(x,...){
 		states<-colnames(x$ace)
 		if(hasArg(colors)) colors<-list(...)$colors
 		else colors<-setNames(palette()[1:length(states)],states)
-		plotTree(x$tree[[1]],lwd=lwd,offset=0.15*max(nodeHeights(x$tree[[1]])),...)
+		plotTree(x$tree[[1]],lwd=lwd,offset=cex[2],...)
 		nodelabels(pie=x$ace,piecol=1:length(states),cex=cex[1])
 		if(!is.null(x$tips)) tips<-x$tips else tips<-to.matrix(getStates(x$tree[[1]],"tips"),seq=states) 
 		tiplabels(pie=tips,piecol=1:length(states),cex=cex[2])

@@ -1,5 +1,5 @@
 # function reads SIMMAP v1.0 & v1.5 style trees into file
-# written by Liam J. Revell 2011-2013
+# written by Liam J. Revell 2011-2014
 
 read.simmap<-function(file="",text,format="nexus",rev.order=TRUE,version=1.0){
 	if(file!=""){
@@ -14,24 +14,14 @@ read.simmap<-function(file="",text,format="nexus",rev.order=TRUE,version=1.0){
 			Ntree<-length(text)
 			
 		}
-	}  else Ntree<-length(text)
+	}  else {
+		trans<-NULL
+		Ntree<-length(text)
+	}
 	tree<-lapply(text,text_to_tree,version,rev.order,trans)
 	class(tree)<-"multiPhylo"
 	if(length(tree)==1) tree<-tree[[1]]
 	return(tree)
-}
-
-# function gets label
-# written by Liam J. Revell 2011-2013
-
-getLabel<-function(text,start){
-	i<-0
-	label<-vector()
-	while(is.na(match(text[i+start],c(",",":",")")))){
-		label[i+1]<-text[i+start]
-		i<-i+1
-	}
-	return(list(label=paste(label,collapse=""),end=i+start))
 }
 
 # function gets branch length
@@ -292,7 +282,7 @@ readNexusData<-function(file,version){
 		X<-scan(file=file,what="",sep="\n",quiet=TRUE)
 		left<-grep("\\[",X)
 		right<-grep("\\]",X)
-		skip<-grep("\\&map",X)
+		skip<-if(version<=2.0) grep("\\&map",X) else if(version>2.0) grep("\\&prob",X)
 		left<-setdiff(left,skip)
 		right<-setdiff(right,skip)
 		if(length(left)){

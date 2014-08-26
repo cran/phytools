@@ -104,7 +104,7 @@ newick<-function(text){
 
 # function gets label
 # written by Liam J. Revell 2011-2013
-getLabel<-function(text,start,stop.char=c(",",":",")")){
+getLabel<-function(text,start,stop.char=c(",",":",")",";")){
 	i<-0
 	label<-vector()
 	while(is.na(match(text[i+start],stop.char))){
