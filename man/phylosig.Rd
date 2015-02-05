@@ -37,12 +37,13 @@ phylosig(tree, x, method="K", test=FALSE, nsim=1000, se=NULL, start=NULL,
 	\item{message}{message from \code{\link{optim}}, for estimation with sampling error only.}
 }
 \references{
-	Pagel, M. (1999) Inferring the historical patterns of biological evolution. \emph{Nature}, \bold{401}, 877--884.
-
-	Blomberg, S. P., T. Garland Jr., A. R. Ives (2003) Testing for phylogenetic signal in comparative data: Behavioral traits are more labile. \emph{Evolution}, \bold{57},
-  717--745.
+	Blomberg, S. P., T. Garland Jr., A. R. Ives (2003) Testing for phylogenetic signal in comparative data: Behavioral traits are more labile. \emph{Evolution}, \bold{57}, 717-745.
 
 	Ives, A. R., P. E. Midford, T. Garland Jr. (2007) Within-species variation and measurement error in phylogenetic comparative biology. \emph{Systematic Biology}, \bold{56}, 252-270.
+
+	Pagel, M. (1999) Inferring the historical patterns of biological evolution. \emph{Nature}, \bold{401}, 877-884.
+
+	Revell, L. J. (2012) phytools: An R package for phylogenetic comparative biology (and other things). \emph{Methods Ecol. Evol.}, \bold{3}, 217-223.
 }
 \author{Liam Revell \email{liam.revell@umb.edu}}
 \examples{

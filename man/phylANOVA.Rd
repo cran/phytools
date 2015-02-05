@@ -29,6 +29,8 @@ phylANOVA(tree, x, y, nsim=1000, posthoc=TRUE, p.adj="holm")
 	Garland, T., Jr., A. W. Dickerman, C. M. Janis, & J. A. Jones. (1993) Phylogenetic analysis of covariance by computer simulation. \emph{Systematic Biology}, \bold{42}, 265-292.
 
 	Harmon, L. J., J. T. Weir, C. D. Brock, R. E. Glor, W. Challenger. (2008) GEIGER: investigating evolutionary radiations. \emph{Bioinformatics}, 24, 129-131.
+
+	Revell, L. J. (2012) phytools: An R package for phylogenetic comparative biology (and other things). \emph{Methods Ecol. Evol.}, \bold{3}, 217-223.
 }
 \author{Liam Revell \email{liam.revell@umb.edu}}
 \seealso{

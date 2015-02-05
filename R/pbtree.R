@@ -1,5 +1,5 @@
 # function to simulate a pure-birth phylogenetic tree or trees
-# written by Liam J. Revell 2011-2013
+# written by Liam J. Revell 2011-2015
 
 pbtree<-function(b=1,d=0,n=NULL,t=NULL,scale=NULL,nsim=1,type=c("continuous","discrete"),...){
 	# get arguments
@@ -242,11 +242,12 @@ pbtree<-function(b=1,d=0,n=NULL,t=NULL,scale=NULL,nsim=1,type=c("continuous","di
 		# if ape==TRUE make sure 'phylo' is consistent with ape
 		if(ape&&is.null(tree)==FALSE) tree<-read.tree(text=write.tree(tree))
 		if(!is.null(tip.label)){
-			if(length(getExtant(tree))!=NN){
+			th<-max(nodeHeights(tree))
+			if(length(getExtant(tree,tol=1e-08*th))!=NN){
 				# simulation must have gone extint before reaching NN
 				tree$tip.label<-paste("X",1:length(tree$tip.label),sep="")
 			} else {
-				ll<-getExtant(tree)
+				ll<-getExtant(tree,tol=1e-08*th)
 				ii<-sapply(ll,function(x,y) which(x==y),y=tree$tip.label)
 				tree$tip.label[ii]<-tip.label
 				tree$tip.label[-ii]<-paste("X",1:(length(tree$tip.label)-length(ii)),sep="")

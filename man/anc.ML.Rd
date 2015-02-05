@@ -24,6 +24,11 @@ anc.ML(tree, x, maxit=2000, model=c("BM","OU"), ...)
 	\item{logLik}{the log-likelihood.}
 	\item{convergence}{the value of \code{$convergence} returned by \code{optim()} (0 is good).}
 }
+\references{
+	Revell, L. J. (2012) phytools: An R package for phylogenetic comparative biology (and other things). \emph{Methods Ecol. Evol.}, \bold{3}, 217-223.
+
+	Schluter, D., Price, T., Mooers, A. O., and Ludwig, D. (1997) Likelihood of ancestor states in adaptive radiation. \emph{Evolution} \bold{51}, 1699-1711.
+}
 \author{Liam Revell \email{liam.revell@umb.edu}}
 \seealso{
 	\code{\link{ace}}, \code{\link{anc.Bayes}}, \code{\link{fastAnc}}, \code{\link{optim}}

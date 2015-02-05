@@ -13,13 +13,15 @@ export.as.xml(file, trees, X)
 	This function exports trees & character data in XML format.
 }
 \details{
-	Can be used to create input file for the program SIMMAP v1.5 (Bollback 2006), also see: \url{http://www.simmap.org}.
+	Can be used to create input file for the program SIMMAP v1.5 (Bollback 2006), also see: \url{http://www.simmap.com}.
 }
 \value{
 	A file.
 }
 \references{
 	Bollback, J. P. (2006) Stochastic character mapping of discrete traits on phylogenies. \emph{BMC Bioinformatics}, \bold{7}, 88.
+
+	Revell, L. J. (2012) phytools: An R package for phylogenetic comparative biology (and other things). \emph{Methods Ecol. Evol.}, \bold{3}, 217-223.
 }
 \author{Liam Revell \email{liam.revell@umb.edu}}
 \seealso{

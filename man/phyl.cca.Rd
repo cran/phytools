@@ -28,7 +28,9 @@ phyl.cca(tree, X, Y, lambda=1.0, fixed=TRUE)
 	\item{p}{P-values for the hypothesis test that the \emph{i}th and all subsequent correlations are zero.}
 }
 \references{
-	Revell, L. J. & A. S. Harrison. (2008) PCCA: A program for phylogenetic canonical correlation analysis. \emph{Bioinformatics}, \bold{24}, 1018--1020.
+	Revell, L. J., Harrison, A. S. (2008) PCCA: A program for phylogenetic canonical correlation analysis. \emph{Bioinformatics}, \bold{24}, 1018-1020.
+
+	Revell, L. J. (2012) phytools: An R package for phylogenetic comparative biology (and other things). \emph{Methods Ecol. Evol.}, \bold{3}, 217-223.
 }
 \author{Liam Revell \email{liam.revell@umb.edu}}
 \seealso{

@@ -17,6 +17,9 @@ rateshift(tree, x, nrates=1, niter=10, ...)
 \value{
 	An object of class \code{"rateshift"}.
 }
+\references{
+	Revell, L. J. (2012) phytools: An R package for phylogenetic comparative biology (and other things). \emph{Methods Ecol. Evol.}, \bold{3}, 217-223.
+}
 \author{Liam Revell \email{liam.revell@umb.edu}}
 \seealso{
 	\code{\link{brownie.lite}}

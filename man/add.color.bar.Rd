@@ -19,6 +19,9 @@ add.color.bar(leg, cols, title=NULL, lims=c(0,1), digits=1, prompt=TRUE,
 \description{
 	This function adds a color bar to a plot created by \code{\link{plotBranchbyTrait}}. The only way to add the color bar at present is by clicking on the desired location within your plot. It is also used internally by \code{plot.contMap} and \code{plot.densityMap}.
 }
+\references{
+	Revell, L. J. (2013) Two new graphical methods for mapping trait evolution on phylogenies. \emph{Methods in Ecology and Evolution}, \bold{4}, 754-759.
+}
 \author{Liam Revell \email{liam.revell@umb.edu}}
 \seealso{
 	\code{\link{contMap}}, \code{\link{densityMap}}, \code{\link{plotBranchbyTrait}}

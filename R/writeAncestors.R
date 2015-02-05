@@ -109,16 +109,3 @@ writeAnc<-function(tree,Anc,digits){
 	return(string)
 }
 
-# rep for "phylo" or "multiPhylo" object
-# written by Liam J. Revell 2013, modified from http://stackoverflow.com/questions/9448993/rep-first-level-of-lists
-repPhylo<-function(tree,times){
-	tree<- 
-	if(sum(sapply(tree,class)!="list")==0){
-		tree
-	} else {
-    	list(tree)
-	}
-	tree<-rep(tree,length=times)
-	class(tree)<-"multiPhylo"
-	return(tree)
-}

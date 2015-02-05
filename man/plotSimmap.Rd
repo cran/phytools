@@ -5,7 +5,7 @@
 plotSimmap(tree, colors=NULL, fsize=1.0, ftype="reg", lwd=2, pts=FALSE, 
 	node.numbers=FALSE, mar=NULL, add=FALSE, offset=NULL, direction="rightwards",
 	type="phylogram", setEnv=TRUE, part=1.0, xlim=NULL, ylim=NULL, 
-	nodes="intermediate")
+	nodes="intermediate",tips=NULL)
 }
 \arguments{
  	\item{tree}{a modified object of class "phylo" or "multiPhylo" containing a stochastic mapping or set of mappings (e.g., see \code{\link{read.simmap}} & \code{\link{make.simmap}}).}
@@ -13,7 +13,7 @@ plotSimmap(tree, colors=NULL, fsize=1.0, ftype="reg", lwd=2, pts=FALSE,
  	\item{fsize}{relative font size for tip labels.}
 	\item{ftype}{font type - options are \code{"reg"}, \code{"i"} (italics), \code{"b"} (bold), or \code{"bi"} (bold-italics).}
 	\item{lwd}{line width for plotting.}
-	\item{pts}{logical value indicating whether or not to plot filled circles at each vertex of the tree, as well as at transition points between mapped states.  Default is \code{TRUE}.}
+	\item{pts}{logical value indicating whether or not to plot filled circles at each vertex of the tree, as well as at transition points between mapped states.  Default is \code{FALSE}.}
 	\item{node.numbers}{a logical value indicating whether or not node numbers should be plotted.}
 	\item{mar}{vector containing the margins for the plot to be passed to \code{\link{par}}. If not specified, the default margins are [0.1,0.1,0.1,0.1].}
 	\item{add}{a logical value indicating whether or not to add the plotted tree to the current plot (\code{TRUE}) or create a new plot (\code{FALSE}, the default).}
@@ -25,6 +25,7 @@ plotSimmap(tree, colors=NULL, fsize=1.0, ftype="reg", lwd=2, pts=FALSE,
 	\item{xlim}{x-limits for the plot.}
 	\item{ylim}{y-limits for the plot.}
 	\item{nodes}{node placement following Felsenstein (2004; pp. 574-576). Can be \code{"intermediate"}, \code{"centered"}, \code{"weighted"}, or \code{"inner"}. So far only works for \code{type="phylogram"}.}
+	\item{tips}{labeled vector containing the vertical position of tips. Normally this will be \code{1:N} for \code{N} tips in the tree. Presently only available for \code{type="phylogram"}.}
 }
 \description{
 	Function plots one or multiple stochastic character mapped trees.
@@ -42,6 +43,7 @@ plotSimmap(tree, colors=NULL, fsize=1.0, ftype="reg", lwd=2, pts=FALSE,
 
 	Huelsenbeck, J. P., R. Neilsen, and J. P. Bollback. (2003) Stochastic mapping of morphological characters. \emph{Systematic Biology}, \bold{52}, 131-138. 
 
+	Revell, L. J. (2012) phytools: An R package for phylogenetic comparative biology (and other things). \emph{Methods Ecol. Evol.}, \bold{3}, 217-223.
 }
 \author{Liam Revell \email{liam.revell@umb.edu}}
 \seealso{

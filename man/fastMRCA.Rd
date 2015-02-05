@@ -20,6 +20,9 @@ fastHeight(tree, sp1, sp2)
 \value{
 	The node number of the MRCA or the height above the root (for \code{fastHeight}).
 }
+\references{
+	Revell, L. J. (2012) phytools: An R package for phylogenetic comparative biology (and other things). \emph{Methods Ecol. Evol.}, \bold{3}, 217-223.
+}
 \author{Liam Revell \email{liam.revell@umb.edu}}
 \seealso{
 	\code{\link{findMRCA}}, \code{\link{mrca}}

@@ -1,5 +1,5 @@
 # function to read a Newick string with node labels & (possible) singles
-# written by Liam J. Revell 2013
+# written by Liam J. Revell 2013, 2014
 
 read.newick<-function(file="",text){
 	# check to see if reading from file
@@ -12,19 +12,19 @@ read.newick<-function(file="",text){
 }
 
 # main Newick string function
-# written by Liam J. Revell 2013
+# written by Liam J. Revell 2013, 2014
 newick<-function(text){
 	text<-unlist(strsplit(text, NULL))
 	tip.label<-vector(mode="character")
 	node.label<-vector(mode="character") 
-	edge<-matrix(c(1,NA),1,2) 
+	edge<-matrix(NA,sum(text=="(")+sum(text==","),2)
+	ei<-vector()
 	edge.length<-vector()
 	currnode<-1
 	Nnode<-currnode
-	i<-j<-k<-1
+	i<-j<-k<-1 
 	while(text[i]!=";"){
 		if(text[i]=="("){
-			if(j>nrow(edge)) edge<-rbind(edge,c(NA,NA))
 			edge[j,1]<-currnode
 			i<-i+1
 			# is the next element a label?
@@ -44,6 +44,7 @@ newick<-function(text){
 				Nnode<-Nnode+1 # creating a new internal node
 				currnode<-Nnode
 				edge[j,2]<-currnode # move to new internal node
+				ei[currnode]<-j
 			}
 			j<-j+1
 		} else if(text[i]==")"){
@@ -54,18 +55,16 @@ newick<-function(text){
 				node.label[currnode]<-temp$label
 				i<-temp$end
 			}
+			ii<-ei[currnode]
 			# is there a branch length?
 			if(text[i]==":"){
 				temp<-getEdgeLength(text,i)
-				if(currnode>1){ 
-					ii<-match(currnode,edge[,2])
-					edge.length[ii]<-temp$edge.length
-				} else root.edge<-temp$edge.length
+				if(currnode>1) edge.length[ii]<-temp$edge.length
+				else root.edge<-temp$edge.length
 				i<-temp$end
 			}	
-			if(currnode>1) currnode<-edge[match(currnode,edge[,2]),1] # move down the tree
+			if(currnode>1) currnode<-edge[ii,1] # move down the tree	`
 		} else if(text[i]==","){
-			if(j>nrow(edge)) edge<-rbind(edge,c(NA,NA))
 			edge[j,1]<-currnode
 			i<-i+1
 			# is the next element a label?
@@ -85,11 +84,13 @@ newick<-function(text){
 				Nnode<-Nnode+1 # creating a new internal node
 				currnode<-Nnode
 				edge[j,2]<-currnode # move to internal node
+				ei[currnode]<-j
 			}
 			j<-j+1
 		}
 	}
 	Ntip<-k-1
+	edge<-edge[!is.na(edge[,2]),]
 	edge[edge>0]<-edge[edge>0]+Ntip
 	edge[edge<0]<--edge[edge<0]
 	edge.length[is.na(edge.length)]<-0
@@ -99,30 +100,25 @@ newick<-function(text){
 	# assemble into "phylo" object
 	tree<-list(edge=edge,Nnode=as.integer(Nnode),tip.label=tip.label,edge.length=edge.length,node.label=node.label)
 	class(tree)<-"phylo"
+	attr(tree,"order")<-"cladewise"
 	return(tree)
 }
 
 # function gets label
-# written by Liam J. Revell 2011-2013
+# written by Liam J. Revell 2011-2013, 2014
 getLabel<-function(text,start,stop.char=c(",",":",")",";")){
 	i<-0
-	label<-vector()
-	while(is.na(match(text[i+start],stop.char))){
-		label[i+1]<-text[i+start]
-		i<-i+1
-	}
+	while(is.na(match(text[i+start],stop.char))) i<-i+1
+	label<-paste(text[0:(i-1)+start],collapse="")	
 	return(list(label=paste(label,collapse=""),end=i+start))
 }
 
 # function gets branch length
-# written by Liam J. Revell 2011-2013
+# written by Liam J. Revell 2011-2013, 2014
 getEdgeLength<-function(text,start){
-	i<-start+1; m<-1
-	temp<-vector()
-	while(is.na(match(text[i],c(",",")",";")))){
-		temp[m]<-text[i]
-		i<-i+1
-		m<-m+1
-	}
-	return(list(edge.length=as.numeric(paste(temp,collapse="")),end=i))
+	i<-start+1
+	stop.char<-c(",",")",";")
+	while(is.na(match(text[i],stop.char))) i<-i+1
+	edge.length<-as.numeric(paste(text[(start+1):(i-1)],collapse=""))
+	return(list(edge.length=edge.length,end=i))
 }

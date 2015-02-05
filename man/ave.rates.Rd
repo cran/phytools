@@ -20,6 +20,9 @@ ave.rates(tree, shift, tips, sig1, sig2, ave.shift, showTree=TRUE)
 \value{
 	A list of the rates.
 }
+\references{
+	Revell, L. J. (2012) phytools: An R package for phylogenetic comparative biology (and other things). \emph{Methods Ecol. Evol.}, \bold{3}, 217-223.
+}
 \author{Liam Revell \email{liam.revell@umb.edu}}
 \seealso{
 	\code{\link{evol.rate.mcmc}}, \code{\link{minSplit}}, \code{\link{posterior.evolrate}}

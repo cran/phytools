@@ -30,7 +30,9 @@ phyl.pca(tree, Y, method="BM", mode="cov")
 	\item{logL}{log-likelihood for lambda model (\code{method="logL"} only).}
 }
 \references{
-	Revell, L. J. (2009) Size-correction and principal components for interspecific comparative studies. \emph{Evolution}, \bold{63}, 3258--3268.
+	Revell, L. J. (2009) Size-correction and principal components for interspecific comparative studies. \emph{Evolution}, \bold{63}, 3258-3268.
+
+	Revell, L. J. (2012) phytools: An R package for phylogenetic comparative biology (and other things). \emph{Methods Ecol. Evol.}, \bold{3}, 217-223.
 }
 \author{Liam Revell \email{liam.revell@umb.edu}, Joan Maspons}
 \seealso{

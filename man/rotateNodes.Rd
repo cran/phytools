@@ -19,6 +19,9 @@ rotateNodes(tree, nodes, polytom=c(1,2), ...)
 \value{
 	An object of class \code{"phylo"} (i.e., a phylogenetic tree).
 }
+\references{
+	Revell, L. J. (2012) phytools: An R package for phylogenetic comparative biology (and other things). \emph{Methods Ecol. Evol.}, \bold{3}, 217-223.
+}
 \author{Liam Revell \email{liam.revell@umb.edu}}
 \keyword{phylogenetics}
 \keyword{utilities}

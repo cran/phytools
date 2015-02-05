@@ -17,6 +17,9 @@ sim.ratebystate(tree, sig2x=1, sig2y=1, beta=c(0,1), ...)
 \value{
 	This function returns a matrix.
 }
+\references{
+	Revell, L. J. (2012) phytools: An R package for phylogenetic comparative biology (and other things). \emph{Methods Ecol. Evol.}, \bold{3}, 217-223.
+}
 \author{Liam Revell \email{liam.revell@umb.edu}}
 \seealso{
 	\code{\link{fastBM}}, \code{\link{ratebystate}}

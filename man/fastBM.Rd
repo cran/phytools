@@ -20,6 +20,9 @@ fastBM(tree, a=0, mu=0, sig2=1, bounds=c(-Inf,Inf), internal=FALSE, nsim=1, ...)
 \value{
 	A vector (for \code{nsim=1}) or matrix containing the tip states for the \code{n} species in the tree, and (optionally) the ancestral states for internal nodes.
 }
+\references{
+	Revell, L. J. (2012) phytools: An R package for phylogenetic comparative biology (and other things). \emph{Methods Ecol. Evol.}, \bold{3}, 217-223.
+}
 \author{Liam Revell \email{liam.revell@umb.edu}}
 \seealso{
 	\code{\link{branching.diffusion}}

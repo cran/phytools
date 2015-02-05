@@ -19,6 +19,9 @@ describe.simmap(tree, ...)
 	\item{legend}{a vector containing the plot legend, if \code{plot=TRUE}.}
 	if \code{class(tree)="phylo"} then the function simply returns the results of \code{\link{countSimmap}} combined with the states at each node of the tree and a matrix containing the total and relative times spent in each state on the tree.
 }
+\references{
+	Revell, L. J. (2012) phytools: An R package for phylogenetic comparative biology (and other things). \emph{Methods Ecol. Evol.}, \bold{3}, 217-223.
+}
 \author{Liam Revell \email{liam.revell@umb.edu}}
 \keyword{comparative method}
 \keyword{phylogenetics}

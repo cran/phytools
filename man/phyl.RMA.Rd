@@ -28,6 +28,9 @@ phyl.RMA(x, y, tree, method="BM", lambda=NULL, fixed=FALSE, h0=1.0)
 	\item{test}{a vector containing results for hypothesis tests on \code{beta}.}
 	\item{resid}{a vector of residuals for \code{y} given \code{x}.}
 }
+\references{
+	Revell, L. J. (2012) phytools: An R package for phylogenetic comparative biology (and other things). \emph{Methods Ecol. Evol.}, \bold{3}, 217-223.
+}
 \author{Liam Revell \email{liam.revell@umb.edu}}
 \seealso{
 	\code{\link{phyl.cca}}, \code{\link{phyl.pca}}, \code{\link{phyl.resid}}

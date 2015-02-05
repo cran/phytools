@@ -22,7 +22,9 @@ spin=TRUE,axes=TRUE,box=TRUE,simple.axes=FALSE,lwd=1,ftype="reg"
 	This function creates a three dimensional phylomorphospace plot. The function returns a function from \code{spin3d} (for \code{method="dynamic"}); or a series of functions from \code{\link{scatterplot3d}} (for \code{method="static"}).
 }
 \references{
-	Sidlauskas, B. (2008) Continuous and arrested morphological diversification in sister clades of characiform fishes: A phylomorphospace approach. \emph{Evolution}, \bold{62}, 3135--3156.
+	Revell, L. J. (2012) phytools: An R package for phylogenetic comparative biology (and other things). \emph{Methods Ecol. Evol.}, \bold{3}, 217-223.
+
+	Sidlauskas, B. (2008) Continuous and arrested morphological diversification in sister clades of characiform fishes: A phylomorphospace approach. \emph{Evolution}, \bold{62}, 3135-3156.
 }
 \author{Liam Revell \email{liam.revell@umb.edu}}
 \examples{

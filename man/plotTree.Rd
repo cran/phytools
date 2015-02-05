@@ -9,10 +9,13 @@ plotTree(tree, ...)
 	\item{...}{optional arguments.}
 }
 \description{
-	This function plots a rooted phylogram. Arguments in \code{...} are passed to \code{\link{plotSimmap}}, with the exception of optional argument \code{color} which is used to determine the plotted color of the branch lengths of the tree. Note that the optional argument \code{pts}, which is by default \code{pts=TRUE} in \code{plotSimmap} has the default value of \code{pts=FALSE} in \code{plotTree}.
+	This function plots a rooted phylogram. Arguments in \code{...} are passed to \code{\link{plotSimmap}}, with the exception of optional argument \code{color} which is used to determine the plotted color of the branch lengths of the tree.
 }
 \value{
 	This function plots a rooted phylogram.
+}
+\references{
+	Revell, L. J. (2012) phytools: An R package for phylogenetic comparative biology (and other things). \emph{Methods Ecol. Evol.}, \bold{3}, 217-223.
 }
 \author{Liam Revell \email{liam.revell@umb.edu}}
 \seealso{

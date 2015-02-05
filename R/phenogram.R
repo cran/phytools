@@ -1,5 +1,5 @@
 # function creates a phenogram (i.e., 'traitgram')
-# written by Liam J. Revell 2011, 2012, 2013
+# written by Liam J. Revell 2011, 2012, 2013, 2014
 
 phenogram<-function(tree,x,fsize=1.0,ftype="reg",colors=NULL,axes=list(),add=FALSE,...){
 	## get optional arguments
@@ -37,6 +37,8 @@ phenogram<-function(tree,x,fsize=1.0,ftype="reg",colors=NULL,axes=list(),add=FAL
 	else spread.labels<-FALSE
 	if(hasArg(spread.cost)) spread.cost<-list(...)$spread.cost
 	else spread.cost<-c(1,0.4)
+	if(hasArg(spread.range)) spread.range<-list(...)$spread.range
+	else spread.range<-range(x)
 	if(hasArg(link)) link<-list(...)$link
 	else link<-if(spread.labels) 0.1*max(nodeHeights(tree)) else 0 
 	## end optional arguments
@@ -67,7 +69,7 @@ phenogram<-function(tree,x,fsize=1.0,ftype="reg",colors=NULL,axes=list(),add=FAL
 		if(is.null(colors)) colors<-"black"
 		if(!add){ 
 			plot(H[1,],X[1,],type=type,lwd=lwd,lty=lty,col=colors,xlim=xlim,ylim=ylim,log=log,asp=asp,xlab="",ylab="",frame=FALSE, axes=FALSE)
-			if(spread.labels) tt<-spreadlabels(tree,x,fsize=fsize,cost=spread.cost) else tt<-x[1:length(tree$tip)]
+			if(spread.labels) tt<-spreadlabels(tree,x,fsize=fsize,cost=spread.cost,range=spread.range) else tt<-x[1:length(tree$tip)]
 			if(tree$edge[1,2]<=length(tree$tip)){
 				if(fsize&&!add){
 					text(tree$tip.label[tree$edge[1,2]],x=H[1,2]+link,y=tt[tree$edge[1,2]],cex=fsize,font=ftype,pos=4,offset=offset)
@@ -98,7 +100,7 @@ phenogram<-function(tree,x,fsize=1.0,ftype="reg",colors=NULL,axes=list(),add=FAL
 				b<-m*(a-H[i,1])+X[i,1]
 				if(i==1&&j==1&&!add) {
 					plot(a,b,col=colors[names(tree$maps[[i]])[j]],type=type,lwd=lwd,lty=lty,xlim=xlim,ylim=ylim,log=log,asp=asp,axes=FALSE,xlab="",ylab="")
-					if(spread.labels) tt<-spreadlabels(tree,x[1:length(tree$tip)],fsize=fsize,cost=spread.cost) else tt<-x[1:length(tree$tip)]
+					if(spread.labels) tt<-spreadlabels(tree,x[1:length(tree$tip)],fsize=fsize,cost=spread.cost,range=spread.range) else tt<-x[1:length(tree$tip)]
 				} else lines(a,b,col=colors[names(tree$maps[[i]])[j]],lwd=lwd,lty=lty,type=type)
 				y<-a[2]
 			}
@@ -117,8 +119,9 @@ phenogram<-function(tree,x,fsize=1.0,ftype="reg",colors=NULL,axes=list(),add=FAL
 }
 
 # function to spread labels
-# written by Liam J. Revell 2013
-spreadlabels<-function(tree,x,fsize=1,cost=c(1,1)){
+# written by Liam J. Revell 2013, 2014
+spreadlabels<-function(tree,x,fsize=1,cost=c(1,1),range=NULL){
+	if(is.null(range)) range<-range(x)
 	yy<-x[1:length(tree$tip)]
 	zz<-setNames((rank(yy,ties.method="random")-1)/(length(yy)-1)*diff(range(yy))+range(yy)[1],names(yy))
 	mm<-max(fsize*strheight(tree$tip.label))
@@ -133,7 +136,7 @@ spreadlabels<-function(tree,x,fsize=1,cost=c(1,1)){
 	ms<-ff(yy,zz,cost=c(0,1))
 	if(mo==0&&ms==0) return(yy)
 	else {
-		rr<-optim(zz,ff,yy=yy,mo=mo,ms=ms,cost=cost,method="L-BFGS-B",lower=rep(min(x),length(yy)),upper=rep(max(x),length(yy)))
+		rr<-optim(zz,ff,yy=yy,mo=mo,ms=ms,cost=cost,method="L-BFGS-B",lower=rep(range[1],length(yy)),upper=rep(range[2],length(yy)))
 		return(rr$par)
 	}
 }

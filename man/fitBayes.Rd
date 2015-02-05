@@ -19,6 +19,8 @@ fitBayes(tree, x, ngen=10000, model="BM", method="reduced", control=list())
 	A matrix with number of rows \code{ngen/control$sample+1} containing the posterior sample and likelihoods.  Matrix columns are labeled by species (for species means and variances), or by the corresponding evolutionary parameter.
 }
 \references{
+	Revell, L. J. (2012) phytools: An R package for phylogenetic comparative biology (and other things). \emph{Methods Ecol. Evol.}, \bold{3}, 217-223.
+
 	Revell, L. J. and R. G. Reynolds. (2012) A new Bayesian method for fitting evolutionary models to comparative data with intraspecific variation. \emph{Evolution}, 66, 2697-2707.
 }
 \author{Liam Revell \email{liam.revell@umb.edu}}

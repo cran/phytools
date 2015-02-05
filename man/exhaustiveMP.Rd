@@ -21,6 +21,8 @@ exhaustiveMP(data, tree=NULL, method="branch.and.bound")
 \references{
 	Felsenstein, J. (2004) \emph{Inferring Phylogenies}. Sinauer.
 
+	Revell, L. J. (2012) phytools: An R package for phylogenetic comparative biology (and other things). \emph{Methods Ecol. Evol.}, \bold{3}, 217-223.
+
 	Schliep, K. P. (2011) phangorn: phylogenetic analysis in R. \emph{Bioinformatics}, \bold{27}, 592-593.
 }
 \author{Liam Revell \email{liam.revell@umb.edu}}

@@ -25,6 +25,9 @@ pbtree(b=1, d=0, n=NULL, t=NULL, scale=NULL, nsim=1,
 \value{
 	A tree or list of trees as an object of class \code{"phylo"} or \code{"multiPhylo"}, respectively.
 }
+\references{
+	Revell, L. J. (2012) phytools: An R package for phylogenetic comparative biology (and other things). \emph{Methods Ecol. Evol.}, \bold{3}, 217-223.
+}
 \author{Liam Revell \email{liam.revell@umb.edu}}
 \examples{
 # simulate a pure-birth tree with 1000 tips, scaled to a length of 1.0

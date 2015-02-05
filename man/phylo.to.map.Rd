@@ -20,6 +20,9 @@ phylo.to.map(tree, coords, rotate=TRUE, ...)
 \value{
 	Plots a phylogeny and map and returns an object of class \code{"phylo.to.map"} invisibly.
 }
+\references{
+	Revell, L. J. (2012) phytools: An R package for phylogenetic comparative biology (and other things). \emph{Methods Ecol. Evol.}, \bold{3}, 217-223.
+}
 \author{Liam Revell \email{liam.revell@umb.edu}}
 \keyword{phylogenetics}
 \keyword{plotting}

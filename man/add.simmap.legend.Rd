@@ -14,6 +14,9 @@ add.simmap.legend(leg=NULL, colors, prompt=TRUE, vertical=TRUE, ...)
 \description{
 	This function adds a legend (by default, interactively) to a plotted stochastic character mapped tree.
 }
+\references{
+	Revell, L. J. (2012) phytools: An R package for phylogenetic comparative biology (and other things). \emph{Methods Ecol. Evol.}, \bold{3}, 217-223.
+}
 \author{Liam Revell \email{liam.revell@umb.edu}}
 \seealso{
 	\code{\link{plotSimmap}}

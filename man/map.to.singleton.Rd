@@ -18,6 +18,9 @@ drop.tip.singleton(tree, tip)
 \value{
 	An object of class \code{"phylo"} with singleton nodes. \code{plotTree.singletons} plots a tree. If \code{names(tree$edge.length)!=NULL} it will use a different color from \code{\link{palette}} for each mapped state.
 }
+\references{
+	Revell, L. J. (2012) phytools: An R package for phylogenetic comparative biology (and other things). \emph{Methods Ecol. Evol.}, \bold{3}, 217-223.
+}
 \author{Liam Revell \email{liam.revell@umb.edu}}
 \seealso{
 	\code{\link{collapse.singles}}, \code{\link{drop.tip}}, \code{\link{make.simmap}}

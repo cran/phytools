@@ -16,6 +16,9 @@ anc.Bayes(tree, x, ngen=10000, control=list())
 \value{
 	A matrix with number of rows \code{ngen/sample+1} containing the posterior sample and likelihoods.  Matrix columns are labeled either \code{sig2} or by the node number of the internal node.
 }
+\references{
+	Revell, L. J. (2012) phytools: An R package for phylogenetic comparative biology (and other things). \emph{Methods Ecol. Evol.}, \bold{3}, 217-223.
+}
 \author{Liam Revell \email{liam.revell@umb.edu}}
 \seealso{
 	\code{\link{ace}}, \code{\link{anc.ML}}, \code{\link{anc.trend}}, \code{\link{evol.rate.mcmc}}, \code{\link{fastAnc}}

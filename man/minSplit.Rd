@@ -19,6 +19,8 @@ minSplit(tree, split.list, method="sum", printD=FALSE)
 	\item{bp}{location on the branch leading to \code{node} of the minimum split.}
 }
 \references{
+	Revell, L. J. (2012) phytools: An R package for phylogenetic comparative biology (and other things). \emph{Methods Ecol. Evol.}, \bold{3}, 217-223.
+
 	Revell, L. J., D. L. Mahler, P. Peres-Neto, and B. D. Redelings (2012) A new method for identifying exceptional phenotypic diversification. \emph{Evolution}, \bold{66}, 135-146.
 }
 \author{Liam Revell \email{liam.revell@umb.edu}}

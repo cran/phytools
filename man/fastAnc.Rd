@@ -16,6 +16,9 @@ fastAnc(tree, x, vars=FALSE, CI=FALSE)
 \value{
 	A named vector containing the states at internal nodes - names are node numbers; or a list containing ancestral state estimates (\code{ace}), variances on the estimates (\code{var}), and/or 95-percent confidence intervals (\code{CI95}).
 }
+\references{
+	Revell, L. J. (2012) phytools: An R package for phylogenetic comparative biology (and other things). \emph{Methods Ecol. Evol.}, \bold{3}, 217-223.
+}
 \author{Liam Revell \email{liam.revell@umb.edu}}
 \seealso{
 	\code{\link{ace}}, \code{\link{anc.Bayes}}, \code{\link{anc.ML}}, \code{\link{pic}}

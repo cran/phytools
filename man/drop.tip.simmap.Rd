@@ -19,6 +19,9 @@ extract.clade.simmap(tree, node)
 \value{
 	A modified object of class \code{"phylo"} containing the elements \code{maps} and \code{$mapped.edge} with the time spent in each state along each edge of the tree.
 }
+\references{
+	Revell, L. J. (2012) phytools: An R package for phylogenetic comparative biology (and other things). \emph{Methods Ecol. Evol.}, \bold{3}, 217-223.
+}
 \author{Liam Revell \email{liam.revell@umb.edu}}
 \seealso{
 	\code{\link{brownie.lite}}, \code{\link{drop.tip}}, \code{\link{extract.clade}}, \code{\link{make.simmap}}, \code{\link{read.simmap}}, \code{\link{sim.history}}

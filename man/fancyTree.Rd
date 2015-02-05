@@ -17,6 +17,9 @@ fancyTree(tree, type=c("extinction","traitgram3d","droptip","densitymap",
 \value{
 	This function plots different types of phylogenetic trees. For \code{type="droptip"} the function also returns the pruned tree.
 }
+\references{
+	Revell, L. J. (2012) phytools: An R package for phylogenetic comparative biology (and other things). \emph{Methods Ecol. Evol.}, \bold{3}, 217-223.
+}
 \author{Liam Revell \email{liam.revell@umb.edu}}
 \seealso{
 	\code{\link{contMap}}, \code{\link{densityMap}}, \code{\link{drop.tip}}, \code{\link{phenogram}}, \code{\link{phylomorphospace3d}}, \code{\link{plot.phylo}}, \code{\link{plotSimmap}}

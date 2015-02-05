@@ -17,6 +17,13 @@ threshBayes(tree, X, types=NULL, ngen=1000, control=list())
 \value{
 	This function returns a list with two elements: \code{par} a matrix containing the posterior sample for the model parameters (evolutionary rates, ancestral states, and correlation); \code{liab} a matrix containing the posterior sample of the liabilities. For continuous characters, the liabilities are treated as known and so the posterior samples are just the observed values.
 }
+\references{
+	Felsenstein, J. (2012) A comparative method for both discrete and continuous characters using the threshold model. \emph{American Naturalist}, \bold{179}, 145-156.
+
+	Revell, L. J. (2012) phytools: An R package for phylogenetic comparative biology (and other things). \emph{Methods Ecol. Evol.}, \bold{3}, 217-223.
+
+	Revell, L. J. (2014) Ancestral character estimation under the threshold model from quantitative genetics. \emph{Evolution}, bold{68}, 743-759.
+}
 \author{Liam Revell \email{liam.revell@umb.edu}}
 \seealso{
 	\code{\link{anc.Bayes}}, \code{\link{bmPlot}}, \code{\link{evol.rate.mcmc}}

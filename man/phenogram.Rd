@@ -13,16 +13,21 @@ phenogram(tree, x, fsize=1.0, ftype="reg", colors=NULL, axes=list(),
 	\item{colors}{colors for plotting the mapped character (if available) in \code{tree}. If no character is mapped on the tree, then a single color for all the branches of the tree can be provided.}
 	\item{axes}{list of axis dimensions. Items are \code{time} and \code{trait}.}
 	\item{add}{optional logical value indicating whether to add to an open plot. If \code{TRUE}, then new axes will not be plotted.}
-	\item{...}{optional arguments including \code{xlim}, \code{ylim}, \code{log}, \code{main}, \code{sub}, \code{xlab}, \code{ylab}, \code{asp}, \code{type}, \code{lty}, \code{lwd}, \code{offset}, \code{digits}, and \code{digits} are as in \code{\link{plot.default}} or \code{\link{par}}. Note that \code{axes} overrides \code{xlim} and \code{ylim}. Finally, \code{spread.labels} is a logical value indicating whether or not to minimize tip label overlap (default is \code{FALSE}); \code{spread.cost} is a numeric vector indicating the relative penalty to be used for label overlap and deviance if \code{spread.labels=TRUE}; finally, \code{link} is a numeric value by which to offset the tip labels, linking them to the tips with a dashed line (default is \code{0} if \code{spread.labels=FALSE} or \code{0.1*max(nodeHeights(tree))} otherwise). The optional argument \code{offsetFudge} "fudges" the computation of label offset in scaling \code{xlim}. It is 1.37, which is the correct fudge in the Windows R GUI, but this may need to be changed in other systems.}
+	\item{...}{optional arguments including \code{xlim}, \code{ylim}, \code{log}, \code{main}, \code{sub}, \code{xlab}, \code{ylab}, \code{asp}, \code{type}, \code{lty}, \code{lwd}, \code{offset}, and \code{digits} are as in \code{\link{plot.default}} or \code{\link{par}}. Note that \code{axes} overrides \code{xlim} and \code{ylim}. Finally, \code{spread.labels} is a logical value indicating whether or not to minimize tip label overlap (default is \code{FALSE}); \code{spread.cost} is a numeric vector indicating the relative penalty to be used for label overlap and deviance if \code{spread.labels=TRUE}; \code{spread.range} is the range over which to (potentially) spread the labels - note that if labels do not overlap, not all of that range will be used; finally, \code{link} is a numeric value by which to offset the tip labels, linking them to the tips with a dashed line (default is \code{0} if \code{spread.labels=FALSE} or \code{0.1*max(nodeHeights(tree))} otherwise). The optional argument \code{offsetFudge} "fudges" the computation of label offset in scaling \code{xlim}. It is 1.37, which is the correct fudge in the Windows R GUI, but this may need to be changed in other systems.}
 }
 \description{
-	Function plots a traitgram, that is, a projection of the phylogenetic tree in a space defined by phenotype (on the \emph{y} axis) and time (on the \emph{x}). If a discrete character is mapped on the tree this will also be plotted.
+	Function plots a traitgram (Evans et al. 2009), that is, a projection of the phylogenetic tree in a space defined by phenotype (on the \emph{y} axis) and time (on the \emph{x}). If a discrete character is mapped on the tree this will also be plotted.
 }
 \details{
-	For \code{spread.labels=TRUE} numerical optimization is performed to optimize the distribution of the labels vertically, where the solution depends on the vector \code{spread.cost} containing the cost of overlap (first) and the cost of deviation from the vertical position of the tip. Because this is done via numerical optimization, plotting may hang briefly while the best solution is found (especially for large trees).
+	For \code{spread.labels=TRUE} numerical optimization is performed to optimize the distribution of the labels vertically, where the solution depends on the vector \code{spread.cost} containing the cost of overlap (first) and the cost of deviation from the vertical position of the tip. Note that because this is done via numerical optimization, plotting may hang briefly while the best solution is found (especially for large trees).
 }
 \value{
 	Plots a traitgram, optionally with a mapped discrete character.
+}
+\references{
+	Evans, M. E. K., Smith, S. A., Flynn, R. S., Donoghue, M. J. (2009) Climate, niche evolution, and diversification of the "bird-cage" evening primroses (Oenothera, sections Anogra and Kleinia). \emph{American Naturalist}, \bold{173}, 225-240.
+
+	Revell, L. J. (2012) phytools: An R package for phylogenetic comparative biology (and other things). \emph{Methods Ecol. Evol.}, \bold{3}, 217-223.
 }
 \author{Liam Revell \email{liam.revell@umb.edu}}
 \examples{

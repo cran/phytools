@@ -31,9 +31,11 @@ contMap(tree, x, res=100, fsize=NULL, ftype=NULL, lwd=4, legend=NULL,
 	Plots a tree. An object of class \code{"contMap"} is returned invisibly.
 }
 \references{
-	Revell, L. J. 2013. Two new graphical methods for mapping trait evolution on phylogenies. \emph{Methods in Ecology and Evolution}, \bold{4}, 754-759.
-
 	Felsenstein, J. 1985. Phylogenies and the comparative method. \emph{American Naturalist}, \bold{125}, 1-15. 
+
+	Revell, L. J. (2012) phytools: An R package for phylogenetic comparative biology (and other things). \emph{Methods Ecol. Evol.}, \bold{3}, 217-223.
+
+	Revell, L. J. 2013. Two new graphical methods for mapping trait evolution on phylogenies. \emph{Methods in Ecology and Evolution}, \bold{4}, 754-759.
 }
 \author{Liam Revell \email{liam.revell@umb.edu}}
 \seealso{

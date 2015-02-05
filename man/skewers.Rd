@@ -19,11 +19,11 @@ skewers(X, Y, nsim=100, method=NULL)
 	\item{p}{p-value from simulation.}
 }
 \references{
-
 	Cheverud, J. M. (1996) Quantitative genetic analysis of cranial morphology in the cotton-top (Saguinus oedipus) and saddle-back (S. fuscicollis) tamarins. \emph{J. Evol. Biol.}, \bold{9}, 5--42.
 
 	Cheverud, J. M. & Marroig, G. (2007) Comparing covariance matrices: Random skewers method compared to the common principal components model. \emph{Genetics & Molecular Biology}, \bold{30}, 461--469.
 
+	Revell, L. J. (2012) phytools: An R package for phylogenetic comparative biology (and other things). \emph{Methods Ecol. Evol.}, \bold{3}, 217-223.
 }
 \author{Liam Revell \email{liam.revell@umb.edu}}
 \keyword{comparative method}

@@ -18,6 +18,9 @@ findMRCA(tree, tips=NULL, type=c("node","height"))
 \value{
   The node number of the MRCA, or a matrix of node numbers (if \code{tips==NULL}) - for \code{type="node"}; or the height of the MRCA, or a matrix of heights (if \code{tips==NULL}) - for \code{type="height"}.
 }
+\references{
+	Revell, L. J. (2012) phytools: An R package for phylogenetic comparative biology (and other things). \emph{Methods Ecol. Evol.}, \bold{3}, 217-223.
+}
 \author{Liam Revell \email{liam.revell@umb.edu}}
 \seealso{
 	\code{\link{findMRCA}}, \code{\link{mrca}}

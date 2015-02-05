@@ -15,6 +15,9 @@ getDescendants(tree, node, curr=NULL)
 \value{
 	The set of node and tip numbers for the nodes and tips descended from \code{node} in a vector.
 }
+\references{
+	Revell, L. J. (2012) phytools: An R package for phylogenetic comparative biology (and other things). \emph{Methods Ecol. Evol.}, \bold{3}, 217-223.
+}
 \author{Liam Revell \email{liam.revell@umb.edu}}
 \seealso{
 	\code{\link{paintSubTree}}

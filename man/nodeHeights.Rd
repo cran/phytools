@@ -19,6 +19,9 @@ nodeheight(tree, node)
 \value{
 	Either a matrix of the same dimensions as \code{tree$edge} containing the height above the root of each node in \code{edge} (for \code{nodeHeights}); or a single positive number (for \code{nodeheight}).
 }
+\references{
+	Revell, L. J. (2012) phytools: An R package for phylogenetic comparative biology (and other things). \emph{Methods Ecol. Evol.}, \bold{3}, 217-223.
+}
 \author{Liam Revell \email{liam.revell@umb.edu}}
 \seealso{
 	\code{\link{vcvPhylo}}

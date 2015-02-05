@@ -59,7 +59,7 @@ phyloScattergram<-function(tree,...){
 }
 
 # phenogram95 internal function
-# written by Liam J. Revell 2013
+# written by Liam J. Revell 2013, 2014
 
 phenogram95<-function(tree,...){
 	if(hasArg(x)) x<-list(...)$x
@@ -72,8 +72,10 @@ phenogram95<-function(tree,...){
 	else offset<-0
 	# get ancestral states
 	A<-fastAnc(tree,x,CI=TRUE)
-	# compute transparencies	
-	trans<-as.character(floor(0:50/2))
+	# compute transparencies
+	if(hasArg(tlim)) tlim<-list(...)$tlim
+	else tlim<-c(0,25)
+	trans<-as.character(floor(seq(tlim[1],tlim[2],length.out=51)))
 	trans[as.numeric(trans)<10]<-paste("0", trans[as.numeric(trans)<10],sep="")
 	# now get the arguments for phenogram
 	args<-list(...)
@@ -214,6 +216,7 @@ plotContMap<-function(tree,...){
 	if(hasArg(x)) x<-list(...)$x
 	else stop("need to provide vector 'x' of phenotypic trait values")
 	if(hasArg(res)) res<-list(...)$res
+
 	else res<-100
 	if(hasArg(fsize)) fsize<-list(...)$fsize
 	else fsize<-NULL

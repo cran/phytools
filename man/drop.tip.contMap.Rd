@@ -19,6 +19,9 @@ drop.tip.densityMap(x, tip)
 \value{
 	An object of class \code{"contMap"} or \code{"densityMap"}.
 }
+\references{
+	Revell, L. J. (2012) phytools: An R package for phylogenetic comparative biology (and other things). \emph{Methods Ecol. Evol.}, \bold{3}, 217-223.
+}
 \author{Liam Revell \email{liam.revell@umb.edu}}
 \seealso{
 	\code{\link{contMap}}, \code{\link{densityMap}}, \code{\link{drop.tip}}, \code{\link{drop.tip.simmap}}

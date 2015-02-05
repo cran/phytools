@@ -6,6 +6,8 @@ densityMap<-function(trees,res=100,fsize=NULL,ftype=NULL,lwd=3,check=FALSE,legen
 	else mar<-rep(0.3,4)
 	if(hasArg(offset)) offset<-list(...)$offset
 	else offset<-NULL
+	if(hasArg(states)) states<-list(...)$states
+	else states<-NULL
 	tol<-1e-10
 	if(class(trees)!="multiPhylo") stop("trees not 'multiPhylo' object; just use plotSimmap")
 	h<-sapply(unclass(trees),function(x) max(nodeHeights(x)))
@@ -18,7 +20,8 @@ densityMap<-function(trees,res=100,fsize=NULL,ftype=NULL,lwd=3,check=FALSE,legen
 	}
 	tree<-trees[[1]]
 	trees<-unclass(trees)
-	ss<-sort(unique(c(getStates(tree,"nodes"),getStates(tree,"tips"))))
+	if(is.null(states)) ss<-sort(unique(c(getStates(tree,"nodes"),getStates(tree,"tips"))))
+	else ss<-states
 	if(!all(ss==c("0","1"))){
 		c1<-paste(sample(c(letters,LETTERS),6),collapse="")
 		c2<-paste(sample(c(letters,LETTERS),6),collapse="")
@@ -111,12 +114,11 @@ plot.densityMap<-function(x,...){
 		if(legend) ylim<-c(1-0.12*(N-1),N)
 		else ylim<-NULL
 		if(outline){
-			par(col="white")
+			par(col="transparent")
 			plotTree(tree,fsize=fsize[1],lwd=lwd+2,offset=offset+0.2*lwd/3+0.2/3,ftype=ftype[1],ylim=ylim,mar=mar,direction=direction)
 			par(col="black")
-			add<-TRUE
-		} else add<-FALSE
-		plotSimmap(tree,cols,pts=FALSE,lwd=lwd,fsize=fsize[1],mar=mar,ftype=ftype[1],add=add,ylim=ylim,direction=direction,offset=offset)
+		}
+		plotSimmap(tree,cols,pts=FALSE,lwd=lwd,fsize=fsize[1],mar=mar,ftype=ftype[1],add=outline,ylim=ylim,direction=direction,offset=offset)
 		if(legend){
 			ff<-function(dd){
 				if(!("."%in%dd)) dig<-0
@@ -158,8 +160,11 @@ print.densityMap<-function(x,...){
 ## written by Liam J. Revell 2014
 
 setMap<-function(x,...){
+	if(hasArg(invert)) invert<-list(...)$invert
+	else invert<-FALSE
 	n<-length(x$cols)
-	x$cols[1:n]<-colorRampPalette(...)(n)
+	if(invert) x$cols<-setNames(rev(x$cols),names(x$cols))
+	else x$cols[1:n]<-colorRampPalette(...)(n)
 	x
 }
 

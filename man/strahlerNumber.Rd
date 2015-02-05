@@ -17,6 +17,9 @@ extract.strahlerNumber(tree, i, plot=TRUE)
 \value{
 	Either a vector with the Strahler number for each tip and internal node; or (for \code{extract.strahlerNumber} the set of (most inclusive) subtrees with Strahler number \code{i} as an object of class \code{"multiPhylo"}.
 }
+\references{
+	Revell, L. J. (2012) phytools: An R package for phylogenetic comparative biology (and other things). \emph{Methods Ecol. Evol.}, \bold{3}, 217-223.
+}
 \author{Liam Revell \email{liam.revell@umb.edu}}
 \keyword{phylogenetics}
 \keyword{utilities}

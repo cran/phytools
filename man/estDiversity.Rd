@@ -23,6 +23,8 @@ estDiversity(tree, x, method=c("asr","simulation"), model="ER", ...)
 \references{
 	Mahler, D. L, L. J. Revell, R. E. Glor, and J. B. Losos. (2010) Ecological opportunity and the rate of morphological evolution in the diversification of Greater Antillean anoles. \emph{Evolution}, \bold{64}, 2731-2745.
 
+	Revell, L. J. (2012) phytools: An R package for phylogenetic comparative biology (and other things). \emph{Methods Ecol. Evol.}, \bold{3}, 217-223.
+
 	Yang, Z. (2006) \emph{Computational Molecular Evolution}. Oxford University Press.
 }
 \author{Liam Revell \email{liam.revell@umb.edu}}

@@ -19,6 +19,9 @@ matchNodes(tr1, tr2, method=c("descendants","distances"), ...)
 \value{
 	A matrix in which the first column contains the nodes of \code{tr1} with the second column containing matching nodes in \code{tr2}, with the criterion for matching defined by \code{method}.
 }
+\references{
+	Revell, L. J. (2012) phytools: An R package for phylogenetic comparative biology (and other things). \emph{Methods Ecol. Evol.}, \bold{3}, 217-223.
+}
 \author{Liam Revell \email{liam.revell@umb.edu}}
 \keyword{phylogenetics}
 \keyword{utilities}

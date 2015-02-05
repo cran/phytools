@@ -22,6 +22,13 @@ rerootingMethod(tree, x, model=c("ER","SYM"), ...)
 	\item{Q}{the fitted transition matrix between states.}
 	\item{marginal.anc}{the marginal ancestral state reconstructions for each node (and, optionally, each tip).}
 }
+\references{
+	Paradis, E., J. Claude, and K. Strimmer (2004) APE: Analyses of phylogenetics and evolution in R language. \emph{Bioinformatics}, \bold{20}, 289-290.
+
+	Revell, L. J. (2012) phytools: An R package for phylogenetic comparative biology (and other things). \emph{Methods Ecol. Evol.}, \bold{3}, 217-223.
+
+	Yang, Z., Kumar, S., Nei, M. (1995) A new method of inference of ancestral nucleotide and amino acid sequences. \emph{Genetics}, \bold{141}, 1641-1650.
+}
 \author{Liam Revell \email{liam.revell@umb.edu}}
 \seealso{
 	\code{\link{ace}}, \code{\link{make.simmap}}

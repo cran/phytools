@@ -17,6 +17,9 @@ paste.tree(tr1, tr2)
 \value{
 	A tree.
 }
+\references{
+	Revell, L. J. (2012) phytools: An R package for phylogenetic comparative biology (and other things). \emph{Methods Ecol. Evol.}, \bold{3}, 217-223.
+}
 \author{Liam Revell \email{liam.revell@umb.edu}}
 \examples{
 tr1<-rtree(10)

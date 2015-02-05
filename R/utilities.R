@@ -1,15 +1,86 @@
 # some utility functions
 # written by Liam J. Revell 2011, 2012, 2013, 2014
 
-## multivariate normal density function
+## function to add an arrow pointing to a tip or node in the tree
 ## written by Liam J. Revell 2014
 
-dmnorm<-function(x,mean=rep(0,d),varcov,log=FALSE){
-	d<-length(x)
-	invC<-pd.solve(varcov,log.det=TRUE)
-	pd <- -t(x-mean)%*%invC%*%(x-mean)/2-attr(invC,"log.det")/2-d*log(2*pi)/2
-	if(log) pd[1,1] else exp(pd[1,1])
+add.arrow<-function(tree=NULL,tip,...){
+	lastPP<-get("last_plot.phylo",envir=.PlotPhyloEnv)
+	if(!is.null(tree)){
+		if(class(tree)=="contMap") tree<-tree$tree
+		else if(class(tree)=="densityMap") tree<-tree$tree
+	}
+	if(is.numeric(tip)){
+		ii<-tip
+		if(!is.null(tree)&&ii<=length(tree$tip.label)) tip<-tree$tip.label[ii]
+		else tip<-""
+	} else if(is.character(tip)&&!is.null(tree)) ii<-which(tree$tip.label==tip)
+	if(hasArg(offset)) offset<-list(...)$offset
+	else offset<-1
+	strw<-lastPP$cex*(strwidth(tip)+offset*mean(strwidth(c(LETTERS,letters))))
+	if(hasArg(arrl)) arrl<-list(...)$arrl
+	else { 
+		if(lastPP$type=="fan") arrl<-0.3*max(lastPP$xx)
+		else if(lastPP$type=="phylogram") arrl<-0.15*max(lastPP$xx)
+	}
+	if(hasArg(hedl)) hedl<-list(...)$hedl
+	else hedl<-arrl/3
+	if(hasArg(angle)) angle<-list(...)$angle
+	else angle<-45
+	arra<-angle*pi/180
+	asp<-if(lastPP$type=="fan") 1 else (par()$usr[4]-par()$usr[3])/(par()$usr[2]-par()$usr[1])
+	if(hasArg(col)) col<-list(...)$col
+	else col<-"black"
+	if(hasArg(lwd)) lwd<-list(...)$lwd
+	else lwd<-2
+	if(lastPP$type=="fan") theta<-atan2(lastPP$yy[ii],lastPP$xx[ii])
+	else if(lastPP$type=="phylogram") theta<-0	
+	segments(x0=lastPP$xx[ii]+cos(theta)*(strw+arrl),
+		y0=lastPP$yy[ii]+sin(theta)*(strw+arrl),
+		x1=lastPP$xx[ii]+cos(theta)*strw,
+		y1=lastPP$yy[ii]+sin(theta)*strw,
+		col=col,lwd=lwd,lend="round")
+	segments(x0=lastPP$xx[ii]+cos(theta)*strw+cos(theta+arra/2)*hedl,
+		y0=lastPP$yy[ii]+sin(theta)*strw+sin(theta+arra/2)*hedl*asp,
+		x1=lastPP$xx[ii]+cos(theta)*strw,
+		y1=lastPP$yy[ii]+sin(theta)*strw,
+		col=col,lwd=lwd,lend="round")
+	segments(x0=lastPP$xx[ii]+cos(theta)*strw+cos(theta-arra/2)*hedl,
+		y0=lastPP$yy[ii]+sin(theta)*strw+sin(theta-arra/2)*hedl*asp,
+		x1=lastPP$xx[ii]+cos(theta)*strw,
+		y1=lastPP$yy[ii]+sin(theta)*strw,
+		col=col,lwd=lwd,lend="round") 
 }
+
+## function to ladderize phylogeny with mapped discrete character
+## written by Liam J. Revell 2014
+
+ladderize.simmap<-function(tree,right=TRUE){
+	obj<-read.tree(text=write.tree(ladderize(tree,right=right)))
+	rN<-Ntip(obj)+1
+	T<-cbind(1:Ntip(obj),sapply(obj$tip.label,function(x,y) which(y==x),y=tree$tip.label))
+	N<-matchNodes(obj,tree)
+	M<-rbind(T,N[N[,1]!=rN,])
+	ii<-sapply(M[,1],function(x,y) which(y==x),y=obj$edge[,2])
+	jj<-sapply(M[,2],function(x,y) which(y==x),y=tree$edge[,2])
+	obj$maps<-vector(length=nrow(tree$edge),mode="list")
+	obj$mapped.edge<-matrix(NA,nrow(tree$edge),ncol(tree$mapped.edge),
+		dimnames=list(apply(tree$edge,1,paste,collapse=","),
+		colnames(tree$mapped.edge)))
+	if(!is.null(tree$states)) 
+		obj$states<-tree$states[sapply(obj$tip.label,function(x,y) which(y==x),y=tree$tip.label)]
+	if(!is.null(tree$node.states)) obj$node.states<-matrix(NA,nrow(tree$edge),2)
+	for(i in 1:length(ii)){
+		obj$maps[[ii[i]]]<-tree$maps[[jj[i]]]
+		obj$mapped.edge[ii[i],]<-tree$mapped.edge[jj[i],]
+		if(!is.null(tree$node.states)) obj$node.states[ii[i],]<-tree$node.states[jj[i],]
+	}
+	obj
+}
+
+## for backward compatibility
+
+repPhylo<-function(tree,times) rep(tree,times)
 
 ## S3 method rep for objects of class "phylo" and "multiPhylo"
 ## written by Liam J. Revell 2014
@@ -899,7 +970,9 @@ matchDatatoTree<-function(tree,x,name){
 			print(paste(name,"has no names; assuming x is in the same order as tree$tip.label"))
 			names(x)<-tree$tip.label
 		} else
+
 			stop(paste(name,"has no names and is a different length than tree$tip.label"))
+
 	}
 	if(any(is.na(match(names(x),tree$tip.label)))){
 		print(paste("some species in",name,"are missing from tree, dropping missing taxa from",name))

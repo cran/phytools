@@ -20,6 +20,10 @@ bmPlot(tree, type="BM", anc=0, sig2=1/1000, ngen=1000, ...)
 }
 \references{
 	Felsenstein, J. 2012. A comparative method for both discrete and continuous characters using the threshold model. \emph{American Naturalist}, \bold{179}, 145-156.
+
+	Revell, L. J. (2012) phytools: An R package for phylogenetic comparative biology (and other things). \emph{Methods Ecol. Evol.}, \bold{3}, 217-223.
+
+	Revell, L. J. (2014) Ancestral character estimation under the threshold model from quantitative genetics. \emph{Evolution}, bold{68}, 743-759.
 }
 \author{Liam Revell \email{liam.revell@umb.edu}}
 \seealso{

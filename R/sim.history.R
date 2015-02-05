@@ -1,24 +1,34 @@
 # function simulates stochastic character history under some model
-# written by Liam J. Revell 2011, 2013
+# written by Liam J. Revell 2011, 2013, 2014
 
-sim.history<-function(tree,Q,anc=NULL,nsim=1){
+sim.history<-function(tree,Q,anc=NULL,nsim=1,...){
+	if(hasArg(message)) message<-list(...)$message
+	else message<-TRUE
 	# reorder to cladewise
 	tree<-reorder.phylo(tree,"cladewise")
 	# check Q
-	if(!all(round(colSums(Q),8)==0)){
-		print("some columns of Q don't sum to 0.0. fixing. . .")
-		diag(Q)<-0
-		diag(Q)<--colSums(Q,na.rm=TRUE)
+	if(!isSymmetric(Q)) if(message) cat("Note - the rate of substitution from i->j should be given by Q[j,i].\n")
+	if(!all(round(colSums(Q),10)==0)){
+		if(all(round(rowSums(Q),10)==0)&&!isSymmetric(Q)){
+			if(message) cat("Detecting that rows, not columns, of Q sum to zero :\n  Transposing Q for internal calculations.\n")
+			Q<-t(Q)
+		} else {
+			if(message) cat("Some columns (or rows) of Q don't sum to 0.0. Fixing.\n")
+			diag(Q)<-0
+			diag(Q)<--colSums(Q,na.rm=TRUE)
+		}
 	}
 	# does Q have names?
 	if(is.null(dimnames(Q))) dimnames(Q)<-list(1:nrow(Q),1:ncol(Q))
 	# create "multiPhylo" object
-	mtrees<-list(); class(mtrees)<-"multiPhylo"
+	mtrees<-vector(mode="list",length=nsim)
+	class(mtrees)<-"multiPhylo"
 	# now loop
 	for(i in 1:nsim){
 		# set root state		
 		if(is.null(anc)){
-			temp<-rep(1/nrow(Q),nrow(Q)); names(temp)<-rownames(Q)
+			temp<-rep(1/nrow(Q),nrow(Q))
+			names(temp)<-rownames(Q)
 			anc<-rstate(temp)
 		}
 		# create the map tree object
@@ -60,6 +70,7 @@ sim.history<-function(tree,Q,anc=NULL,nsim=1){
 		mtrees[[i]]<-mtree	
 	}
 	if(nsim==1) mtrees<-mtrees[[1]]
+	if(message) cat("Done simulation(s).\n")
 	return(mtrees)
 }
 

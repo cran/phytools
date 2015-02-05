@@ -16,6 +16,11 @@ sim.corrs(tree, vcv, anc=NULL, internal=FALSE)
 \value{
 	A matrix containing the multivariate tip states for the \code{n} species in the tree (and nodes if \code{internal=TRUE}).
 }
+\references{
+	Revell, L. J., and D. C. Collar (2009) Phylogenetic analysis of the evolutionary correlation using likelihood. \emph{Evolution}, \bold{63}, 1090-1100.
+
+	Revell, L. J. (2012) phytools: An R package for phylogenetic comparative biology (and other things). \emph{Methods Ecol. Evol.}, \bold{3}, 217-223.
+}
 \author{Liam Revell \email{liam.revell@umb.edu}}
 \seealso{
 	\code{\link{fastBM}}, \code{\link{make.simmap}}, \code{\link{read.simmap}}, \code{\link{sim.history}}, \code{\link{sim.rates}}
