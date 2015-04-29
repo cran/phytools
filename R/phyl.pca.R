@@ -1,9 +1,12 @@
 # function to perform phylogenetic principal components analysis
 # multiple morphological traits in Y
-# also can use lambda transformation in which lambda is optimized by ML
+# also can use lambda transformation in which lambda is optimized by ML or REML(in progress)
 # written by Liam Revell 2010, 2011, 2013 ref. Revell (2009; Evolution)
 
-phyl.pca<-function(tree,Y,method="BM",mode="cov"){
+phyl.pca<-function(tree,Y,method="BM",mode="cov",...){
+	## get optional argument
+	if(hasArg(opt)) opt<-list(...)$opt
+	else opt<-"ML"
 	# check tree
 	if(class(tree)!="phylo") stop("tree must be an object of class 'phylo.'")
 	# check mode
@@ -37,7 +40,8 @@ phyl.pca<-function(tree,Y,method="BM",mode="cov"){
 		temp<-phyl.vcv(Y,C,1.0)
 		V<-temp$R; a<-t(temp$alpha); C<-temp$C
 	} else if(method=="lambda"){
-		temp<-optimize(f=likMlambda,interval=c(0,maxLambda(tree)),X=Y,C=C,maximum=TRUE)
+		if(opt=="ML") temp<-optimize(f=likMlambda,interval=c(0,maxLambda(tree)),X=Y,C=C,maximum=TRUE)
+		else if(opt=="REML") temp<-optimize(f=remlMlambda,interval=c(0,maxLambda(tree)),tree=tree,X=Y,maximum=TRUE)
 		lambda<-temp$maximum; logL<-as.numeric(temp$objective)
 		temp<-phyl.vcv(Y,C,lambda)
 		V<-temp$R; a<-t(temp$alpha); C<-temp$C
@@ -101,7 +105,49 @@ summary.phyl.pca<-function(object, ...){
 
 ## S3 biplot method for "phyl.pca"
 ## modified from code provided by Joan Maspons
-biplot.phyl.pca<- function(x, ...){
-	biplot(x$S, x$L, ...)
+## written by Liam J. Revell 2015
+biplot.phyl.pca<-function(x,...){
+	to.do<-list(...)
+	if(hasArg(choices)){ 
+		choices<-list(...)$choices
+		to.do$choices<-NULL
+	} else choices<-c(1,2)
+	to.do$x<-x$S[,choices]
+	to.do$y<-x$L[,choices]
+	do.call(biplot,to.do)
+}
+
+## lambdaTree for lambda="REML"
+## written by Liam J. Revell 2013
+lambdaTree<-function(tree,lambda){
+	n<-length(tree$tip.label)
+	h1<-nodeHeights(tree)
+	ii<-which(tree$edge[,2]>n)
+	tree$edge.length[ii]<-lambda*tree$edge.length[ii]
+	h2<-nodeHeights(tree)
+	tree$edge.length[-ii]<-tree$edge.length[-ii]+h1[-ii,2]-h2[-ii,2]
+	tree
+}
+ 
+## REML function
+## written by Liam J. Revell 2013
+remlMlambda<-function(lambda,tree,X){
+	tt<-lambdaTree(tree,lambda)
+	Y<-apply(X,2,pic,phy=tt)
+	V<-t(Y)%*%Y/nrow(Y)
+	logL<-sum(dmnorm(Y,mean=rep(0,ncol(Y)),varcov=V,log=TRUE))
+	## kronRC<-kronecker(V,diag(rep(1,nrow(Y))))
+	## y<-as.vector(Y)
+	## logL<--y%*%solve(kronRC,y)/2-length(y)*log(2*pi)/2-determinant(kronRC,logarithm=TRUE)$modulus/2
+	## print(V)
+	print(c(lambda,logL))
+	logL
+}
+
+plot.phyl.pca<- function(x,...){
+	if(hasArg(main)) main<-list(...)$main
+	else main="screeplot"
+	x$sdev<-sqrt(diag(x$Eval))
+	screeplot(x,main=main)
 }
 

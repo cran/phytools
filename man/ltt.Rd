@@ -15,7 +15,7 @@ ltt(tree, plot=TRUE, drop.extinct=FALSE, log.lineages=TRUE, gamma=TRUE)
 	This function computes LTT plot with extant and extinct lineages, and optionally conducts \eqn{\gamma}-test of Pybus & Harvey (2000).
 }
 \details{
-	It's unclear how to interpret the \eqn{\gamma}-statistic if not all the tips in the tree are contemporaneous.}
+	Although it is calculated here, it's unclear how to interpret the \eqn{\gamma}-statistic if not all the tips in the tree are contemporaneous.}
 \value{
 	A list with the following components:
 	\item{times}{a vector of branching times.}

@@ -5,7 +5,7 @@
 plotSimmap(tree, colors=NULL, fsize=1.0, ftype="reg", lwd=2, pts=FALSE, 
 	node.numbers=FALSE, mar=NULL, add=FALSE, offset=NULL, direction="rightwards",
 	type="phylogram", setEnv=TRUE, part=1.0, xlim=NULL, ylim=NULL, 
-	nodes="intermediate",tips=NULL)
+	nodes="intermediate", tips=NULL, maxY=NULL, hold=TRUE)
 }
 \arguments{
  	\item{tree}{a modified object of class "phylo" or "multiPhylo" containing a stochastic mapping or set of mappings (e.g., see \code{\link{read.simmap}} & \code{\link{make.simmap}}).}
@@ -25,7 +25,9 @@ plotSimmap(tree, colors=NULL, fsize=1.0, ftype="reg", lwd=2, pts=FALSE,
 	\item{xlim}{x-limits for the plot.}
 	\item{ylim}{y-limits for the plot.}
 	\item{nodes}{node placement following Felsenstein (2004; pp. 574-576). Can be \code{"intermediate"}, \code{"centered"}, \code{"weighted"}, or \code{"inner"}. So far only works for \code{type="phylogram"}.}
-	\item{tips}{labeled vector containing the vertical position of tips. Normally this will be \code{1:N} for \code{N} tips in the tree. Presently only available for \code{type="phylogram"}.}
+	\item{tips}{labeled vector containing the vertical position of tips. Normally this will be \code{1:N} for \code{N} tips in the tree.}
+	\item{maxY}{maximum value of y to use before rotating a tree into fan configuration. This will only make a difference if different from \code{Ntip(tree)}.}
+	\item{hold}{logical argument indicating whether or not to hold the output to the graphical device before plotting. Defaults to \code{hold=TRUE}.}
 }
 \description{
 	Function plots one or multiple stochastic character mapped trees.

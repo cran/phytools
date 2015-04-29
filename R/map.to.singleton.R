@@ -43,7 +43,7 @@ map.to.singleton<-function(tree){
 }
 
 ## function plots tree with singleton nodes
-## written by Liam J. Revell 2013
+## written by Liam J. Revell 2013, 2015
 plotTree.singletons<-function(tree){
 	## preliminaries
 	n<-length(tree$tip.label)
@@ -78,7 +78,10 @@ plotTree.singletons<-function(tree){
 	# plot vertical relationships
 	for(i in 1:tree$Nnode+n){
 		xx<-X[which(cw$edge[,1]==i),1]
-		yy<-range(y[cw$edge[which(cw$edge[,1]==i),2]])
+		## yy<-range(y[cw$edge[which(cw$edge[,1]==i),2]]) ## breaks for polytomies
+		## fixes that tolerate polytomies
+		## yy<-seq(min(y[cw$edge[which(cw$edge[,1]==i),2]]),max(y[cw$edge[which(cw$edge[,1]==i),2]]),length=length(xx))
+		yy<-y[cw$edge[which(cw$edge[,1]==i),2]]
 		if(length(xx)>1) lines(xx,yy,lwd=2,lend=2,col=colors[which(cw$edge[,1]==i)])
 	}
 	# plot points

@@ -1,5 +1,5 @@
 # function creates a phenogram (i.e., 'traitgram')
-# written by Liam J. Revell 2011, 2012, 2013, 2014
+# written by Liam J. Revell 2011, 2012, 2013, 2014, 2015
 
 phenogram<-function(tree,x,fsize=1.0,ftype="reg",colors=NULL,axes=list(),add=FALSE,...){
 	## get optional arguments
@@ -34,13 +34,17 @@ phenogram<-function(tree,x,fsize=1.0,ftype="reg",colors=NULL,axes=list(),add=FAL
 	if(hasArg(nticks)) nticks<-list(...)$nticks
 	else nticks<-5
 	if(hasArg(spread.labels)) spread.labels<-list(...)$spread.labels
-	else spread.labels<-FALSE
+	else spread.labels<-TRUE
 	if(hasArg(spread.cost)) spread.cost<-list(...)$spread.cost
 	else spread.cost<-c(1,0.4)
 	if(hasArg(spread.range)) spread.range<-list(...)$spread.range
 	else spread.range<-range(x)
 	if(hasArg(link)) link<-list(...)$link
-	else link<-if(spread.labels) 0.1*max(nodeHeights(tree)) else 0 
+	else link<-if(spread.labels) 0.1*max(nodeHeights(tree)) else 0
+	if(hasArg(hold)) hold<-list(...)$hold
+	else hold<-TRUE
+	if(hasArg(quiet)) quiet<-list(...)$quiet
+	else quiet<-FALSE
 	## end optional arguments
 	# check tree
 	if(class(tree)!="phylo") stop("tree should be an object of class 'phylo'")
@@ -64,7 +68,12 @@ phenogram<-function(tree,x,fsize=1.0,ftype="reg",colors=NULL,axes=list(),add=FAL
 		sw<-fsize*(max(strwidth(tree$tip.label,units="inches")))+offsetFudge*offset*fsize*strwidth("W",units="inches")
 		alp<-optimize(function(a,H,link,sw,pp) (a*1.04*(max(H)+link)+sw-pp)^2,H=H,link=link,sw=sw,pp=pp,interval=c(0,1e6))$minimum
 		xlim<-c(min(H),max(H)+link+sw/alp)
-	} 
+	}
+	if(!quiet&&Ntip(tree)>=40&&spread.labels){ 
+		cat("Optimizing the positions of the tip labels...\n")
+		flush.console()
+	}
+	if(hold) null<-dev.hold()
 	if(is.null(tree$maps)){
 		if(is.null(colors)) colors<-"black"
 		if(!add){ 
@@ -116,6 +125,7 @@ phenogram<-function(tree,x,fsize=1.0,ftype="reg",colors=NULL,axes=list(),add=FAL
 		at<-round(0:(nticks-1)*max(H)/(nticks-1),digits)
 		axis(1,at=at); axis(2); title(xlab=xlab,ylab=ylab,main=main,sub=sub)
 	}
+	if(hold) null<-dev.flush()
 }
 
 # function to spread labels

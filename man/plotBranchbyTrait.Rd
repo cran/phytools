@@ -18,7 +18,7 @@ plotBranchbyTrait(tree, x, mode=c("edges","tips","nodes"), palette="rainbow",
 	Function plots a tree with branches colored by the value for a quantitative trait or probability, by various methods. Unlike most other tree plotting functions in phytools, this function calls \code{\link{plot.phylo}} (not \code{plotSimmap}) internally.
 }
 \details{
-	Note that if \code{prompt=TRUE}, the function will prompt for the position of the legend. For some reason, the position is required \emph{before} the prompting message!
+	Note that if \code{prompt=TRUE}, the function will prompt for the position of the legend.
 }
 \value{
 	Plots a phylogeny.

@@ -1,15 +1,30 @@
 # function animates branching random diffusion
-# written by Liam Revell 2011, 2013
+# written by Liam Revell 2011, 2013, 2015
 
 branching.diffusion<-function(sig2=1,b=0.0023,time.stop=1000,ylim=NULL,smooth=TRUE,pause=0.02,record=NULL,path=NULL){
-	N<-1; Y<-matrix(0,1,N)
+	N<-1
+	Y<-matrix(0,1,N)
 	if(is.null(ylim)) ylim<-c(-2*sqrt(sig2*time.stop),2*sqrt(sig2*time.stop))
 	par(bg="white")
-	plot(0,0,xlim=c(0,time.stop),ylim=ylim,xlab="time",ylab="phenotype",main="branching diffusion")	
+	plot(0,0,xlim=c(0,time.stop),ylim=ylim,xlab="time",ylab="phenotype",main="branching diffusion")
+	chk<-.check.pkg("animation")
+	if(!chk){
+		cat("  record != NULL requires the package \"animation\"\n")
+		cat("  Animation will play but not record\n\n")
+		record<-NULL
+	}
 	if(!is.null(record)){
 		if(is.null(path)) path="C:/Program Files/ffmpeg/bin/ffmpeg.exe"
-		ani.options(interval=0.01,ffmpeg=path,outdir=getwd())
-		ani.record(reset=TRUE)
+		tmp<-strsplit(path,"/")[[1]]
+		ll<-list.files(paste(tmp[2:length(tmp)-1],collapse="/"))
+		if(length(grep(tmp[length(tmp)],ll))>0){
+			ani.options(interval=0.01,ffmpeg=path,outdir=getwd())
+			ani.record(reset=TRUE)
+		} else {
+			cat("  record != NULL requires correct path supplied to video renderer\n")
+			cat("  Animation will play but not record\n\n")
+			record<-NULL
+		}
 	}
 	for(i in 2:time.stop){
 		time<-1:i
@@ -22,11 +37,10 @@ branching.diffusion<-function(sig2=1,b=0.0023,time.stop=1000,ylim=NULL,smooth=TR
 			}
 			Y[i,j]<-Y[i,j]+rnorm(n=1,sd=sqrt(sig2))
 		}
-		if(smooth==FALSE) for(j in 1:N) lines(c(time[i-1],time[i]),c(Y[i-1,j],Y[i,j]))
-		if(smooth==TRUE){
-			plot(0,0,xlim=c(0,time.stop),ylim=ylim,xlab="time",ylab="phenotype",main="branching diffusion")
-			for(j in 1:N) lines(time,Y[,j])
-		}
+		dev.hold()
+		plot(0,0,xlim=c(0,time.stop),ylim=ylim,xlab="time",ylab="phenotype",main="branching diffusion")
+		apply(Y,2,lines)
+		dev.flush()
 		if(!is.null(record)) ani.record()
 		Sys.sleep(pause)
 	}

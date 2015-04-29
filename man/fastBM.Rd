@@ -25,7 +25,7 @@ fastBM(tree, a=0, mu=0, sig2=1, bounds=c(-Inf,Inf), internal=FALSE, nsim=1, ...)
 }
 \author{Liam Revell \email{liam.revell@umb.edu}}
 \seealso{
-	\code{\link{branching.diffusion}}
+	\code{\link{sim.corrs}}
 }
 \examples{
 tree<-pbtree(n=1000)

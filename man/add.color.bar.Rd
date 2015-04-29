@@ -17,7 +17,7 @@ add.color.bar(leg, cols, title=NULL, lims=c(0,1), digits=1, prompt=TRUE,
 	\item{...}{optional arguments including: \code{x} x-coordinate of the legend (if \code{prompt=FALSE}); \code{y} y-coordinate of the legend; \code{subtitle} optional legend subtitle.}
 }
 \description{
-	This function adds a color bar to a plot created by \code{\link{plotBranchbyTrait}}. The only way to add the color bar at present is by clicking on the desired location within your plot. It is also used internally by \code{plot.contMap} and \code{plot.densityMap}.
+	This function adds a color bar to a plot created by \code{\link{plotBranchbyTrait}}. A color bar can be added by clicking on a location within the plot (when \code{prompt=TRUE}) or by setting \code{prompt=FALSE} and supplying x & y coordinates for the object. This function is also used internally by \code{plot.contMap} and \code{plot.densityMap}.
 }
 \references{
 	Revell, L. J. (2013) Two new graphical methods for mapping trait evolution on phylogenies. \emph{Methods in Ecology and Evolution}, \bold{4}, 754-759.

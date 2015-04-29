@@ -1,5 +1,5 @@
 # visualize discrete time Brownian simulation on a tree
-# written by Liam J. Revell 2012, 2013
+# written by Liam J. Revell 2012, 2013, 2015
 
 bmPlot<-function(tree,type="BM",anc=0,sig2=1/1000,ngen=1000,...){
 	if(hasArg(return.tree)) return.tree<-list(...)$return.tree
@@ -8,6 +8,7 @@ bmPlot<-function(tree,type="BM",anc=0,sig2=1/1000,ngen=1000,...){
 	tr<-reorder(tree)
 	H<-nodeHeights(tr)
 	tr$edge.length<-round(tr$edge.length/max(H)*ngen)
+	tr<-di2multi(tr)
 	h<-nodeHeights(tr)[,1]
 
 	bmSim<-function(start,n)
@@ -50,7 +51,7 @@ bmPlot<-function(tree,type="BM",anc=0,sig2=1/1000,ngen=1000,...){
 	a<-c(anc,Y[tr$edge[,2]%in%(N+2:tr$Nnode),2])
 	names(a)<-c(N+1,tr$edge[tr$edge[,2]%in%(N+2:tr$Nnode),2])
 	
-	xx<-c(x[tree$tip],a[as.character(N+1:tree$Nnode)])
+	xx<-c(x[tr$tip],a[as.character(N+1:tr$Nnode)])
 	if(!return.tree) return(xx)
 	else return(list(x=xx,tree=tr,colors=cols))
 }

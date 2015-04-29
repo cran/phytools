@@ -17,7 +17,7 @@ phyl.RMA(x, y, tree, method="BM", lambda=NULL, fixed=FALSE, h0=1.0)
 	This function performs phylogenetic RMA regression.
 }
 \details{
-	Optionally jointly estimates lambda if \code{method="lambda"}. Likelihood optimization of lambda is performed using \code{\link{optimize}} on the interval (0,1).
+	Optionally jointly estimates lambda if \code{method="lambda"}. Likelihood optimization of lambda is performed using \code{\link{optimize}} on the interval (0,1). Note that some statistician think there is \emph{never} a condition in which a reduced-major-axis regression should be used.
 }
 \value{
 	A list with the following components:

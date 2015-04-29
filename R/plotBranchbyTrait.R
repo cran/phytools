@@ -91,11 +91,12 @@ plotBranchbyTrait<-function(tree,x,mode=c("edges","tips","nodes"),palette="rainb
 }
 
 # function to add color bar
-# written by Liam J. Revell 2013
+# written by Liam J. Revell 2013, 2015
 
 add.color.bar<-function(leg,cols,title=NULL,lims=c(0,1),digits=1,prompt=TRUE,lwd=4,outline=TRUE,...){
 	if(prompt){
 		cat("Click where you want to draw the bar\n")
+		flush.console()
 		x<-unlist(locator(1))
 		y<-x[2]
 		x<-x[1]

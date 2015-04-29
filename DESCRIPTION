@@ -1,7 +1,7 @@
 Package: phytools
-Version: 0.4-45
-Date: 2015-2-5
-Title: Phylogenetic Tools for comparative biology (and other things)
+Version: 0.4-56
+Date: 2015-4-28
+Title: Phylogenetic Tools for Comparative Biology (and Other Things)
 Author: Liam J. Revell
 Maintainer: Liam J. Revell <liam.revell@umb.edu>
 Depends: R (>= 2.10), ape (>= 3.0-10), maps
@@ -52,7 +52,7 @@ Description: Package contains various functions for phylogenetic analysis.
 	their research.
 License: GPL (>= 2)
 URL: http://www.phytools.org
-Packaged: 2015-02-05 21:03:10 UTC; Liam
+Packaged: 2015-04-29 00:12:43 UTC; Liam
 Repository: CRAN
-Date/Publication: 2015-02-05 22:04:28
+Date/Publication: 2015-04-29 08:41:07
 NeedsCompilation: no

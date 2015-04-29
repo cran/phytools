@@ -18,7 +18,7 @@ bind.tip(tree, tip.label, edge.length=NULL, where=NULL, position=0)
 	Wrapper function for 'ape' \code{\link{bind.tree}}.
 }
 \value{
-	A tree.
+	An object of class \code{"phylo"}.
 }
 \references{
 	Revell, L. J. (2012) phytools: An R package for phylogenetic comparative biology (and other things). \emph{Methods Ecol. Evol.}, \bold{3}, 217-223.

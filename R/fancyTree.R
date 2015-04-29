@@ -36,7 +36,16 @@ phyloScattergram<-function(tree,...){
 	else if(!is.null(tree$maps)) colors<-setNames(palette()[1:ncol(tree$mapped.edge)],sort(colnames(tree$mapped.edge)))
 	if(hasArg(label)) label<-list(...)$label
 	else label<-"radial"
+	if(hasArg(hold)) hold<-list(...)$hold
+	else hold<-TRUE
+	if(hasArg(quiet)) quiet<-list(...)$quiet
+	else quiet<-FALSE
 	m<-ncol(X)
+	if(hold) null<-dev.hold()
+	if(!quiet&&hold){ 
+		cat("Computing multidimensional phylogenetic scatterplot matrix...\n")
+		flush.console()
+	}
 	par(mfrow=c(m,m))
 	par(cex=fsize)
 	par(mar=c(0,0,0,0))
@@ -56,6 +65,7 @@ phyloScattergram<-function(tree,...){
 	if(is.null(colnames(X))) colnames(X)<-paste("V",1:m,sep="")
 	invisible(mapply(title,xlab=colnames(X),adj=seq(0,(m-1)/m,1/m)+1/(2*m),MoreArgs=list(outer=TRUE,cex=0.9)))
 	invisible(mapply(title,ylab=colnames(X)[m:1],adj=seq(0,(m-1)/m,1/m)+1/(2*m),MoreArgs=list(outer=TRUE,cex=0.9)))
+	if(hold) null<-dev.flush()
 }
 
 # phenogram95 internal function
@@ -70,6 +80,10 @@ phenogram95<-function(tree,...){
 	else link<-0.05*max(nodeHeights(tree))
 	if(hasArg(offset)) offset<-list(...)$offset
 	else offset<-0
+	if(hasArg(hold)) hold<-list(...)$hold
+	else hold<-TRUE
+	if(hasArg(quiet)) quiet<-list(...)$quiet
+	else quiet<-FALSE
 	# get ancestral states
 	A<-fastAnc(tree,x,CI=TRUE)
 	# compute transparencies
@@ -83,6 +97,11 @@ phenogram95<-function(tree,...){
 	args$lwd<-1
 	args$link<-0.05*max(nodeHeights(tree))
 	args$offset<-0
+	if(hold) null<-dev.hold()
+	if(!quiet&&hold){ 
+		cat("Computing density traitgram...\n")
+		flush.console()
+	}
 	for(i in 0:50){
   		p<-i/length(trans)
 		args$add<-i>0
@@ -105,6 +124,7 @@ phenogram95<-function(tree,...){
 	args$lwd<-2
 	args$offset<-offset+link
 	do.call(phenogram,args)
+	null<-dev.flush()
 }
 
 # extinctionTree internal function

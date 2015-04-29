@@ -4,12 +4,12 @@
 plotSimmap<-function(tree,colors=NULL,fsize=1.0,ftype="reg",lwd=2,
 	pts=FALSE,node.numbers=FALSE,mar=NULL,add=FALSE,offset=NULL,direction="rightwards",
 	type="phylogram",setEnv=TRUE,part=1.0,xlim=NULL,ylim=NULL,nodes="intermediate",
-	tips=NULL){
+	tips=NULL,maxY=NULL,hold=TRUE){
 	if(class(tree)=="multiPhylo"){
 		par(ask=TRUE)
 		for(i in 1:length(tree)) plotSimmap(tree[[i]],colors=colors,fsize=fsize,ftype=ftype,
 			lwd=lwd,pts=pts,node.numbers=node.numbers,mar,add,offset,direction,type,
-			setEnv,part,xlim,ylim,nodes)
+			setEnv,part,xlim,ylim,nodes,hold)
 	} else {
 		# check font
 		ftype<-which(c("off","reg","b","i","bi")==ftype)-1
@@ -31,12 +31,14 @@ plotSimmap<-function(tree,colors=NULL,fsize=1.0,ftype="reg",lwd=2,
 		tree$tip.label<-gsub("_"," ",tree$tip.label)
 		# get margin
 		if(is.null(mar)) mar=rep(0.1,4)
+		if(hold) null<-dev.hold()
 		if(type=="phylogram"){
 			plotPhylogram(tree,colors,fsize,ftype,lwd,pts,node.numbers,mar,add,offset,
 				direction,setEnv,xlim,ylim,nodes,tips)
 		} else if(type=="fan"){
-			plotFan(tree,colors,fsize,ftype,lwd,mar,add,part,setEnv,xlim,ylim)
+			plotFan(tree,colors,fsize,ftype,lwd,mar,add,part,setEnv,xlim,ylim,tips,maxY)
 		}
+		if(hold) null<-dev.flush()
 	}
 }	
 
@@ -149,8 +151,8 @@ plotPhylogram<-function(tree,colors,fsize,ftype,lwd,pts,node.numbers,mar,
 }
 
 # function to plot simmap tree in type "fan"
-# written by Liam J. Revell 2013, 2014
-plotFan<-function(tree,colors,fsize,ftype,lwd,mar,add,part,setEnv,xlim,ylim){
+# written by Liam J. Revell 2013-2015
+plotFan<-function(tree,colors,fsize,ftype,lwd,mar,add,part,setEnv,xlim,ylim,tips,maxY){
 	# reorder
 	cw<-reorder(tree)
 	pw<-reorder(tree,"pruningwise")
@@ -159,14 +161,16 @@ plotFan<-function(tree,colors,fsize,ftype,lwd,mar,add,part,setEnv,xlim,ylim){
 	m<-cw$Nnode 
 	# get Y coordinates on uncurved space
 	Y<-vector(length=m+n)
+	if(is.null(tips)) tips<-1:n
 	if(part<1.0) Y[cw$edge[cw$edge[,2]<=n,2]]<-0:(n-1)
-	else Y[cw$edge[cw$edge[,2]<=n,2]]<-1:n
+	else Y[cw$edge[cw$edge[,2]<=n,2]]<-tips
 	nodes<-unique(pw$edge[,1])
 	for(i in 1:m){
 		desc<-pw$edge[which(pw$edge[,1]==nodes[i]),2]
 		Y[nodes[i]]<-(min(Y[desc])+max(Y[desc]))/2
 	}
-	Y<-setNames(Y/max(Y)*2*pi,1:(n+m))
+	if(is.null(maxY)) maxY<-max(Y)
+	Y<-setNames(Y/maxY*2*pi,1:(n+m))
 	Y<-part*cbind(Y[as.character(tree$edge[,2])],Y[as.character(tree$edge[,2])])
 	R<-nodeHeights(cw)
 	# now put into a circular coordinate system
@@ -224,9 +228,9 @@ plotFan<-function(tree,colors,fsize,ftype,lwd,mar,add,part,setEnv,xlim,ylim){
 			x.lim=xlim,y.lim=ylim,direction="rightwards",tip.color="black",
 			Ntip=Ntip(cw),Nnode=cw$Nnode,edge=cw$edge,
 			xx=c(x[sapply(1:n,function(x,y) which(x==y)[1],y=tree$edge[,2]),2],x[1,1],
-			x[sapply(2:m+n,function(x,y) which(x==y)[1],y=tree$edge[,2]),2]),
+			if(m>1) x[sapply(2:m+n,function(x,y) which(x==y)[1],y=tree$edge[,2]),2] else c()),
 			yy=c(y[sapply(1:n,function(x,y) which(x==y)[1],y=tree$edge[,2]),2],y[1,1],
-			y[sapply(2:m+n,function(x,y) which(x==y)[1],y=tree$edge[,2]),2]))
+			if(m>1) y[sapply(2:m+n,function(x,y) which(x==y)[1],y=tree$edge[,2]),2] else c()))
 		assign("last_plot.phylo",PP,envir=.PlotPhyloEnv)
 	}
 }
@@ -305,13 +309,17 @@ plotTree<-function(tree,...){
 	else nodes<-"intermediate"
 	if(hasArg(tips)) tips<-list(...)$tips
 	else tips<-NULL
+	if(hasArg(maxY)) maxY<-list(...)$maxY
+	else maxY<-NULL
+	if(hasArg(hold)) hold<-list(...)$hold
+	else hold<-TRUE
 	if(class(tree)=="multiPhylo"){
 		par(ask=TRUE)
 		if(!is.null(color)) names(color)<-"1"
 		for(i in 1:length(tree)) plotTree(tree[[i]],color=color,fsize=fsize,ftype=ftype,
 			lwd=lwd,pts=pts,node.numbers=node.numbers,mar=mar,add=add,offset=offset,
 			direction=direction,type=type,setEnv=setEnv,part=part,xlim=xlim,ylim=ylim,
-			nodes=nodes,tips=tips)
+			nodes=nodes,tips=tips,maxY=maxY,hold=hold)
 	} else {
 		if(is.null(tree$edge.length)) tree<-compute.brlen(tree)
 		tree$maps<-as.list(tree$edge.length)
@@ -319,7 +327,8 @@ plotTree<-function(tree,...){
 		if(!is.null(color)) names(color)<-"1"
 		plotSimmap(tree,colors=color,fsize=fsize,ftype=ftype,lwd=lwd,pts=pts,
 			node.numbers=node.numbers,mar=mar,add=add,offset=offset,direction=direction,
-			type=type,setEnv=setEnv,part=part,xlim=xlim,ylim=ylim,nodes=nodes,tips=tips)
+			type=type,setEnv=setEnv,part=part,xlim=xlim,ylim=ylim,nodes=nodes,tips=tips,maxY=maxY,
+			hold=hold)
 	}
 }
 

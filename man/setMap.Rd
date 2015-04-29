@@ -6,7 +6,7 @@ setMap(x, ...)
 }
 \arguments{
 	\item{x}{an object of class \code{"contMap"} or \code{"densityMap"}.}
-	\item{...}{arguments to be passed to \code{\link{colorRampPalette}}.}
+	\item{...}{arguments to be passed to \code{\link{colorRampPalette}}. Also, the argument \code{invert} which (if \code{invert=TRUE}) will just flip the current color ramp.}
 }
 \description{
 	Function to change the color map (ramp) in an object of class \code{"contMap"} or \code{"densityMap"}.

@@ -1,13 +1,16 @@
 # function plots posterior density of mapped states from stochastic mapping
-# written by Liam J. Revell 2012, 2013, 2014
+# written by Liam J. Revell 2012, 2013, 2014, 2015
 
-densityMap<-function(trees,res=100,fsize=NULL,ftype=NULL,lwd=3,check=FALSE,legend=NULL,outline=FALSE,type="phylogram",direction="rightwards",plot=TRUE,...){
+densityMap<-function(trees,res=100,fsize=NULL,ftype=NULL,lwd=3,check=FALSE,legend=NULL,
+	outline=FALSE,type="phylogram",direction="rightwards",plot=TRUE,...){
 	if(hasArg(mar)) mar<-list(...)$mar
 	else mar<-rep(0.3,4)
 	if(hasArg(offset)) offset<-list(...)$offset
 	else offset<-NULL
 	if(hasArg(states)) states<-list(...)$states
 	else states<-NULL
+	if(hasArg(hold)) hold<-list(...)$hold
+	else hold<-TRUE
 	tol<-1e-10
 	if(class(trees)!="multiPhylo") stop("trees not 'multiPhylo' object; just use plotSimmap")
 	h<-sapply(unclass(trees),function(x) max(nodeHeights(x)))
@@ -37,7 +40,8 @@ densityMap<-function(trees,res=100,fsize=NULL,ftype=NULL,lwd=3,check=FALSE,legen
 			c(steps[intersect(which(steps>H[i,1]),which(steps<H[i,2]))],H[i,2]))-H[i,1]
 		ZZ<-rep(0,nrow(YY))
 		for(j in 1:length(trees)){
-			XX<-matrix(0,length(trees[[j]]$maps[[i]]),2,dimnames=list(names(trees[[j]]$maps[[i]]),c("start","end")))
+			XX<-matrix(0,length(trees[[j]]$maps[[i]]),2,dimnames=list(names(trees[[j]]$maps[[i]]),
+				c("start","end")))
 			XX[1,2]<-trees[[j]]$maps[[i]][1]
 			if(length(trees[[j]]$maps[[i]])>1){
 				for(k in 2:length(trees[[j]]$maps[[i]])){
@@ -51,7 +55,8 @@ densityMap<-function(trees,res=100,fsize=NULL,ftype=NULL,lwd=3,check=FALSE,legen
 				names(lower)<-names(upper)<-NULL
 				if(!all(XX==0)){
 					for(l in lower:upper) 
-						AA<-AA+(min(XX[l,2],YY[k,2])-max(XX[l,1],YY[k,1]))/(YY[k,2]-YY[k,1])*as.numeric(rownames(XX)[l])
+						AA<-AA+(min(XX[l,2],YY[k,2])-max(XX[l,1],YY[k,1]))/(YY[k,2]-
+							YY[k,1])*as.numeric(rownames(XX)[l])
 				} else AA<-as.numeric(rownames(XX)[1])
 				ZZ[k]<-ZZ[k]+AA/length(trees)
 			}
@@ -63,12 +68,13 @@ densityMap<-function(trees,res=100,fsize=NULL,ftype=NULL,lwd=3,check=FALSE,legen
 	tree$mapped.edge<-makeMappedEdge(tree$edge,tree$maps)
 	tree$mapped.edge<-tree$mapped.edge[,order(as.numeric(colnames(tree$mapped.edge)))]
 	x<-list(tree=tree,cols=cols,states=ss); class(x)<-"densityMap"
-	if(plot) plot.densityMap(x,fsize=fsize,ftype=ftype,lwd=lwd,legend=legend,outline=outline,type=type,mar=mar,direction=direction,offset=offset)
+	if(plot) plot.densityMap(x,fsize=fsize,ftype=ftype,lwd=lwd,legend=legend,outline=outline,
+		type=type,mar=mar,direction=direction,offset=offset,hold=hold)
 	invisible(x)
 }
 
 # function
-# written by Liam J. Revell 2012, 2013, 2014
+# written by Liam J. Revell 2012, 2013, 2014, 2015
 
 plot.densityMap<-function(x,...){
 	if(class(x)=="densityMap"){
@@ -97,6 +103,10 @@ plot.densityMap<-function(x,...){
 	else direction<-"rightwards"
 	if(hasArg(offset)) offset<-list(...)$offset
 	else offset<-NULL
+	if(hasArg(ylim)) ylim<-list(...)$ylim
+	else ylim<-NULL
+	if(hasArg(hold)) hold<-list(...)$hold
+	else hold<-TRUE
 	if(is.null(legend)) legend<-0.5*max(H)
 	if(is.null(fsize)) fsize<-c(1,1)
 	if(length(fsize)==1) fsize<-rep(fsize,2)
@@ -109,16 +119,19 @@ plot.densityMap<-function(x,...){
 			legend<-0.5*max(H)
 		}
 	}
+	if(hold) null<-dev.hold()
 	if(type=="phylogram"){
 		N<-length(tree$tip.label)
-		if(legend) ylim<-c(1-0.12*(N-1),N)
-		else ylim<-NULL
+		if(legend&&is.null(ylim)) ylim<-c(1-0.12*(N-1),N)
+		else if(is.null(ylim)) ylim<-NULL
 		if(outline){
 			par(col="transparent")
-			plotTree(tree,fsize=fsize[1],lwd=lwd+2,offset=offset+0.2*lwd/3+0.2/3,ftype=ftype[1],ylim=ylim,mar=mar,direction=direction)
+			plotTree(tree,fsize=fsize[1],lwd=lwd+2,offset=offset+0.2*lwd/3+0.2/3,ftype=ftype[1],
+				ylim=ylim,mar=mar,direction=direction,hold=FALSE)
 			par(col="black")
 		}
-		plotSimmap(tree,cols,pts=FALSE,lwd=lwd,fsize=fsize[1],mar=mar,ftype=ftype[1],add=outline,ylim=ylim,direction=direction,offset=offset)
+		plotSimmap(tree,cols,pts=FALSE,lwd=lwd,fsize=fsize[1],mar=mar,ftype=ftype[1],add=outline,
+			ylim=ylim,direction=direction,offset=offset,hold=FALSE)
 		if(legend){
 			ff<-function(dd){
 				if(!("."%in%dd)) dig<-0
@@ -126,15 +139,18 @@ plot.densityMap<-function(x,...){
 				dig
 			}
 			dig<-max(sapply(strsplit(leg.txt[c(1,3)],split=""),ff))
-			add.color.bar(legend,cols,title=leg.txt[2],lims<-as.numeric(leg.txt[c(1,3)]),digits=dig,prompt=FALSE,x=0,y=1-0.08*(N-1),lwd=lwd,fsize=fsize[2])
+			add.color.bar(legend,cols,title=leg.txt[2],lims<-as.numeric(leg.txt[c(1,3)]),
+				digits=dig,prompt=FALSE,x=0,y=1-0.08*(N-1),lwd=lwd,fsize=fsize[2])
 		}
 	} else if(type=="fan"){
 		if(outline){
 			par(col="white")
-			invisible(capture.output(plotTree(tree,type="fan",lwd=lwd+2,mar=mar,fsize=fsize[1],ftype=ftype[1])))
+			invisible(capture.output(plotTree(tree,type="fan",lwd=lwd+2,mar=mar,fsize=fsize[1],
+				ftype=ftype[1],ylim=ylim,hold=FALSE)))
 			par(col="black")
 		}
-		invisible(capture.output(plotSimmap(tree,cols,lwd=lwd,mar=mar,fsize=fsize[1],add=outline,ftype=ftype[1],type="fan")))
+		invisible(capture.output(plotSimmap(tree,cols,lwd=lwd,mar=mar,fsize=fsize[1],add=outline,ftype=ftype[1],
+			type="fan",ylim=ylim,hold=FALSE)))
 		if(legend){
 			ff<-function(dd){
 				if(!("."%in%dd)) dig<-0
@@ -142,9 +158,11 @@ plot.densityMap<-function(x,...){
 				dig
 			}
 			dig<-max(sapply(strsplit(leg.txt[c(1,3)],split=""),ff))
-			add.color.bar(legend,cols,title=leg.txt[2],lims<-as.numeric(leg.txt[c(1,3)]),digits=dig,prompt=FALSE,x=0.9*par()$usr[1],y=0.9*par()$usr[3],lwd=lwd,fsize=fsize[2])
+			add.color.bar(legend,cols,title=leg.txt[2],lims<-as.numeric(leg.txt[c(1,3)]),digits=dig,
+				prompt=FALSE,x=0.9*par()$usr[1],y=0.9*par()$usr[3],lwd=lwd,fsize=fsize[2])
 		}
 	}
+	if(hold) null<-dev.flush()
 }
 
 ## S3 print method for object of class 'densityMap'

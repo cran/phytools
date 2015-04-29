@@ -1,5 +1,66 @@
 # some utility functions
-# written by Liam J. Revell 2011, 2012, 2013, 2014
+# written by Liam J. Revell 2011, 2012, 2013, 2014, 2015
+
+# function splits tree at split
+# written by Liam Revell 2011, 2014, 2015
+
+splitTree<-function(tree,split){
+	if(split$node>length(tree$tip.label)){
+		# first extract the clade given by shift$node
+		tr2<-extract.clade(tree,node=split$node)
+		tr2$root.edge<-tree$edge.length[which(tree$edge[,2]==split$node)]-split$bp
+		#now remove tips in tr2 from tree
+		tr1<-drop.clade(tree,tr2$tip.label)
+		nn<-if(!is.null(tree$node.label)) c(tree$node.label,"NA") else "NA"
+		tr1$tip.label[which(tr1$tip.label%in%nn)]<-"NA"
+		tr1$edge.length[match(which(tr1$tip.label=="NA"),tr1$edge[,2])]<-split$bp
+	} else {
+		# first extract the clade given by shift$node
+		tr2<-list(edge=matrix(c(2L,1L),1,2),tip.label=tree$tip.label[split$node],edge.length=tree$edge.length[which(tree$edge[,2]==split$node)]-split$bp,Nnode=1L)
+		class(tr2)<-"phylo"
+		# now remove tip in tr2 from tree
+		tr1<-tree
+		tr1$edge.length[match(which(tr1$tip.label==tr2$tip.label[1]),tr1$edge[,2])]<-split$bp
+		tr1$tip.label[which(tr1$tip.label==tr2$tip.label[1])]<-"NA"
+	}
+	trees<-list(tr1,tr2)
+	class(trees)<-"multiPhylo"
+	trees
+}
+
+
+# function drops entire clade
+# written by Liam Revell 2011, 2015
+
+drop.clade<-function(tree,tip){
+	nn<-if(!is.null(tree$node.label)) c(tree$node.label,"NA") else "NA"
+	tree<-drop.tip(tree,tip,trim.internal=FALSE)
+	while(sum(tree$tip.label%in%nn)>1)
+		tree<-drop.tip(tree,tree$tip.label[tree$tip.label%in%nn],
+			trim.internal=FALSE)
+	tree
+}
+
+# function to re-root a phylogeny along an edge
+# written by Liam Revell 2011-2015
+
+reroot<-function(tree,node.number,position){
+	if(class(tree)!="phylo") stop("tree object must be of class 'phylo.'")
+	tt<-splitTree(tree,list(node=node.number,bp=position))
+	p<-tt[[1]]
+	d<-tt[[2]]
+	tip<-if(length(which(p$tip.label=="NA"))>0) "NA" else p$tip.label[which(p$tip.label%in%tree$node.label)]
+	p<-root(p,outgroup=tip,resolve.root=T)
+	bb<-which(p$tip.label==tip)
+	p$tip.label[bb]<-"NA"
+	ee<-p$edge.length[which(p$edge[,2]==bb)]
+	p$edge.length[which(p$edge[,2]==bb)]<-0
+	cc<-p$edge[which(p$edge[,2]==bb),1]
+	dd<-setdiff(p$edge[which(p$edge[,1]==cc),2],bb)
+	p$edge.length[which(p$edge[,2]==dd)]<-p$edge.length[which(p$edge[,2]==dd)]+ee
+	tt<-paste.tree(p,d)
+	return(tt)
+}
 
 ## function to add an arrow pointing to a tip or node in the tree
 ## written by Liam J. Revell 2014
@@ -261,30 +322,6 @@ nodeheight<-function(tree,node){
 		h<-sum(tree$edge.length[sapply(a,function(x,e) which(e==x),e=tree$edge[,2])])
 	}
 	h
-}
-
-# function splits tree at split
-# written by Liam Revell 2011, 2014
-splitTree<-function(tree,split){
-	if(split$node>length(tree$tip.label)){
-		# first extract the clade given by shift$node
-		tr2<-extract.clade(tree,node=split$node)
-		tr2$root.edge<-tree$edge.length[which(tree$edge[,2]==split$node)]-split$bp
-		#now remove tips in tr2 from tree
-		tr1<-drop.clade(tree,tr2$tip.label)
-		tr1$edge.length[match(which(tr1$tip.label=="NA"),tr1$edge[,2])]<-split$bp
-	} else {
-		# first extract the clade given by shift$node
-		tr2<-list(edge=matrix(c(2L,1L),1,2),tip.label=tree$tip.label[split$node],edge.length=tree$edge.length[which(tree$edge[,2]==split$node)]-split$bp,Nnode=1L)
-		class(tr2)<-"phylo"
-		# now remove tip in tr2 from tree
-		tr1<-tree
-		tr1$edge.length[match(which(tr1$tip.label==tr2$tip.label[1]),tr1$edge[,2])]<-split$bp
-		tr1$tip.label[which(tr1$tip.label==tr2$tip.label[1])]<-"NA"
-	}
-	trees<-list(tr1,tr2)
-	class(trees)<-"multiPhylo"
-	trees
 }
 
 # fast pairwise MRCA function
@@ -823,23 +860,6 @@ countSimmap<-function(tree,states=NULL,message=TRUE){
 	}
 }
 
-# function to re-root a phylogeny along an edge
-# written by Liam Revell 2011-2013
-reroot<-function(tree,node.number,position){
-	if(class(tree)!="phylo") stop("tree object must be of class 'phylo.'")
-	tt<-splitTree(tree,list(node=node.number,bp=position))
-	p<-tt[[1]]; d<-tt[[2]]
-	p<-root(p,outgroup="NA",resolve.root=T)
-	bb<-which(p$tip.label=="NA")
-	ee<-p$edge.length[which(p$edge[,2]==bb)]
-	p$edge.length[which(p$edge[,2]==bb)]<-0
-	cc<-p$edge[which(p$edge[,2]==bb),1]
-	dd<-setdiff(p$edge[which(p$edge[,1]==cc),2],bb)
-	p$edge.length[which(p$edge[,2]==dd)]<-p$edge.length[which(p$edge[,2]==dd)]+ee
-	tt<-paste.tree(p,d)
-	return(tt)
-}
-
 # function returns random state with probability given by y
 # written by Liam J. Revell 2013 (replaces earlier version)
 rstate<-function(y){
@@ -1091,16 +1111,6 @@ paste.tree<-function(tr1,tr2){
 	}
 	tr.bound<-bind.tree(tr1,tr2,where=which(tr1$tip.label=="NA"))	
 	return(tr.bound)
-}
-
-# function drops entire clade
-# written by Liam Revell 2011
-drop.clade<-function(tree,tip){
-	tree<-drop.tip(tree,tip,trim.internal=FALSE)
-	while(sum(tree$tip.label=="NA")>1){
-		tree<-drop.tip(tree,"NA",trim.internal=FALSE)
-	}
-	return(tree)
 }
 
 # match type

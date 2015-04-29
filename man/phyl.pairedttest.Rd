@@ -16,14 +16,14 @@ phyl.pairedttest(tree, x1, x2=NULL, se1=NULL, se2=NULL, lambda=1.0, h0=0.0,
 	\item{fixed}{logical value specifying whether or not to optimize lambda.}
 }
 \description{
-	This function conducts a phylogenetic paired t-test, roughly following Lindenfors et al. (2010; \emph{J. Evol. Biol.}).
+	This function conducts a phylogenetic paired t-test, roughly following Lindenfors et al. (2010; \emph{J. Evol. Biol.}). This is not a phylogenetic ANOVA, in which we want to compare the means of different sets of species on the tree. Instead, we are interested in the difference between two characters, or two measures of a character within a species, and we want to know if this difference is significantly different from zero controlling for the phylogenetic non-independence of species. 
 }
 \details{
 	Likelihood optimization is performed using \code{\link{optim}} with \code{method="L-BFGS-B"} with box constraints on lambda (0,1).
 }
 \value{
 	A list with the following components:
-	\item{dbar}{phylogenetic mean differenc.}
+	\item{dbar}{phylogenetic mean difference.}
 	\item{se}{standard error of \code{dbar}.}
 	\item{sig2}{estimated evolutionary variance (of the difference).}
 	\item{lambda}{fitted (or fixed) value of lambda.}

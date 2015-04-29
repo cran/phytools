@@ -3,7 +3,7 @@
 \alias{biplot.phyl.pca}
 \title{Phylogenetic principal components analysis}
 \usage{
-phyl.pca(tree, Y, method="BM", mode="cov")
+phyl.pca(tree, Y, method="BM", mode="cov", ...)
 \method{biplot}{phyl.pca}(x, ...)
 }
 \arguments{
@@ -18,7 +18,7 @@ phyl.pca(tree, Y, method="BM", mode="cov")
 	This function performs phylogenetic PCA (e.g., Revell 2009; \emph{Evolution}).
 }
 \details{
-	If \code{method="lambda"} \eqn{\lambda} is optimized on the interval (0,1) using \code{\link{optimize}}. S3 methods (\code{print}, \code{summary}, and \code{biplot} are modified from code provided by Joan Maspons and are based on the same methods for objects of class \code{"prcomp"}.
+	If \code{method="lambda"} \eqn{\lambda} is optimized on the interval (0,1) using \code{\link{optimize}}. S3 methods (\code{print}, \code{summary}, and \code{biplot}) are modified from code provided by Joan Maspons and are based on the same methods for objects of class \code{"prcomp"}. Function \code{biplot} now permits the argument \code{choices} to be supplied, which should be a vector of length two indicated the two PC axes to be plotted.
 }
 \value{
 	An object of class \code{phyl.pca} which is a list with some or all of the following components:

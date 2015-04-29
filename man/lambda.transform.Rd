@@ -21,10 +21,6 @@ lambda.transform(lambda, C)
 	Revell, L. J. (2012) phytools: An R package for phylogenetic comparative biology (and other things). \emph{Methods Ecol. Evol.}, \bold{3}, 217-223.
 }
 \author{Liam Revell \email{liam.revell@umb.edu}}
-\examples{
-tree<-pbtree(n=100)
-V.lambda<-lambda.transform(0.7,vcvPhylo(tree,FALSE))
-}
 \keyword{phylogenetics}
 \keyword{math}
 \keyword{comparative method}
