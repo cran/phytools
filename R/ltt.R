@@ -1,35 +1,34 @@
-# this function computes the data for a lineage-through-time plot and (optionally) creates this plot
-# the function does not require a tree that is ultrametric.  Optionally, the function can remove extinct
-# species from the phylogeny
-# if the input tree is an object of class "multiPhylo" then the function will simultaneously plot all ltts
-# written by Liam J. Revell 2010, 2011, 2012, 2013, 2014
+## This function computes the data for a lineage-through-time plot and 
+## (optionally) creates this plot the function does not require a tree 
+## that is ultrametric.  Optionally, the function can remove extinct
+## species from the phylogeny. If the input tree is an object of class 
+## "multiPhylo" then the function will simultaneously plot all ltts.
+## written by Liam J. Revell 2010-2015
 
-ltt<-function(tree,plot=TRUE,drop.extinct=FALSE,log.lineages=TRUE,gamma=TRUE){
+ltt<-function(tree,plot=TRUE,drop.extinct=FALSE,log.lineages=TRUE,gamma=TRUE,...){
 	# set tolerance
 	tol<-1e-6
 	# check 'phylo' object
-	if(class(tree)!="phylo"&&class(tree)!="multiPhylo") stop("tree object must be of class 'phylo.'")
+	if(class(tree)!="phylo"&&class(tree)!="multiPhylo") 
+		stop("tree object must be of class 'phylo.'")
 	if(class(tree)=="multiPhylo"){
-		X<-lapply(tree,ltt,plot=FALSE,drop.extinct=drop.extinct,log.lineages=log.lineages,gamma=gamma)
-		max.lineages<-max(sapply(X,function(y) max(y$ltt)))
-		max.time<-max(sapply(X,function(y) max(y$times)))
-		if(plot==TRUE){
-			if(log.lineages==TRUE) plot(X[[1]]$time,log(X[[1]]$ltt),"s",xlab="time",ylab="log(lineages)",xlim=c(0,max.time),ylim=c(0,log(max.lineages)))
-			else plot(X[[1]]$time,X[[1]]$ltt,"s",xlab="time",ylab="lineages",xlim=c(0,max.time),ylim=c(0,max.lineages))
-			for(i in 2:length(trees))
-				if(log.lineages==TRUE) lines(X[[i]]$time,log(X[[i]]$ltt),"s",xlab="time",ylab="log(lineages)",xlim=c(0,max.time),ylim=c(0,log(max.lineages)))
-				else lines(X[[i]]$time,X[[i]]$ltt,"s",xlab="time",ylab="lineages",xlim=c(0,max.time),ylim=c(0,max.lineages))
-		}
-		return(X)
+		obj<-lapply(tree,ltt,plot=FALSE,drop.extinct=drop.extinct,
+			log.lineages=log.lineages,gamma=gamma)
+		class(obj)<-"multiLtt"
 	} else {
 		# reorder the tree
 		tree<-reorder.phylo(tree,order="cladewise")
+		if(!is.null(tree$node.label)){ 
+			node.names<-setNames(tree$node.label,1:tree$Nnode+Ntip(tree))
+			tree$node.label<-NULL
+		} else node.names<-NULL
 		## check if tree is ultrametric & if yes, then make *precisely* ultrametric
 		if(is.ultrametric(tree)){
 			h<-max(nodeHeights(tree))
 			time<-c(0,h-sort(branching.times(tree),decreasing=TRUE),h)
 			nodes<-as.numeric(names(time)[2:(length(time)-1)])
-			ltt<-c(cumsum(c(1,sapply(nodes,function(x,y) sum(y==x)-1,y=tree$edge[,1]))),length(tree$tip.label))
+			ltt<-c(cumsum(c(1,sapply(nodes,function(x,y) sum(y==x)-1,y=tree$edge[,1]))),
+				length(tree$tip.label))
 			names(ltt)<-names(time)
 		} else {
 			# internal functions
@@ -78,24 +77,26 @@ ltt<-function(tree,plot=TRUE,drop.extinct=FALSE,log.lineages=TRUE,gamma=TRUE){
 			# set names (these are the node indices)
 			names(ltt)<-names(time)
 			# append 0,1 for time 0
-			ltt<-c(1,ltt); time<-c(0,time)
+			ltt<-c(1,ltt)
+			time<-c(0,time)
 			# subtract fudge factor
 			time[length(time)]<-time[length(time)]-1.1*tol
 		}
-		# plot ltt
-		if(plot==TRUE){
-			if(log.lineages==TRUE)
-				plot(time,log(ltt),"s",xlab="time",ylab="log(lineages)")
-			else
-				plot(time,ltt,"s",xlab="time",ylab="lineages")
+		if(!is.null(node.names)){ nn<-sapply(names(time),function(x,y) 
+			if(any(names(y)==x)) y[which(names(y)==x)] else "",y=node.names)
+			names(ltt)<-names(time)<-nn
 		}
-		if(gamma==FALSE)
-			return(list(ltt=ltt,times=time))
-		else{
+		if(gamma==FALSE){
+			obj<-list(ltt=ltt,times=time,tree=tree)
+			class(obj)<-"ltt"
+		} else {
 			gam<-gammatest(list(ltt=ltt,times=time))
-			return(list(ltt=ltt,times=time,gamma=gam$gamma,p=gam$p))
+			obj<-list(ltt=ltt,times=time,gamma=gam$gamma,p=gam$p,tree=tree)
+			class(obj)<-"ltt"
 		}
 	}
+	if(plot) plot(obj,log.lineages=log.lineages,...)
+	obj
 }
 
 # function computes the gamma-statistic & a two-tailed P-value
@@ -112,3 +113,86 @@ gammatest<-function(x){
 	p<-2*pnorm(abs(gamma),lower.tail=F)
 	return(list(gamma=gamma,p=p))
 }
+
+## S3 print method for object of class "ltt"
+## written by Liam J. Revell 2015
+
+print.ltt<-function(x,digits=4,...){
+	cat("Object of class \"ltt\" containing:\n\n")
+	cat(paste("(1) A phylogenetic tree with ",Ntip(x$tree), 
+		" tips and ",x$tree$Nnode," internal nodes.\n\n",sep= ""))
+	cat(paste("(2) Vectors containing the number of lineages (ltt) ",
+		"and branching times (times) on the tree.\n\n",sep=""))
+	if(!is.null(x$gamma))
+		cat(paste("(3) A value for Pybus & Harvey's \"gamma\"",
+			" statistic of ",round(x$gamma,digits),", p-value = ",
+			round(x$p,digits),".\n\n",sep=""))
+}
+
+## S3 print method for object of class "multiLtt"
+## written by Liam J. Revell 2015
+
+print.multiLtt<-function(x,...){
+	cat(paste(length(x),"objects of class \"ltt\" in a list\n"))
+}
+
+## S3 plot method for object of class "ltt"
+## written by Liam J. Revell 2015
+
+plot.ltt<-function(x,...){
+	args<-list(...)
+	args$x<-x$time
+	if(!is.null(args$log.lineages)){ 
+		logl<-args$log.lineages
+		args$log.lineages<-NULL
+	} else logl<-TRUE
+	if(!is.null(args$show.tree)){
+		show.tree<-args$show.tree
+		args$show.tree<-NULL
+	} else show.tree<-FALSE
+	if(!is.null(args$transparency)){
+		transparency<-args$transparency
+		args$transparency<-NULL
+	} else transparency<-0.3
+	args$y<-if(logl) log(x$ltt) else x$ltt
+	if(is.null(args$xlab)) args$xlab<-"time"
+	if(is.null(args$ylab)) 
+		args$ylab<-if(logl) "log(lineages)" else "lineages"
+	if(is.null(args$type)) args$type<-"s"
+	if(hasArg(add)){ 
+		add<-list(...)$add
+		args$add<-NULL
+	} else add<-FALSE
+	if(!add) do.call(plot,args)
+	else do.call(lines,args)
+	if(show.tree) plotTree(x$tree,color=rgb(0,0,1,transparency),
+		ftype="off",add=TRUE, mar=par()$mar)
+}
+
+## S3 plot method for object of class "multiLtt"
+## written by Liam J. Revell 2015
+
+plot.multiLtt<-function(x,...){
+	max.lineages<-max(sapply(x,function(x) max(x$ltt)))
+	max.time<-max(sapply(x,function(x) max(x$time)))
+	args<-list(...)
+	if(!is.null(args$log.lineages)) logl<-list(...)$log.lineages
+	else logl<-TRUE	
+	if(is.null(args$xlim)) args$xlim<-c(0,max.time)
+	if(is.null(args$ylim)) 
+		args$ylim<-if(logl) c(0,log(max.lineages)) else c(0,max.lineages)
+	args$x<-x[[1]]
+	do.call(plot,args)
+	args$add<-TRUE
+	if(!is.null(args$log)) args$log<-NULL
+	if(length(x)>2){
+		for(i in 2:length(x)){
+			args$x<-x[[i]]
+			do.call(plot,args)
+		}
+	} else {
+		args$x<-x[[2]]
+		do.call(plot,args)
+	}
+}
+

@@ -1,5 +1,5 @@
 # function writes a "phylo" object to a Newick string with ancestor state estimates
-# written by Liam J. Revell 2013
+# written by Liam J. Revell 2013, 2015
 
 writeAncestors<-function(tree,Anc=NULL,file="",digits=6,format=c("phylip","nexus"),...){
 	format=format[1]
@@ -10,7 +10,7 @@ writeAncestors<-function(tree,Anc=NULL,file="",digits=6,format=c("phylip","nexus
 			x<-list(...)$x
 			if(class(tree)=="multiPhylo"){
 				if(is.list(x)) Anc<-mapply(fastAnc,tree,x,MoreArgs=list(CI=CI),SIMPLIFY=FALSE)
-				else Anc<-lapply(trees,fastAnc,x=x,CI=CI)
+				else Anc<-lapply(tree,fastAnc,x=x,CI=CI)
 			} else if(class(tree)=="phylo"){
 				if(is.list(x)){ 
 					Anc<-lapply(x,fastAnc,tree=tree,CI=CI)

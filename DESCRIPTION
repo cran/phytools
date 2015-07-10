@@ -1,12 +1,13 @@
 Package: phytools
-Version: 0.4-56
-Date: 2015-4-28
+Version: 0.4-60
+Date: 2015-7-09
 Title: Phylogenetic Tools for Comparative Biology (and Other Things)
 Author: Liam J. Revell
 Maintainer: Liam J. Revell <liam.revell@umb.edu>
 Depends: R (>= 2.10), ape (>= 3.0-10), maps
-Imports: animation, clusterGeneration, mnormt, msm, numDeriv, phangorn
-        (>= 1.6-3), plotrix, scatterplot3d
+Imports: animation, clusterGeneration, graphics, grDevices, methods,
+        mnormt, msm, numDeriv, phangorn (>= 1.6-3), plotrix,
+        scatterplot3d, stats, utils
 Suggests: geiger, rgl
 ZipData: no
 Description: Package contains various functions for phylogenetic analysis.
@@ -52,7 +53,7 @@ Description: Package contains various functions for phylogenetic analysis.
 	their research.
 License: GPL (>= 2)
 URL: http://www.phytools.org
-Packaged: 2015-04-29 00:12:43 UTC; Liam
+Packaged: 2015-07-09 16:28:22 UTC; Liam
 Repository: CRAN
-Date/Publication: 2015-04-29 08:41:07
+Date/Publication: 2015-07-10 20:33:04
 NeedsCompilation: no

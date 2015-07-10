@@ -1,5 +1,5 @@
-6a5a4e0147b434294125fc3d7059f851 *DESCRIPTION
-09429d5dbad0973c8a2a2ceaf7902057 *NAMESPACE
+6289d56433bab8e9e7157cb459d5ca00 *DESCRIPTION
+221844a28550a0725f8be5b31cdfe2ac *NAMESPACE
 8f41acffe68735aa7449b5e66a9812b1 *R/add.everywhere.R
 34423edfd64ed1b237c63a0364288bdf *R/add.random.R
 17eb477b7b99dbdf228b0694b6ed01f4 *R/add.species.to.genus.R
@@ -14,7 +14,7 @@ a6e7c12432775c0db331677fb7161d07 *R/backbonePhylo.R
 2ad5f3aa5021c7cc67269d6cb21e4ffd *R/brownie.lite.R
 6c3bf1e39384f5e24d711ec7ac0d0a2c *R/brownieREML.R
 79ce0f5cb5474ef01bfa044419c507dd *R/collapseTree.R
-172eca541352e7aae713b533c89d0910 *R/contMap.R
+6dbd84131e23f7babc1f06216fb8f746 *R/contMap.R
 81dde1ba66beb1408be9c0c358961497 *R/densityMap.R
 b707fc247b889daacea864a75e0915ed *R/drop.tip.simmap.R
 bd862cef57b58a4221f0c761d4284d88 *R/estDiversity.R
@@ -33,7 +33,7 @@ de4661e9387e345e11ba6a96f6dfb690 *R/fastBM.R
 845b53ce3f60f6ed7d3728a67da0ecfc *R/getExtant.R
 bddf4ca9c479faa597ea1561a265490b *R/locate.fossil.R
 c8ded3505a547ba586b3ebffbba40343 *R/locate.yeti.R
-b16b9534c1eb7d1757a070d7c58e5aaa *R/ltt.R
+997c736fdede5c39423378636077b577 *R/ltt.R
 5a03095333cdc6926135e17a06b5718b *R/ltt95.R
 429a79ff1742fc3a8f628d441df34710 *R/make.era.map.R
 760853ff95d15d7b7fde7501c8e5d7dc *R/make.simmap.R
@@ -49,7 +49,7 @@ af3ee4b2e3a749a9d0040ca6fceb40a5 *R/optim.phylo.ls.R
 32cf021867e184c4d17912a931b8d2e5 *R/paintSubTree.R
 e9e01ad2df33334424ddb0453603c336 *R/pbtree.R
 0432d301015fb3848dbab54f3740d56e *R/pgls.Ives.R
-5b71a94a7cc5636931a2e494880fee26 *R/phenogram.R
+3e4334956b9db24c6dced39dba445b15 *R/phenogram.R
 4db055cf75d6a3d2e7cda5a91cafd137 *R/phyl.RMA.R
 636d5d590f0c6a7cfafae4f13df2d57e *R/phyl.cca.R
 067743180672ac2b90d1e160186fe0de *R/phyl.pairedttest.R
@@ -67,7 +67,7 @@ eb798ee8249519bd2afc6c132f24a065 *R/ratebystate.R
 1c590708fed31ebaba52763d510f25bb *R/rateshift.R
 434b44be7131677f2e66da3f62b3ecf1 *R/read.newick.R
 b8b5ead91ff5bcfbbc89655e563d2431 *R/read.simmap.R
-70c86da3b51847705f3114ff102e4df2 *R/rerootingMethod.R
+c12723df3ba3d0c9b615bb502d02a13f *R/rerootingMethod.R
 54a7286b38ed9310390c726c151a25af *R/roundPhylogram.R
 a734b9387333dc2d9a5ece1f8ee06f98 *R/sim.corrs.R
 bdeb611db55ccb1b452c3392f27dffec *R/sim.history.R
@@ -80,7 +80,7 @@ c8bfa07dd3238d97fcaafe5a369e5e89 *R/starTree.R
 a38bac98b4681cee859750b8193a9a9b *R/treeSlice.R
 b76bf13cdae23ac6c5b285ccd130c941 *R/utilities.R
 7282f87b3143db28b7e982e86d90b6e5 *R/write.simmap.R
-56aea5f39235e8e0b1b3281465563f93 *R/writeAncestors.R
+153e84243e309f0cfa8846137b997cf5 *R/writeAncestors.R
 c6d9cb0dbedb17c4cc0d4e16032da623 *R/writeNexus.R
 93c8e79ef949a21de4bfe83d817c32fb *data/anoletree.rda
 0eb3bef3466bd6d264c669571621c2d1 *inst/CITATION
@@ -143,7 +143,7 @@ c2a04357ebedc51867f98d3e24ef0d66 *man/lambda.transform.Rd
 3149b5b7a824f424f799ab3e522d6850 *man/locate.fossil.Rd
 d274dca0554874d3a3476906e281093a *man/locate.yeti.Rd
 a09a3cd5616557bd09ba88e990addd40 *man/ls.tree.Rd
-c881e3d219450aa8ddf3094cb2ad5be2 *man/ltt.Rd
+164517a355a60693d56b4ba8e52ccb18 *man/ltt.Rd
 fed051823f388fb54a6cb38c2da4e5a3 *man/ltt95.Rd
 cf7e13fd79fec035abe59959454442f2 *man/make.era.map.Rd
 edc94b0dfc1667270675a80b96bd05a1 *man/make.simmap.Rd

@@ -35,6 +35,7 @@ phenogram<-function(tree,x,fsize=1.0,ftype="reg",colors=NULL,axes=list(),add=FAL
 	else nticks<-5
 	if(hasArg(spread.labels)) spread.labels<-list(...)$spread.labels
 	else spread.labels<-TRUE
+	if(ftype=="off") spread.labels<-FALSE
 	if(hasArg(spread.cost)) spread.cost<-list(...)$spread.cost
 	else spread.cost<-c(1,0.4)
 	if(hasArg(spread.range)) spread.range<-list(...)$spread.range

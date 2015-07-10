@@ -1,6 +1,5 @@
 # function plots reconstructed values for ancestral characters along the edges of the tree
 # written by Liam J. Revell 2012, 2013, 2014, 2015
-
 contMap<-function(tree,x,res=100,fsize=NULL,ftype=NULL,lwd=4,legend=NULL,
 	lims=NULL,outline=TRUE,sig=3,type="phylogram",direction="rightwards",
 	plot=TRUE,...){
@@ -12,6 +11,8 @@ contMap<-function(tree,x,res=100,fsize=NULL,ftype=NULL,lwd=4,legend=NULL,
 	else method<-"fastAnc"
 	if(hasArg(hold)) hold<-list(...)$hold
 	else hold<-TRUE
+	if(hasArg(leg.txt)) leg.txt<-list(...)$leg.txt
+	else leg.txt<-"trait value"
 	h<-max(nodeHeights(tree))
 	steps<-0:res/res*max(h)
 	H<-nodeHeights(tree)
@@ -44,13 +45,12 @@ contMap<-function(tree,x,res=100,fsize=NULL,ftype=NULL,lwd=4,legend=NULL,
 	xx<-list(tree=tree,cols=cols,lims=lims)
 	class(xx)<-"contMap"
 	if(plot) plot.contMap(xx,fsize=fsize,ftype=ftype,lwd=lwd,legend=legend,outline=outline,
-		sig=sig,type=type,mar=mar,direction=direction,offset=offset,hold=hold)
+		sig=sig,type=type,mar=mar,direction=direction,offset=offset,hold=hold,leg.txt=leg.txt)
 	invisible(xx)
 }
 
 # function
 # written by Liam J. Revell 2012
-
 getState<-function(x,trans){
 	i<-1
 	while(x>trans[i]){
@@ -62,7 +62,6 @@ getState<-function(x,trans){
 
 # function
 # written by Liam J. Revell 2012, 2013, 2014, 2015
-
 plot.contMap<-function(x,...){
 	if(class(x)=="contMap"){
 		lims<-x$lims
@@ -100,15 +99,16 @@ plot.contMap<-function(x,...){
 	if(length(fsize)==1) fsize<-rep(fsize,2)
 	if(is.null(ftype)) ftype<-c("i","reg")
 	if(length(ftype)==1) ftype<-c(ftype,"reg")
+	if(hasArg(leg.txt)) leg.txt<-list(...)$leg.txt
+	else leg.txt<-"trait value"
 	# done optional arguments
-	leg.txt<-c(round(lims[1],sig),"trait value",round(lims[2],sig))
+	leg.txt<-c(round(lims[1],sig),leg.txt,round(lims[2],sig))
 	plot(x,fsize=fsize,ftype=ftype,lwd=lwd,legend=legend,outline=outline,leg.txt=leg.txt,
 		type=type,mar=mar,direction=direction,offset=offset,ylim=ylim,hold=hold)
 }
 
 ## S3 print method for object of class 'contMap'
 ## written by Liam J. Revell 2013
-
 print.contMap<-function(x,digits=6,...){
 	cat("Object of class \"contMap\" containing:\n\n")
 	cat(paste("(1) A phylogenetic tree with ",length(x$tree$tip.label)," tips and ",x$tree$Nnode," internal nodes.\n\n",sep=""))
@@ -117,7 +117,6 @@ print.contMap<-function(x,digits=6,...){
 
 ## drop tips from an object of class 'contMap'
 ## written by Liam J. Revell 2014
-
 drop.tip.contMap<-function(x,tip){
 	if(class(x)!="contMap") cat("x should be an object of class \"contMap\"\n")
 	else {
