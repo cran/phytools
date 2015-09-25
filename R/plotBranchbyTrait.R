@@ -3,6 +3,7 @@
 
 plotBranchbyTrait<-function(tree,x,mode=c("edges","tips","nodes"),palette="rainbow",legend=TRUE,xlims=NULL,...){
 	mode<-mode[1]
+	if(!inherits(tree,"phylo")) stop("tree should be an object of class \"phylo\".")
 	if(mode=="tips"){
 		x<-c(x[tree$tip.label],fastAnc(tree,x))
 		names(x)[1:length(tree$tip.label)]<-1:length(tree$tip.label)

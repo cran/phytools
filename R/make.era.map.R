@@ -1,12 +1,12 @@
 # function creates a mapped tree in which the mappings are based on eras defined by "limits"
-# written by Liam J. Revell 2011, 2013
+# written by Liam J. Revell 2011, 2013, 2015
 
 make.era.map<-function(tree,limits,...){
 	## set tolerance
 	if(hasArg(tol)) tol<-list(...)$tol
 	else tol<-1e-5
 	# check
-	if(class(tree)!="phylo") warning("tree should be a \"phylo\" object.")
+	if(!inherits(tree,"phylo")) stop("tree should be object of class \"phylo\".")
 	H<-nodeHeights(tree) # compute node heights
 	if(limits[1]>tol){ 
 		warning("first value in limits should be zero.")
@@ -42,7 +42,12 @@ make.era.map<-function(tree,limits,...){
 	allstates<-vector()
 	for(i in 1:nrow(tree$edge)) allstates<-c(allstates,names(tree$maps[[i]]))
 	allstates<-unique(allstates)
-	tree$mapped.edge<-matrix(data=0,length(tree$edge.length),length(allstates),dimnames=list(apply(tree$edge,1,function(x) paste(x,collapse=",")),state=allstates))
-	for(i in 1:length(tree$maps)) for(j in 1:length(tree$maps[[i]])) tree$mapped.edge[i,names(tree$maps[[i]])[j]]<-tree$mapped.edge[i,names(tree$maps[[i]])[j]]+tree$maps[[i]][j]
-	return(tree)
+	tree$mapped.edge<-matrix(data=0,length(tree$edge.length),length(allstates),
+		dimnames=list(apply(tree$edge,1,function(x) paste(x,collapse=",")),
+		state=allstates))
+	for(i in 1:length(tree$maps)) for(j in 1:length(tree$maps[[i]])) 
+		tree$mapped.edge[i,names(tree$maps[[i]])[j]]<-tree$mapped.edge[i,
+		names(tree$maps[[i]])[j]]+tree$maps[[i]][j]
+	class(tree)<-c("simmap",setdiff(class(tree),"simmap"))
+	tree
 }

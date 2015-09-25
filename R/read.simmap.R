@@ -1,5 +1,5 @@
 # function reads SIMMAP v1.0 & v1.5 style trees into file
-# written by Liam J. Revell 2011-2014
+# written by Liam J. Revell 2011-2015
 
 read.simmap<-function(file="",text,format="nexus",rev.order=TRUE,version=1.0){
 	if(file!=""){
@@ -19,7 +19,7 @@ read.simmap<-function(file="",text,format="nexus",rev.order=TRUE,version=1.0){
 		Ntree<-length(text)
 	}
 	tree<-lapply(text,text_to_tree,version,rev.order,trans)
-	class(tree)<-"multiPhylo"
+	class(tree)<-c("multiSimmap","multiPhylo")
 	if(length(tree)==1) tree<-tree[[1]]
 	return(tree)
 }
@@ -123,7 +123,7 @@ makeMappedEdge<-function(edge,maps){
 
 
 # function translates text-string to tree
-# written by Liam J. Revell 2011-2013
+# written by Liam J. Revell 2011-2015
 
 text_to_tree<-function(text,version,rev.order,trans){
 	text<-unlist(strsplit(text, NULL))
@@ -204,7 +204,7 @@ text_to_tree<-function(text,version,rev.order,trans){
 	if(!is.null(trans))tip.label<-trans[tip.label]
 	# assemble into modified "phylo" object
 	tree<-list(edge=edge,Nnode=as.integer(Nnode),tip.label=tip.label,edge.length=edge.length,maps=maps,mapped.edge=mapped.edge)
-	class(tree)<-"phylo"
+	class(tree)<-c("simmap","phylo")
 	attr(tree,"map.order")<-if(rev.order) "right-to-left" else "left-to-right"
 	return(tree)
 }

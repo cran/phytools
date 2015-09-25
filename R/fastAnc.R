@@ -2,6 +2,7 @@
 # written by Liam J. Revell 2012, 2013, 2015
 
 fastAnc<-function(tree,x,vars=FALSE,CI=FALSE){
+	if(!inherits(tree,"phylo")) stop("tree should be object of class \"phylo\".")
 	if(!is.binary.tree(tree)) btree<-multi2di(tree)
 	else btree<-tree
 	M<-btree$Nnode
@@ -28,12 +29,54 @@ fastAnc<-function(tree,x,vars=FALSE,CI=FALSE){
 			names(v)<-ancNames[,1]
 		}
 	}
-	result<-list(ace=anc)
-	if(vars) result$var<-v
+	obj<-list(ace=anc)
+	if(vars) obj$var<-v
 	if(CI){ 
-		result$CI95<-cbind(anc-1.96*sqrt(v),anc+1.96*sqrt(v))
-		rownames(result$CI95)<-names(anc)
+		obj$CI95<-cbind(anc-1.96*sqrt(v),anc+1.96*sqrt(v))
+		rownames(obj$CI95)<-names(anc)
 	}
-	if(length(result)==1) return(result$ace)
-	else return(result)
+	if(length(obj)==1) obj<-obj$ace
+	class(obj)<-"fastAnc"
+	obj
+}
+
+## print method for "fastAnc"
+## written by Liam J. Revell 2015
+print.fastAnc<-function(x,digits=6,printlen=NULL,...){
+	cat("Ancestral character estimates using fastAnc:\n")
+	if(!is.list(x)){ 
+		if(is.null(printlen)||printlen>=length(x)) print(round(unclass(x),digits)) 
+		else printDotDot(unclass(x),digits,printlen)
+	} else {
+		Nnode<-length(x$ace)
+		if(is.null(printlen)||printlen>=Nnode) print(round(x$ace,digits))
+		else printDotDot(x$ace,digits,printlen)
+		if(!is.null(x$var)){
+			cat("\nVariances on ancestral states:\n")
+			if(is.null(printlen)||printlen>=Nnode) print(round(x$var,digits))
+			else printDotDot(x$var,digits,printlen)
+		}
+		if(!is.null(x$CI95)){
+			cat("\nLower & upper 95% CIs:\n")
+			colnames(x$CI95)<-c("lower","upper")
+			if(is.null(printlen)||printlen>=Nnode) print(round(x$CI95,digits))
+			else printDotDot(x$CI95,digits,printlen)
+		}
+	}
+	cat("\n")
+}
+
+## internal function
+## written by Liam J. Revell 2015
+printDotDot<-function(x,digits,printlen){
+	if(is.vector(x)){
+		x<-as.data.frame(t(as.matrix(unclass(round(x[1:printlen],digits)))))
+		x<-cbind(x,"....")
+		rownames(x)<-""
+		colnames(x)[printlen+1]<-""
+		print(x)
+	} else if(is.matrix(x)){
+		x<-as.data.frame(rbind(round(x[1:printlen,],digits),c("....","....")))
+		print(x)
+	}
 }

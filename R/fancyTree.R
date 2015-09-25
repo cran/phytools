@@ -8,12 +8,12 @@
 # "contmap" maps reconstructed trait evolution for a continuous character on the tree
 # "phenogram95" plots a 95% CI phenogram
 # "scattergram" plots a phylogenetic scatterplot matrix
-# written by Liam J. Revell 2012, 2013, 2014
+# written by Liam J. Revell 2012, 2013, 2014, 2015
 
 fancyTree<-function(tree,type=c("extinction","traitgram3d","droptip","densitymap","contmap","phenogram95","scattergram"),...,control=list()){
 	type<-matchType(type,c("extinction","traitgram3d","droptip","densitymap","contmap","phenogram95","scattergram"))
-	if(class(tree)!="phylo"&&type%in%c("extinction","traitgram3d","droptip")) stop("tree should be an object of class 'phylo'")
-	else if(class(tree)!="multiPhylo"&&type=="densitymap") stop("for type='densitymap' tree should be an object of class 'multiPhylo'")
+	if(!inherits(tree,"phylo")&&type%in%c("extinction","traitgram3d","droptip")) stop("tree should be an object of class \"phylo\".")
+	else if(!inherits(tree,"multiPhylo")&&type=="densitymap") stop("for type='densitymap' tree should be an object of class \"multiPhylo\".")
 	if(type=="extinction") extinctionTree(tree)
 	else if(type=="traitgram3d") invisible(traitgram3d(tree,...,control=control))
 	else if(type=="droptip") return(droptipTree(tree,...))

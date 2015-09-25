@@ -1,7 +1,8 @@
 # function does phylogenetic canonical correlation analysis (Revell & Harrison 2008)
-# written by Liam Revell 2011, 2012, 2013
+# written by Liam Revell 2011, 2012, 2013, 2015
 
 phyl.cca<-function(tree,X,Y,lambda=1.0,fixed=TRUE){
+	if(!inherits(tree,"phylo")) stop("tree should be an object of class \"phylo\".")
 	# misc
 	n<-length(tree$tip)
 	mX<-ncol(X)

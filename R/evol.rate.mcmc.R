@@ -1,12 +1,12 @@
 # these functions uses a Bayesian MCMC approach to estimate heterogeneity in the evolutionary rate for a
 # continuous character (Revell, Mahler, Peres-Neto, & Redelings. In revision.)
-# code written by Liam J. Revell 2010, 2011, 2013
+# code written by Liam J. Revell 2010, 2011, 2013, 2015
 
 # function for Bayesian MCMC
 # written by Liam Revell 2010/2011
 evol.rate.mcmc<-function(tree,x,ngen=10000,control=list()){	
 	# some minor error checking
-	if(class(tree)!="phylo") stop("tree object must be of class 'phylo.'")
+	if(!inherits(tree,"phylo")) stop("tree should be object of class \"phylo\".")
 	if(is.matrix(x)) x<-x[,1]
 	if(is.null(names(x))){
 		if(length(x)==length(tree$tip)){
@@ -273,10 +273,10 @@ evol.rate.mcmc<-function(tree,x,ngen=10000,control=list()){
 }
 
 # this function finds the split with the minimum the distance to all the other splits in the sample
-# written by Liam J. Revell 2010
+# written by Liam J. Revell 2010, 2015
 minSplit<-function(tree,split.list,method="sum",printD=FALSE){
 	# some minor error checking
-	if(class(tree)!="phylo") stop("tree object must be of class 'phylo.'")
+	if(!inherits(tree,"phylo")) stop("tree should be object of class \"phylo\".")
 	# determine is split.list is a list from our mcmc run, or a matrix
 	if(class(split.list)=="list") split.list<-split.list$mcmc[,c("node","bp")]
 	else if(class(split.list)=="matrix") split.list<-split.list[,c("node","bp")]

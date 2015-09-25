@@ -1,12 +1,30 @@
-# function to split a tree into two plots
-# written by Liam J. Revell 2012
+## functions to split a tree into two (or more) plots by different methods
+## written by Liam J. Revell 2012, 2015
+
+plotTree.splits<-function(tree,splits=NULL,file=NULL,fn=NULL,...){
+	if(is.null(fn)) fn<-function(){}
+	ef<-0.037037037037 ## expansion factor
+	if(!is.null(file)) pdf(file,width=8.5,height=11)
+	if(is.null(splits)) splits<-(floor(0.5*Ntip(tree))+0.5)/Ntip(tree)
+	if(hasArg(y.lim)) y.lim<-list(...)$y.lim
+	else y.lim<-c(0,Ntip(tree))
+	S<-matrix(c(0,splits,splits,1+1/Ntip(tree)),length(splits)+1,2)
+	S<-cbind(S[,1]+ef*(S[,2]-S[,1]),S[,2]-ef*(S[,2]-S[,1]))
+	S<-S*diff(y.lim)+y.lim[1]
+	for(i in nrow(S):1){
+		if(is.null(file)&&i<nrow(S)) par(ask=TRUE)
+		plotTree(tree,ylim=S[i,],...)
+		fn()
+	}
+	if(!is.null(file)) oo<-dev.off()
+}
 
 splitplotTree<-function(tree,fsize=1.0,ftype="reg",lwd=2,split=NULL,new.window=FALSE){
 	# check font
 	ftype<-which(c("off","reg","b","i","bi")==ftype)-1
 	if(!ftype) fsize=0 	# check tree
 	# check tree
-	if(class(tree)!="phylo") stop("tree should be object of class 'phylo.'")
+	if(!inherits(tree,"phylo")) stop("tree should be an object of class \"phylo\".")
 	# rescale tree
 	tree$edge.length<-tree$edge.length/max(nodeHeights(tree))
 	# check split

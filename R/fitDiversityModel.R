@@ -3,7 +3,7 @@
 
 fitDiversityModel<-function(tree,x,d=NULL,showTree=TRUE,tol=1e-6){
 	# some minor error checking
-	if(class(tree)!="phylo") stop("tree object must be of class 'phylo.'")
+	if(!inherits(tree,"phylo")) stop("tree should be object of class \"phylo\".")
 	if(is.data.frame(x)) x<-as.matrix(x)
 	if(is.matrix(x)) x<-x[,1]
 	if(is.null(names(x))){

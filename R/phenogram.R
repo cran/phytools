@@ -48,7 +48,7 @@ phenogram<-function(tree,x,fsize=1.0,ftype="reg",colors=NULL,axes=list(),add=FAL
 	else quiet<-FALSE
 	## end optional arguments
 	# check tree
-	if(class(tree)!="phylo") stop("tree should be an object of class 'phylo'")
+	if(!inherits(tree,"phylo")) stop("tree should be an object of class \"phylo\".")
 	# check font
 	ftype<-which(c("off","reg","b","i","bi")==ftype)-1
 	if(!ftype&&!add) fsize=0 
@@ -98,9 +98,9 @@ phenogram<-function(tree,x,fsize=1.0,ftype="reg",colors=NULL,axes=list(),add=FAL
 			}
 		}
 	} else {
-		if(is.null(colors)){ 
-			colors<-palette()
-			names(colors)<-as.character(1:8)
+		if(is.null(colors)){
+			nn<-sort(unique(c(getStates(tree,"tips"),getStates(tree,"nodes"))))
+			colors<-setNames(palette()[1:length(nn)],nn)
 		}
 		for(i in 1:nrow(H)){
 			y<-H[i,1]

@@ -1,12 +1,12 @@
 # function for Matrix Representation Parsimony supertree estimation in R
 # uses pratchet() or optim.parsimony() from the "phangorn" package
-# written by Liam J. Revell 2011, 2013
+# written by Liam J. Revell 2011, 2013, 2015
 
 mrp.supertree<-function(trees,method=c("pratchet","optim.parsimony"),...){
 	# set method
 	method<-method[1]
 	# some minor error checking
-	if(!class(trees)=="multiPhylo") stop("trees must be object of class 'multiPhylo.'")
+	if(!inherits(trees,"multiPhylo")) stop("trees should be an object of class \"multiPhylo\".")
 	# compute matrix representation phylogenies
 	X<-list() # list of bipartitions
 	characters<-0 # number of characters

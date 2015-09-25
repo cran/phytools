@@ -3,10 +3,13 @@
 ## written by Liam J. Revell 2015
 
 collapseTree<-function(tree,...){
+	if(!inherits(tree,"phylo")) stop("tree should be an object of class \"phylo\".")
 	if(hasArg(nodes)) nodes<-list(...)$nodes
 	else nodes<-TRUE
 	if(hasArg(hold)) hold<-list(...)$hold
 	else hold<-TRUE
+	if(hasArg(drop.extinct)) drop.extinct<-list(...)$drop.extinct
+	else drop.extinct=FALSE
 	cat("Click on the nodes that you would like to collapse...\n")
 	## turn off locator bell (it's annoying)
 	options(locatorBell=FALSE)
@@ -16,6 +19,9 @@ collapseTree<-function(tree,...){
 		tree$node.label[which(tree$node.label)==""]<-
 			which(tree$node.label=="")+Ntip(tree)
 	}
+	## remove any spaces
+	tree$node.label<-sapply(tree$node.label,gsub,pattern=" ",replacement="_")
+	tree$tip.label<-sapply(tree$tip.label,gsub,pattern=" ",replacement="_")
 	## copy original tree:
 	otree<-tree<-reorder(tree)
 	## plot initial tree:
@@ -122,6 +128,15 @@ collapseTree<-function(tree,...){
 	}
 	## turn locator bell back on
 	options(locatorBell=TRUE)
+	if(drop.extinct){ 
+		if(!is.ultrametric(otree)) cat("Input tree was not ultrametric. Ignoring argument drop.extinct.\n")
+		else { 
+			th<-setNames(sapply(1:Ntip(tree),nodeheight,tree=tree),tree$tip.label)
+			tips<-names(th)[which(th<(mean(sapply(1:Ntip(otree),
+				nodeheight,tree=otree))-.Machine$double.eps^0.5))]
+			tree<-drop.tip(tree,tips)
+		}
+	}
 	tree
 }
 

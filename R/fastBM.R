@@ -3,11 +3,11 @@
 # mu=0 is standard BM; mu<0 downward trend; mu>0 upward trend.
 # Bounds can be simulated by bounds=c(>-Inf,<Inf).
 # OU can be simulated by alpha>0.
-# Written by Liam J. Revell 2011, 2013
+# Written by Liam J. Revell 2011, 2013, 2015
 
 fastBM<-function(tree,a=0,mu=0,sig2=1,bounds=c(-Inf,Inf),internal=FALSE,nsim=1,...){
 	# some minor error checking
-	if(class(tree)!="phylo") stop("tree object must be of class 'phylo.'")
+	if(!inherits(tree,"phylo")) stop("tree should be object of class \"phylo\".")
 	## check to see if alpha & theta
 	if(hasArg(alpha)) alpha<-list(...)$alpha
 	else alpha<-NULL

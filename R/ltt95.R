@@ -1,7 +1,8 @@
 # 95% CI on ltts
-# written by Liam J. Revell 2013, 2014
+# written by Liam J. Revell 2013, 2014, 2015
 
 ltt95<-function(trees,alpha=0.05,log=FALSE,method=c("lineages","times"),mode=c("median","mean"),...){
+	if(!inherits(trees,"multiPhylo")) stop("trees should be an object of class \"multiPhylo\".")
 	method<-method[1]
 	mode<-mode[1]
 	if(hasArg(res)) res<-list(...)$res

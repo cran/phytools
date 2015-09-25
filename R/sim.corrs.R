@@ -1,8 +1,8 @@
 # sim.corrs
-# written by Liam J. Revell 2012, 2013
+# written by Liam J. Revell 2012, 2013, 2015
 
 sim.corrs<-function(tree,vcv,anc=NULL,internal=FALSE){
-	if(class(tree)!="phylo") stop("tree should be an object of class 'phylo'")
+	if(!inherits(tree,"phylo")) stop("tree should be an object of class \"phylo\".")
 	if(!is.list(vcv)){
 		p<-nrow(vcv)
 		if(is.null(anc)) anc<-rep(0,p)

@@ -3,7 +3,7 @@
 
 ## convert "phylo" to "backbonePhylo"
 phylo.toBackbone<-function(x,trans,...){
-	if(class(x)!="phylo") stop("x not an object of class \"phylo\"")
+	if(!inherits(x,"phylo")) stop("tree should be an object of class \"phylo\".")
 	x$tip.clade<-list()
 	for(i in 1:length(x$tip.label)){
 		if(x$tip.label[i]%in%trans$tip.label){
@@ -26,7 +26,7 @@ phylo.toBackbone<-function(x,trans,...){
 
 ## convert to object of class "phylo"
 backbone.toPhylo<-function(x){
-	if(class(x)!="backbonePhylo") stop("x not an object of class \"backbonePhylo\"")
+	if(!inherits(x,"backbonePhylo")) stop("x not an object of class \"backbonePhylo\"")
 	x$tip.label<-sapply(x$tip.clade,function(x) x$label)
 	x$tip.clade<-NULL
 	class(x)<-"phylo"
@@ -61,7 +61,7 @@ scaleN<-function(x,k){
 
 ## plot backbone phylogeny with triangles
 plot.backbonePhylo<-function(x,...){
-	if(class(x)!="backbonePhylo") stop("x not an object of class \"backbonePhylo\"")
+	if(!inherits(x,"backbonePhylo")) stop("x not an object of class \"backbonePhylo\"")
 	if(hasArg(vscale)) vscale<-list(...)$vscale
 	else vscale<-1
 	x<-scaleN(x,vscale)

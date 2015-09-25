@@ -1,9 +1,9 @@
 ## functions computes Robinson-Foulds distance between all trees in a list of class "multiPhylo"
 ## works only for unrooted trees (if trees are rooted, them will be unrooted)
-## written by Liam J. Revell
+## written by Liam J. Revell 2013, 2015
 
 multiRF<-function(trees){
-	if(class(trees)!="multiPhylo") stop("trees should be an object of class \"multiPhylo\"")
+	if(!inherits(trees,"multiPhylo")) stop("trees should be an object of class \"multiPhylo\".")
 	N<-length(trees)
 	RF<-matrix(0,N,N)
 	if(any(sapply(unclass(trees),is.rooted))){

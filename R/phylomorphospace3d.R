@@ -3,7 +3,7 @@
 
 phylomorphospace3d<-function(tree,X,A=NULL,label=TRUE,control=list(),method=c("dynamic","static"),...){
 	method<-method[1]
-	if(class(tree)!="phylo") stop("tree object must be of class 'phylo.'")
+	if(!inherits(tree,"phylo")) stop("tree should be an object of class \"phylo\".")
 	# control list
 	con=list(spin=TRUE,axes=TRUE,box=TRUE,simple.axes=FALSE,lwd=1,ftype="reg",
 		col.edge=rep("black",nrow(tree$edge)))

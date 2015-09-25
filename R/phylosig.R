@@ -3,7 +3,7 @@
 
 phylosig<-function(tree,x,method="K",test=FALSE,nsim=1000,se=NULL,start=NULL,control=list()){
 	# some minor error checking
-	if(class(tree)!="phylo") stop("tree object must be of class 'phylo.'")
+	if(!inherits(tree,"phylo")) stop("tree should be an object of class \"phylo\".")
 	x<-matchDatatoTree(tree,x,"x")
 	tree<-matchTreetoData(tree,x,"x")
 	if(!is.null(se)){

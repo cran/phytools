@@ -8,10 +8,10 @@
 ltt<-function(tree,plot=TRUE,drop.extinct=FALSE,log.lineages=TRUE,gamma=TRUE,...){
 	# set tolerance
 	tol<-1e-6
-	# check 'phylo' object
-	if(class(tree)!="phylo"&&class(tree)!="multiPhylo") 
-		stop("tree object must be of class 'phylo.'")
-	if(class(tree)=="multiPhylo"){
+	# check "phylo" object
+	if(!inherits(tree,"phylo")&&!inherits(tree,"multiPhylo"))
+		stop("tree must be object of class \"phylo\" or \"multiPhylo\".")
+	if(inherits(tree,"multiPhylo")){
 		obj<-lapply(tree,ltt,plot=FALSE,drop.extinct=drop.extinct,
 			log.lineages=log.lineages,gamma=gamma)
 		class(obj)<-"multiLtt"
@@ -165,8 +165,12 @@ plot.ltt<-function(x,...){
 	} else add<-FALSE
 	if(!add) do.call(plot,args)
 	else do.call(lines,args)
-	if(show.tree) plotTree(x$tree,color=rgb(0,0,1,transparency),
-		ftype="off",add=TRUE, mar=par()$mar)
+	if(show.tree){
+		tips<-if(par()$ylog) setNames(exp(1:Ntip(x$tree)),x$tree$tip.label) 
+			else setNames(1:Ntip(x$tree),x$tree$tip.label)
+		plotTree(x$tree,color=rgb(0,0,1,transparency),
+			ftype="off",add=TRUE,mar=par()$mar,tips=tips)
+	}
 }
 
 ## S3 plot method for object of class "multiLtt"

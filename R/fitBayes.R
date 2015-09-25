@@ -1,8 +1,8 @@
 # this function calls various MCMC methods
-# written by Liam J. Revell 2011
+# written by Liam J. Revell 2011, 2015
 
 fitBayes<-function(tree,x,ngen=10000,model="BM",method="reduced",control=list()){
-
+	if(!inherits(tree,"phylo")) stop("tree should be object of class \"phylo\".")
 	if(model=="BM"){
 		if(method=="reduced")
 			X<-mcmcBM(tree,x,ngen,control)

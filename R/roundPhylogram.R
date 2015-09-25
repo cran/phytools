@@ -1,14 +1,14 @@
 ## function plots a round phylogram
-## written by Liam J. Revell 2014
+## written by Liam J. Revell 2014, 2015
 
 roundPhylogram<-function(tree,fsize=1.0,ftype="reg",lwd=2,mar=NULL,offset=NULL,direction="rightwards",type="phylogram",xlim=NULL,ylim=NULL){
-	if(class(tree)=="multiPhylo"){
+	if(inherits(tree,"multiPhylo")){
 		par(ask=TRUE)
 		tt<-lapply(tree,roundPhylogram,fsize=fsize,ftype=ftype,lwd=lwd,mar=mar,offset=offset, direction=direction,type=type,xlim=xlim,ylim=ylim)
 	} else {
 		if(type=="cladogram"||is.null(tree$edge.length)) tree<-compute.brlen(tree)
 		ftype<-which(c("off","reg","b","i","bi")==ftype)-1
-		if(class(tree)!="phylo") stop("tree should be object of class \"phylo\"")
+		if(!inherits(tree,"phylo")) stop("tree should be an object of class \"phylo\".")
 		# swap out "_" character for spaces (assumes _ is a place holder)
 		tree$tip.label<-gsub("_"," ",tree$tip.label)
 		if(is.null(mar)) mar=rep(0.1,4)

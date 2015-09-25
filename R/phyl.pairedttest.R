@@ -1,9 +1,9 @@
 # function for phylogenetic paired t-test (Lindenfors et al. 2010)
-# written by Liam Revell 2011, 2013
+# written by Liam Revell 2011, 2013, 2015
 
 phyl.pairedttest<-function(tree,x1,x2=NULL,se1=NULL,se2=NULL,lambda=1.0,h0=0.0,fixed=FALSE){
 	# check tree
-	if(class(tree)!="phylo") stop("tree object must be of class 'phylo.'")
+	if(!inherits(tree,"phylo")) stop("tree should be an object of class \"phylo\".")
 	# convert x1 to a matrix if necessary
 	if(is.data.frame(x1)) x1<-as.matrix(x1)
 	# if x2 is NULL

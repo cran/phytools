@@ -1,7 +1,8 @@
 ## convert stochastic map style tree to a tree with singleton nodes
-## written by Liam J. Revell 2013
+## written by Liam J. Revell 2013, 2015
 
 map.to.singleton<-function(tree){
+	if(!inherits(tree,"phylo")) stop("tree should be object of class \"phylo\".")
 	tree<-reorderSimmap(tree)
 	Nedge<-nrow(tree$edge)+sum(sapply(tree$maps,length)-1)
 	Ntips<-length(tree$tip.label)

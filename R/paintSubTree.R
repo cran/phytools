@@ -1,7 +1,8 @@
 ## paint branch(es)
-## written by Liam J. Revell 2014
+## written by Liam J. Revell 2014, 2015
 
 paintBranches<-function(tree,edge,state,anc.state="1"){
+	if(!inherits(tree,"phylo")) stop("tree should be an object of class \"phylo\".")
 	if(is.null(tree$maps)) maps<-lapply(tree$edge.length,function(x) setNames(x,anc.state))
 	else maps<-tree$maps
 	ii<-sapply(edge,function(x,y) which(y==x),y=tree$edge[,2])
@@ -15,13 +16,15 @@ paintBranches<-function(tree,edge,state,anc.state="1"){
 	## add attributes to the tree
 	tree$mapped.edge<-mapped.edge
 	tree$maps<-maps
+	class(tree)<-c("simmap",setdiff(class(tree),"simmap"))
 	tree
 }
 
 # function paints a subtree
-# written by Liam Revell 2012, 2013
+# written by Liam Revell 2012, 2013, 2015
 
 paintSubTree<-function(tree,node,state,anc.state="1",stem=FALSE){
+	if(!inherits(tree,"phylo")) stop("tree should be an object of class \"phylo\".")
 	if(stem==0&&node<=length(tree$tip)) stop("stem must be TRUE for node<=N")
 	if(is.null(tree$edge.length)) tree<-compute.brlen(tree)
 	if(is.null(tree$maps)){
@@ -71,6 +74,7 @@ paintSubTree<-function(tree,node,state,anc.state="1",stem=FALSE){
 	for(i in 1:length(maps)) for(j in 1:length(maps[[i]])) mapped.edge[i,names(maps[[i]])[j]]<-mapped.edge[i,names(maps[[i]])[j]]+maps[[i]][j]
 	tree$mapped.edge<-mapped.edge
 	tree$maps<-maps
+	class(tree)<-c("simmap",setdiff(class(tree),"simmap"))
 	return(tree)
 }
 

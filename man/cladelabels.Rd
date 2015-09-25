@@ -2,7 +2,8 @@
 \alias{cladelabels}
 \title{Add labels to subtrees of a plotted phylogeny}
 \usage{
-cladelabels(tree=NULL, text, node, offset=NULL, wing.length=NULL, cex=1)
+cladelabels(tree=NULL, text, node, offset=NULL, wing.length=NULL, cex=1,
+	orientation="vertical")
 }
 \arguments{
 	\item{tree}{an object of class \code{"phylo"}. If not supplied, the function will obtain the last plotted phylogeny from the environmental variable \code{last_plot.phylo}.}
@@ -11,6 +12,7 @@ cladelabels(tree=NULL, text, node, offset=NULL, wing.length=NULL, cex=1)
 	\item{offset}{offset (as a multiplier of character width) for the label. Defaults to \code{offset=1} if \code{tree} is supplied or \code{offset=8} otherwise.}
 	\item{wing.length}{length of the wings to add to the top & bottom of the label bar (in character widths).}
 	\item{cex}{character expansion factor.}
+	\item{orientation}{orientation of the text. Can be \code{orientation = "vertical"} (the default) or \code{"horizontal"}.}
 }
 \description{
 	This function adds clade labels to a plotted tree.

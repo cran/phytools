@@ -2,6 +2,7 @@
 # written by Liam J. Revell 2013
 
 phylo.to.map<-function(tree,coords,rotate=TRUE,...){
+	if(!inherits(tree,"phylo")) stop("tree should be an object of class \"phylo\".")
 	# optional arguments
 	if(hasArg(database)) database<-list(...)$database
 	else database<-"world"
@@ -106,10 +107,12 @@ plot.phylo.to.map<-function(x,type=c("phylogram","direct"),...){
 	}
 }
 
-# rotates all nodes to try and match tip ordering to longitude
-# written by Liam J. Revell 2013
 
-minRotate<-function(tree,x){
+## rotates all nodes to try and match tip an ordering 
+## written by Liam J. Revell 2013, 2015
+minRotate<-function(tree,x,...){
+	if(hasArg(print)) print<-list(...)$print
+	else print<-TRUE
 	tree<-reorder(tree)
 	nn<-1:tree$Nnode+length(tree$tip.label)
 	x<-x[tree$tip.label]
@@ -118,7 +121,8 @@ minRotate<-function(tree,x){
 		oo<-sum(abs(order(x[tree$tip.label])-1:length(tree$tip.label)))
 		pp<-sum(abs(order(x[tt$tip.label])-1:length(tt$tip.label)))
 		if(oo>pp) tree<-tt
-		message(paste("objective:",min(oo,pp)))
+		if(print) message(paste("objective:",min(oo,pp)))
 	}
+	attr(tree,"minRotate")<-min(oo,pp)
 	return(tree)
 }

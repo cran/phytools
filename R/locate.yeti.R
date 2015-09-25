@@ -2,6 +2,7 @@
 ## written by Liam J. Revell 2014
 
 locate.yeti<-function(tree,X,...){
+	if(!inherits(tree,"phylo")) stop("tree should be object of class \"phylo\".")
 	if(hasArg(method)) method<-list(...)$method
 	else method<-"ML"
 	if(hasArg(search)) search<-list(...)$search

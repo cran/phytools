@@ -7,6 +7,8 @@
 
 threshBayes<-function(tree,X,types=NULL,ngen=1000,control=list()){
 
+	if(!inherits(tree,"phylo")) stop("tree should be an object of class \"phylo\".")
+
 	# likelihood function for the liabilities
 	lik<-function(a,V,invV,detV,D,Y){
 		y<-as.vector(Y)

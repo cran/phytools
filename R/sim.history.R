@@ -2,6 +2,7 @@
 # written by Liam J. Revell 2011, 2013, 2014
 
 sim.history<-function(tree,Q,anc=NULL,nsim=1,...){
+	if(!inherits(tree,"phylo")) stop("tree should be an object of class \"phylo\".")
 	if(hasArg(message)) message<-list(...)$message
 	else message<-TRUE
 	# reorder to cladewise
@@ -22,7 +23,7 @@ sim.history<-function(tree,Q,anc=NULL,nsim=1,...){
 	if(is.null(dimnames(Q))) dimnames(Q)<-list(1:nrow(Q),1:ncol(Q))
 	# create "multiPhylo" object
 	mtrees<-vector(mode="list",length=nsim)
-	class(mtrees)<-"multiPhylo"
+	class(mtrees)<-c("multiSimmap","multiPhylo")
 	# now loop
 	for(i in 1:nsim){
 		# set root state		
@@ -32,7 +33,8 @@ sim.history<-function(tree,Q,anc=NULL,nsim=1,...){
 			anc<-rstate(temp)
 		}
 		# create the map tree object
-		mtree<-tree; mtree$maps<-list()
+		mtree<-tree
+		mtree$maps<-list()
 		# now we want to simulate the node states on the tree
 		node.states<-matrix(NA,nrow(tree$edge),ncol(tree$edge))
 		node.states[which(tree$edge[,1]==(length(tree$tip)+1)),1]<-anc
@@ -45,10 +47,14 @@ sim.history<-function(tree,Q,anc=NULL,nsim=1,...){
 				while(time<tree$edge.length[j]){
 					dt[1]<-time
 					dt[2]<-dt[1]+rexp(n=1,rate=-Q[state,state])
-					if(dt[2]<tree$edge.length[j]) new.state<-rstate(Q[,state][-match(state,rownames(Q))]/sum(Q[,state][-match(state,rownames(Q))]))
+					if(dt[2]<tree$edge.length[j]) 
+						new.state<-rstate(Q[,state][-match(state,rownames(Q))]/sum(Q[,state][-match(state,rownames(Q))]))
 					dt[2]<-min(dt[2],tree$edge.length[j])
-					map[k]<-dt[2]-dt[1]; names(map)[k]<-state; k<-k+1
-					state<-new.state; time<-dt[2]
+					map[k]<-dt[2]-dt[1]
+					names(map)[k]<-state
+					k<-k+1
+					state<-new.state
+					time<-dt[2]
 				}
 				names(map)[length(map)]->node.states[j,2]->node.states[which(tree$edge[,1]==tree$edge[j,2]),1]
 			}
@@ -66,7 +72,7 @@ sim.history<-function(tree,Q,anc=NULL,nsim=1,...){
 		allstates<-unique(allstates)
 		mtree$mapped.edge<-matrix(data=0,length(mtree$edge.length),length(allstates),dimnames=list(apply(mtree$edge,1,function(x) paste(x,collapse=",")),state=allstates))
 		for(j in 1:length(mtree$maps)) for(k in 1:length(mtree$maps[[j]])) mtree$mapped.edge[j,names(mtree$maps[[j]])[k]]<-mtree$mapped.edge[j,names(mtree$maps[[j]])[k]]+mtree$maps[[j]][k]
-		# plotSimmap(mtree)
+		class(mtree)<-c("simmap",setdiff(class(mtree),"simmap"))
 		mtrees[[i]]<-mtree	
 	}
 	if(nsim==1) mtrees<-mtrees[[1]]

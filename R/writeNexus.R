@@ -1,8 +1,8 @@
 # function
-# written by Liam J. Revell 2012
+# written by Liam J. Revell 2012, 2015
 
 writeNexus<-function(tree,file=""){
-	if(class(tree)=="multiPhylo") N<-length(tree)
+	if(inherits(tree,"multiPhylo")) N<-length(tree)
 	else { 
 		N<-1
 		tree<-list(tree)

@@ -8,10 +8,10 @@ writeAncestors<-function(tree,Anc=NULL,file="",digits=6,format=c("phylip","nexus
 	if(is.null(Anc)){
 		if(hasArg(x)){ 
 			x<-list(...)$x
-			if(class(tree)=="multiPhylo"){
+			if(inherits(tree,"multiPhylo")){
 				if(is.list(x)) Anc<-mapply(fastAnc,tree,x,MoreArgs=list(CI=CI),SIMPLIFY=FALSE)
 				else Anc<-lapply(tree,fastAnc,x=x,CI=CI)
-			} else if(class(tree)=="phylo"){
+			} else if(inherits(tree,"phylo")){
 				if(is.list(x)){ 
 					Anc<-lapply(x,fastAnc,tree=tree,CI=CI)
 					tree<-repPhylo(tree,length(x))
@@ -36,7 +36,7 @@ writeAncestors<-function(tree,Anc=NULL,file="",digits=6,format=c("phylip","nexus
 # internal function to create a Nexus style output file
 # written by Liam J. Revell 2013
 writeNex<-function(tree,Anc,file="",digits){
-	if(class(tree)=="multiPhylo") N<-length(tree)
+	if(inherits(tree,"multiPhylo")) N<-length(tree)
 	else { 
 		N<-1
 		tree<-list(tree)

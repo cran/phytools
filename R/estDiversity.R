@@ -2,6 +2,7 @@
 # written by Liam J. Revell 2011-2013
 
 estDiversity<-function(tree,x,method=c("asr","simulation"),model="ER",...){
+	if(!inherits(tree,"phylo")) stop("tree should be object of class \"phylo\".")
 	method<-matchType(method[1],c("asr","simulation"))
 	if(hasArg(nsim)) nsim<-list(...)$nsim else nsim=100
 	if(class(tree)!="phylo") stop("tree object must be of class 'phylo.'")

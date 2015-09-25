@@ -1,7 +1,8 @@
 # this function estimates ancestral traits with a trend
-# written by Liam J. Revell 2011, 2013
+# written by Liam J. Revell 2011, 2013, 2015
 
 anc.trend<-function(tree,x,maxit=2000){
+	if(!inherits(tree,"phylo")) stop("tree should be an object of class \"phylo\".")
 
 	## check if tree is ultretric
 	if(is.ultrametric(tree)) cat("Warning: the trend model is generally non-identifiable for ultrametric trees.\n")

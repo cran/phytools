@@ -2,6 +2,7 @@
 # written by Liam J. Revell 2011, 2012, 2013
 
 evolvcv.lite<-function(tree,X,maxit=2000,tol=1e-10){
+	if(!inherits(tree,"phylo")) stop("tree should be object of class \"phylo\".")
 
 	# model 1: common variances & correlation
 	lik1<-function(theta,C,D,y){

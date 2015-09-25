@@ -1,7 +1,8 @@
 # function drops tip or tips from a SIMMAP style tree created by read.simmap, make.simmap, or sim.history
-# written by Liam Revell 2012
+# written by Liam Revell 2012, 2015
 
 drop.tip.simmap<-function(tree,tip){
+	if(!inherits(tree,"phylo")) stop("tree should be object of class \"phylo\".")
 	tip<-which(tree$tip.label%in%tip)
 	edges<-match(tip,tree$edge[,2])
 	z<-setdiff(1:nrow(tree$edge),edges)
@@ -61,5 +62,6 @@ drop.tip.simmap<-function(tree,tip){
 	allstates<-unique(allstates)
 	tree$mapped.edge<-matrix(data=0,length(tree$edge.length),length(allstates),dimnames=list(edge=apply(tree$edge,1,function(x) paste(x,collapse=",")),state=allstates))
 	for(i in 1:length(tree$maps)) for(j in 1:length(tree$maps[[i]])) tree$mapped.edge[i,names(tree$maps[[i]])[j]]<-tree$mapped.edge[i,names(tree$maps[[i]])[j]]+tree$maps[[i]][j]
+	class(tree)<-c("simmap",setdiff(class(tree),"simmap"))
 	return(tree)
 }

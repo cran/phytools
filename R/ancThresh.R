@@ -2,6 +2,8 @@
 # written by Liam J. Revell 2012, 2013, 2014
 
 ancThresh<-function(tree,x,ngen=1000,sequence=NULL,method="mcmc",model=c("BM","OU","lambda"),control=list(),...){
+
+	if(!inherits(tree,"phylo")) stop("tree should be an object of class \"phylo\".")
 	
 	# check method
 	if(method!="mcmc") stop(paste(c("do not recognize method =",method,",quitting")))

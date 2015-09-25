@@ -1,5 +1,5 @@
 # makes xml data and tree file for SIMMAP
-# written by Liam J. Revell 2012
+# written by Liam J. Revell 2012, 2015
  
 export.as.xml<-function(file,trees,X){
 	if(is.vector(X)) X<-data.frame(X)
@@ -7,7 +7,7 @@ export.as.xml<-function(file,trees,X){
 		X<-as.character(X)
 		datatype="nucleotide"
 	} else datatype="standard"
-	if(class(trees)=="phylo"){ 
+	if(inherits(trees,"phylo")){ 
 		trees<-list(trees)
 		class(trees)<-"multiPhylo"
 	}

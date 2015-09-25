@@ -1,10 +1,10 @@
 # function to fit phylogenetic regression and compute residuals
 # multiple morphological traits in Y, size in x
-# written by Liam Revell 2011, ref. Revell (2009; Evolution)
+# written by Liam Revell 2011, 2015 ref. Revell (2009; Evolution)
 
 phyl.resid<-function(tree,x,Y,method="BM"){
 	# check tree
-	if(class(tree)!="phylo") stop("tree must be an object of class 'phylo.'")
+	if(!inherits(tree,"phylo")) stop("tree should be an object of class \"phylo\".")
 	# check and sort data
 	# X
 	X<-cbind(1,x)

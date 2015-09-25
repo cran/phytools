@@ -2,6 +2,7 @@
 # written by Liam J. Revell 2013
 
 ratebystate<-function(tree,x,y,nsim=100,corr=c("pearson","spearman"),...){
+	if(!inherits(tree,"phylo")) stop("tree should be an object of class \"phylo\".")
 	corr<-corr[1]
 	if(hasArg(sim.method)) sim.method<-list(...)$sim.method
 	else sim.method<-"sim.corrs"

@@ -2,11 +2,13 @@
 \alias{reorderSimmap}
 \title{Reorder edges of a simmap tree}
 \usage{
-reorderSimmap(tree, order="cladewise")
+reorderSimmap(tree, order="cladewise", index.only=FALSE, ...)
 }
 \arguments{
 	\item{tree}{a modified object of class \code{"phylo"}.}
 	\item{order}{either \code{"cladewise"} or \code{"pruningwise"} (see \code{\link{reorder.phylo}}).}
+	\item{index.only}{logical value indicating whether only an index should be returned.}
+	\item{...}{other arguments.}
 }
 \description{
 	Function returns a reordered modified \code{"phylo"} object by using \code{reorder.phylo} but then sorting the additional elements \code{$mapped.edge} and \code{$maps} to have the same order as \code{$edge}.

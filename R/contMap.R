@@ -3,6 +3,7 @@
 contMap<-function(tree,x,res=100,fsize=NULL,ftype=NULL,lwd=4,legend=NULL,
 	lims=NULL,outline=TRUE,sig=3,type="phylogram",direction="rightwards",
 	plot=TRUE,...){
+	if(!inherits(tree,"phylo")) stop("tree should be an object of class \"phylo\".")
 	if(hasArg(mar)) mar<-list(...)$mar
 	else mar<-rep(0.3,4)
 	if(hasArg(offset)) offset<-list(...)$offset
@@ -42,6 +43,7 @@ contMap<-function(tree,x,res=100,fsize=NULL,ftype=NULL,lwd=4,legend=NULL,
 	}
 	tree$mapped.edge<-makeMappedEdge(tree$edge,tree$maps)
 	tree$mapped.edge<-tree$mapped.edge[,order(as.numeric(colnames(tree$mapped.edge)))]
+	class(tree)<-c("simmap",setdiff(class(tree),"simmap"))
 	xx<-list(tree=tree,cols=cols,lims=lims)
 	class(xx)<-"contMap"
 	if(plot) plot.contMap(xx,fsize=fsize,ftype=ftype,lwd=lwd,legend=legend,outline=outline,
@@ -63,7 +65,7 @@ getState<-function(x,trans){
 # function
 # written by Liam J. Revell 2012, 2013, 2014, 2015
 plot.contMap<-function(x,...){
-	if(class(x)=="contMap"){
+	if(inherits(x,"contMap")){
 		lims<-x$lims
 		x<-list(tree=x$tree,cols=x$cols)
 		class(x)<-"densityMap"
@@ -118,7 +120,7 @@ print.contMap<-function(x,digits=6,...){
 ## drop tips from an object of class 'contMap'
 ## written by Liam J. Revell 2014
 drop.tip.contMap<-function(x,tip){
-	if(class(x)!="contMap") cat("x should be an object of class \"contMap\"\n")
+	if(!inherits(x,"contMap")) cat("x should be an object of class \"contMap\"\n")
 	else {
 		x$tree<-drop.tip.simmap(x$tree,tip)
 		return(x)

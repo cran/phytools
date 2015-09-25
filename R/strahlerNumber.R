@@ -1,7 +1,8 @@
 # function computes the Strahler number at each node
-# written by Liam J. Revell 2013
+# written by Liam J. Revell 2013, 2015
 
 strahlerNumber<-function(tree,plot=TRUE){
+	if(!inherits(tree,"phylo")) stop("tree should be an object of class \"phylo\".")
 	pw<-reorder(tree,"pruningwise")
 	oo<-sapply(tree$edge[,2],function(x,y) which(x==y),y=pw$edge[,2])
 	SS<-matrix(0,nrow(pw$edge),2)
@@ -24,9 +25,10 @@ strahlerNumber<-function(tree,plot=TRUE){
 }
 
 # extracts all the most inclusive clades with Strahler number i from tree
-# written by Liam J. Revell 2013
+# written by Liam J. Revell 2013, 2015
 
 extract.strahlerNumber<-function(tree,i,plot=TRUE){
+	if(!inherits(tree,"phylo")) stop("tree should be an object of class \"phylo\".")
 	sn<-strahlerNumber(tree)
 	sn<-sn[sn==i]
 	# get descendant tip numbers for all clades

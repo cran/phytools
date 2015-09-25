@@ -1,7 +1,8 @@
 # function adds a set of tips to random positions in the tree
-# written by Liam J. Revell 2013
+# written by Liam J. Revell 2013, 2015
 
 add.random<-function(tree,n=NULL,tips=NULL,edge.length=NULL,order=c("random","input")){
+	if(!inherits(tree,"phylo")) stop("tree should be an object of class \"phylo\".")
 	# internal function
 	randomPosn<-function(tree){
 		# sum edges cumulatively

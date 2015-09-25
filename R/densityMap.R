@@ -12,7 +12,8 @@ densityMap<-function(trees,res=100,fsize=NULL,ftype=NULL,lwd=3,check=FALSE,legen
 	if(hasArg(hold)) hold<-list(...)$hold
 	else hold<-TRUE
 	tol<-1e-10
-	if(class(trees)!="multiPhylo") stop("trees not 'multiPhylo' object; just use plotSimmap")
+	if(!inherits(trees,"multiPhylo")&&inherits(trees,"phylo")) stop("trees not \"multiPhylo\" object; just use plotSimmap.")
+	if(!inherits(trees,"multiPhylo")) stop("trees should be an object of class \"multiPhylo\".")
 	h<-sapply(unclass(trees),function(x) max(nodeHeights(x)))
 	steps<-0:res/res*max(h)
 	trees<-rescaleSimmap(trees,totalDepth=max(h))
@@ -67,6 +68,7 @@ densityMap<-function(trees,res=100,fsize=NULL,ftype=NULL,lwd=3,check=FALSE,legen
 	cols<-rainbow(1001,start=0.7,end=0); names(cols)<-0:1000
 	tree$mapped.edge<-makeMappedEdge(tree$edge,tree$maps)
 	tree$mapped.edge<-tree$mapped.edge[,order(as.numeric(colnames(tree$mapped.edge)))]
+	class(tree)<-c("simmap",setdiff(class(tree),"simmap"))
 	x<-list(tree=tree,cols=cols,states=ss); class(x)<-"densityMap"
 	if(plot) plot.densityMap(x,fsize=fsize,ftype=ftype,lwd=lwd,legend=legend,outline=outline,
 		type=type,mar=mar,direction=direction,offset=offset,hold=hold)
@@ -187,9 +189,13 @@ setMap<-function(x,...){
 }
 
 ## drop tips from an object of class 'densityMap'
-## written by Liam J. Revell 2014
+## written by Liam J. Revell 2014, 2015
 
 drop.tip.densityMap<-function(x,tip){
-	if(class(x)!="densityMap") cat("x should be an object of class \"densityMap\"\n")
-	else return(drop.tip.contMap(x,tip))
+	if(inherits(x,"densityMap")){ 
+		class(x)<-"contMap"
+		x<-drop.tip.contMap(x,tip)
+		class(x)<-"densityMap"
+		return(x)
+	} else cat("x should be an object of class \"densityMap\"\n")
 }

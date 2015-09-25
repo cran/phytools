@@ -1,7 +1,8 @@
 # this function computes a phylogenetic reduced major axis (RMA) regression
-# written by Liam Revell 2010,2011,2012
+# written by Liam Revell 2010, 2011, 2012, 2015
 
 phyl.RMA<-function(x,y,tree,method="BM",lambda=NULL,fixed=FALSE,h0=1.0){
+	if(!inherits(tree,"phylo")) stop("tree should be an object of class \"phylo\".")
 	x<-x[tree$tip.label]; y<-y[tree$tip.label]
 	# bind the x & y into columns
 	X<-cbind(x,y)

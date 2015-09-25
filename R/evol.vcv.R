@@ -1,7 +1,8 @@
 # this function fits the model of Revell & Collar (2009; Evolution)
-# written by Liam J. Revell 2010, 2011, 2013, 2014
+# written by Liam J. Revell 2010, 2011, 2013, 2014, 2015
 
 evol.vcv<-function(tree,X,maxit=2000,vars=FALSE,...){
+	if(!inherits(tree,"phylo")) stop("tree should be object of class \"phylo\".")
 	n<-nrow(X) # number of species
 	m<-ncol(X) # number of traits
 	if(hasArg(se)){ 
@@ -19,9 +20,9 @@ evol.vcv<-function(tree,X,maxit=2000,vars=FALSE,...){
 	p<-ncol(tree$mapped.edge) # number of states
 	D<-matrix(0,n*m,m)
 	for(i in 1:(n*m)) for(j in 1:m) if((j-1)*n<i&&i<=j*n) D[i,j]=1.0
-	y<-as.matrix(as.vector(X))
 	C<-vcv(tree)
 	X<-X[rownames(C),]
+	y<-as.matrix(as.vector(X))
 	a<-colSums(solve(C))%*%X/sum(solve(C)) # ancestral states
 	R<-t(X-rep(1,nrow(X))%*%a)%*%solve(C)%*%(X-rep(1,nrow(X))%*%a)/n
 	# likelihood for a single matrix

@@ -1,8 +1,8 @@
 # function creates a stochastic character mapped tree as a modified "phylo" object
-# written by Liam Revell 2013
+# written by Liam Revell 2013, 2014, 2015
 
 make.simmap<-function(tree,x,model="SYM",nsim=1,...){
-	if(class(tree)=="multiPhylo"){
+	if(inherits(tree,"multiPhylo")){
 		ff<-function(yy,x,model,nsim,...){
 			zz<-make.simmap(yy,x,model,nsim,...)
 			if(nsim>1) class(zz)<-NULL
@@ -10,7 +10,7 @@ make.simmap<-function(tree,x,model="SYM",nsim=1,...){
 		}	
 		if(nsim>1) mtrees<-unlist(sapply(tree,ff,x,model,nsim,...,simplify=FALSE),recursive=FALSE)
 		else mtrees<-sapply(tree,ff,x,model,nsim,...,simplify=FALSE)
-		class(mtrees)<-"multiPhylo"
+		class(mtrees)<-c("multiSimmap","multiPhylo")
 	} else {
 		## get optional arguments
 		if(hasArg(pi)) pi<-list(...)$pi
@@ -34,7 +34,7 @@ make.simmap<-function(tree,x,model="SYM",nsim=1,...){
 		}
 		## done optional arguments
 		# check
-		if(class(tree)!="phylo") stop("'tree' should be an object of class 'phylo'")
+		if(!inherits(tree,"phylo")) stop("tree should be object of class \"phylo\".")
 		# if vector convert to binary matrix
 		if(!is.matrix(x)) xx<-to.matrix(x,sort(unique(x)))
 		else xx<-x
@@ -49,7 +49,7 @@ make.simmap<-function(tree,x,model="SYM",nsim=1,...){
 		root<-N+1
 		# get conditional likelihoods & model
 		if(is.character(Q)&&Q=="empirical"){
-			XX<-getPars(bt,xx,model,Q=NULL,tree,tol,m)
+			XX<-getPars(bt,xx,model,Q=NULL,tree,tol,m,pi=pi)
 			L<-XX$L
 			Q<-XX$Q
 			logL<-XX$loglik
@@ -60,7 +60,7 @@ make.simmap<-function(tree,x,model="SYM",nsim=1,...){
 			mtrees<-replicate(nsim,smap(tree,x,N,m,root,L,Q,pi,logL),simplify=FALSE)
 		} else if(is.character(Q)&&Q=="mcmc"){
 			if(prior$use.empirical){
-				qq<-apeAce(bt,xx,model)$rates
+				qq<-fitMk(bt,xx,model)$rates
 				prior$alpha<-qq*prior$beta
 			}
 			XX<-mcmcQ(bt,xx,model,tree,tol,m,burnin,samplefreq,nsim,vQ,prior)
@@ -79,7 +79,7 @@ make.simmap<-function(tree,x,model="SYM",nsim=1,...){
 			if(pm) printmessage(Reduce('+',Q)/length(Q),pi,method="mcmc")
 			mtrees<-mapply(smap,L=L,Q=Q,pi=pi,logL=logL,MoreArgs=list(tree=tree,x=x,N=N,m=m,root=root),SIMPLIFY=FALSE)
 		} else if(is.matrix(Q)){
-			XX<-getPars(bt,xx,model,Q=Q,tree,tol,m)
+			XX<-getPars(bt,xx,model,Q=Q,tree,tol,m,pi=pi)
 			L<-XX$L
 			logL<-XX$loglik
 			if(pi[1]=="equal") pi<-setNames(rep(1/m,m),colnames(L)) # set equal
@@ -89,10 +89,10 @@ make.simmap<-function(tree,x,model="SYM",nsim=1,...){
 			mtrees<-replicate(nsim,smap(tree,x,N,m,root,L,Q,pi,logL),simplify=FALSE)
 		}
 		if(length(mtrees)==1) mtrees<-mtrees[[1]]
-		else class(mtrees)<-"multiPhylo"
+		else class(mtrees)<-c("multiSimmap","multiPhylo")
 	}	
 	(if(hasArg(message)) list(...)$message else TRUE)
-	if((if(hasArg(message)) list(...)$message else TRUE)&&class(tree)=="phylo") message("Done.")
+	if((if(hasArg(message)) list(...)$message else TRUE)&&inherits(tree,"phylo")) message("Done.")
 	return(mtrees)
 }
 
@@ -149,13 +149,13 @@ mcmcQ<-function(bt,xx,model,tree,tol,m,burnin,samplefreq,nsim,vQ,prior){
 	p<-rgamma(np,prior$alpha,prior$beta)
 	Q<-matrix(p[rate],m,m)
 	diag(Q)<--rowSums(Q,na.rm=TRUE)
-	yy<-getPars(bt,xx,model,Q,tree,tol,m)
+	yy<-getPars(bt,xx,model,Q,tree,tol,m,pi=pi)
 	cat("Running MCMC burn-in. Please wait....\n")
 	for(i in 1:burnin){
 		pp<-update(p)
 		Qp<-matrix(pp[rate],m,m)
 		diag(Qp)<--rowSums(Qp,na.rm=TRUE)
-		zz<-getPars(bt,xx,model,Qp,tree,tol,m,FALSE)
+		zz<-getPars(bt,xx,model,Qp,tree,tol,m,FALSE,pi=pi)
 		p.odds<-exp(zz$loglik+sum(dgamma(pp,prior$alpha,prior$beta,log=TRUE))-
 			yy$loglik-sum(dgamma(p,prior$alpha,prior$beta,log=TRUE)))
 		if(p.odds>=runif(n=1)){
@@ -170,7 +170,7 @@ mcmcQ<-function(bt,xx,model,tree,tol,m,burnin,samplefreq,nsim,vQ,prior){
 		pp<-update(p)
 		Qp<-matrix(pp[rate],m,m)
 		diag(Qp)<--rowSums(Qp,na.rm=TRUE)
-		zz<-getPars(bt,xx,model,Qp,tree,tol,m,FALSE)
+		zz<-getPars(bt,xx,model,Qp,tree,tol,m,FALSE,pi=pi)
 		p.odds<-exp(zz$loglik+sum(dgamma(pp,prior$alpha,prior$beta,log=TRUE))-
 			yy$loglik-sum(dgamma(p,prior$alpha,prior$beta,log=TRUE)))
 		if(p.odds>=runif(n=1)){
@@ -180,7 +180,7 @@ mcmcQ<-function(bt,xx,model,tree,tol,m,burnin,samplefreq,nsim,vQ,prior){
 		if(i%%samplefreq==0){
 			Qi<-matrix(p[rate],m,m)
 			diag(Qi)<--rowSums(Qi,na.rm=TRUE)
-			XX[[i/samplefreq]]<-getPars(bt,xx,model,Qi,tree,tol,m,TRUE)
+			XX[[i/samplefreq]]<-getPars(bt,xx,model,Qi,tree,tol,m,TRUE,pi=pi)
 		}
 	}
 	return(XX)
@@ -188,8 +188,8 @@ mcmcQ<-function(bt,xx,model,tree,tol,m,burnin,samplefreq,nsim,vQ,prior){
 
 # get pars
 # written by Liam J. Revell 2013
-getPars<-function(bt,xx,model,Q,tree,tol,m,liks=TRUE){
-	XX<-apeAce(bt,xx,model,fixedQ=Q,output.liks=liks)
+getPars<-function(bt,xx,model,Q,tree,tol,m,liks=TRUE,pi){
+	XX<-fitMk(bt,xx,model,fixedQ=Q,output.liks=liks,pi=pi)
 	N<-length(bt$tip.label)
 	II<-XX$index.matrix+1
 	lvls<-XX$states
@@ -248,6 +248,7 @@ smap<-function(tree,x,N,m,root,L,Q,pi,logL){
 	}
 	mtree$Q<-Q
 	mtree$logL<-logL
+	if(!inherits(mtree,"simmap")) class(mtree)<-c("simmap",setdiff(class(mtree),"simmap"))
 	return(mtree)
 }
 
@@ -269,13 +270,6 @@ sch<-function(start,t,Q){
 	return(dt)
 }
 
-# function returns random state with probability given by y
-# written by Liam J. Revell 2013
-rstate<-function(y){
-	if(length(y)==1) return(names(y)[1])
-	else return(names(which(rmultinom(1,1,y/sum(y))[,1]==1)))
-}
-
 # function uses numerical optimization to solve for the stationary distribution
 # written by Liam J. Revell 2013
 statdist<-function(Q){
@@ -293,107 +287,46 @@ statdist<-function(Q){
 	}
 }
 
-# function for conditional likelihoods at nodes, from ace(...,type="discrete")
-# modified (only very slightly) from E. Paradis et al. 2013
-apeAce<-function(tree,x,model,fixedQ=NULL,...){
-	if(hasArg(output.liks)) output.liks<-list(...)$output.liks
-	else output.liks<-TRUE
-	ip<-0.1
-	nb.tip<-length(tree$tip.label)
-	nb.node<-tree$Nnode
-	if(is.matrix(x)){ 
-		x<-x[tree$tip.label,]
-		nl<-ncol(x)
-		lvls<-colnames(x)
-	} else {
-		x<-x[tree$tip.label]
-  		if(!is.factor(x)) x<-factor(x)
-		nl<-nlevels(x)
-		lvls<-levels(x)
-		x<-as.integer(x)
-	}
-	if(is.null(fixedQ)){
-		if(is.character(model)){
-			rate<-matrix(NA,nl,nl)
-			if(model=="ER") np<-rate[]<-1
-			if(model=="ARD"){
-				np<-nl*(nl-1)
-				rate[col(rate)!=row(rate)]<-1:np
-			}
-			if (model=="SYM") {
-				np<-nl*(nl-1)/2
-				sel<-col(rate)<row(rate)
-				rate[sel]<-1:np
-				rate<-t(rate)
-				rate[sel]<-1:np
-			}
-		} else {
-			if(ncol(model)!=nrow(model)) stop("the matrix given as 'model' is not square")
-			if(ncol(model)!=nl) stop("the matrix 'model' must have as many rows as the number of categories in 'x'")
-			rate<-model
-			np<-max(rate)
-		}
-		Q<-matrix(0,nl,nl)
-	} else {
-		rate<-matrix(NA,nl,nl)
-		np<-nl*(nl-1)
-		rate[col(rate)!=row(rate)]<-1:np
-		Q<-fixedQ
-	}
-	index.matrix<-rate
-	tmp<-cbind(1:nl,1:nl)
-	index.matrix[tmp]<-NA
-	rate[tmp]<-0
-	rate[rate==0]<-np+1
-	liks<-matrix(0,nb.tip+nb.node,nl)
-	TIPS<-1:nb.tip
-	if(is.matrix(x)) liks[TIPS,]<-x
-	else liks[cbind(TIPS,x)]<-1
-	phy<-reorder(tree,"pruningwise")
-	dev<-function(p,output.liks=FALSE,fixedQ=NULL){
-		if(any(is.nan(p))||any(is.infinite(p))) return(1e50)
-		comp<-numeric(nb.tip+nb.node)
-		if(is.null(fixedQ)){
-			Q[]<-c(p,0)[rate]
-			diag(Q)<--rowSums(Q)
-		} else Q<-fixedQ
-		for(i in seq(from=1,by=2,length.out=nb.node)){
-			j<-i+1L
-			anc<-phy$edge[i,1]
-			des1<-phy$edge[i,2]
-			des2<-phy$edge[j,2]
-			v.l<-matexpo(Q*phy$edge.length[i])%*%liks[des1,]
-			v.r<-matexpo(Q*phy$edge.length[j])%*%liks[des2,]
-			v<-v.l*v.r
-			comp[anc]<-sum(v)
-			liks[anc,]<-v/comp[anc]
-		}
-		if(output.liks) return(liks[-TIPS,])
-		dev<--2*sum(log(comp[-TIPS]))
-		if(is.na(dev)) Inf else dev
-	}
-	if(is.null(fixedQ)){
-		out<-nlminb(rep(ip,length.out=np),function(p) dev(p),lower=rep(0,np),upper=rep(1e50,np))
-		obj<-list()
-		obj$loglik<--out$objective/2
-		obj$rates<-out$par
-		obj$index.matrix<-index.matrix
-		if(output.liks){ 
-			obj$lik.anc<-dev(obj$rates,TRUE)
-			colnames(obj$lik.anc)<-lvls
-		}
-		obj$states<-lvls
-	} else {
-		out<-dev(rep(ip,length.out=np),fixedQ=Q)
-		obj<-list()
-		obj$loglik<--out/2
-		obj$rates<-fixedQ[sapply(1:np,function(x,y) which(x==y),index.matrix)]
-		obj$index.matrix<-index.matrix
-		if(output.liks){
-			obj$lik.anc<-dev(obj$rates,TRUE,fixedQ=Q)
-			colnames(obj$lik.anc)<-lvls
-		}
-		obj$states<-lvls
-	}
-	return(obj)
+## S3 print method for objects of class "simmap" & multiSimmap
+## based on print.phylo in ape
+print.simmap<-function(x,printlen=6,...){
+	N<-Ntip(x)
+    	M<-x$Nnode
+	cat(paste("\nPhylogenetic tree with",N,"tips and",M,"internal nodes.\n\n"))
+	cat("Tip labels:\n")
+	if(N>printlen) cat(paste("\t",paste(x$tip.label[1:printlen],collapse=", "),", ...\n",sep=""))
+	else print(x$tip.label)
+	ss<-sort(unique(c(getStates(x,"tips"),getStates(x,"nodes"))))
+	cat(paste("\nThe tree includes a mapped, ",length(ss),"-state discrete character with states:\n",
+		sep=""))
+	if(length(ss)>printlen) cat(paste("\t",paste(ss[1:printlen],collapse=", "),", ...\n",sep=""))
+	else cat(paste("\t",paste(ss,collapse=", "),"\n",sep=""))
+    	rlab<-if(is.rooted(x)) "Rooted" else "Unrooted"
+	cat("\n",rlab,"; includes branch lengths.\n",sep="")
 }
+print.multiSimmap<-function(x,details=FALSE,...){
+	N<-length(x)
+	cat(N,"phylogenetic trees with mapped discrete characters\n")
+    	if(details){
+		n<-sapply(x,Ntip)
+		s<-sapply(x,function(x) length(unique(c(getStates(x,"tips"),getStates(x,"nodes")))))
+		for(i in 1:N) cat("tree",i,":",n[i],"tips,",s[i],"mapped states\n")
+	}
+}
+
+## S3 summary method for objects of class "simmap" & "multiSimmap"
+summary.simmap<-function(object,...) describe.simmap(object,...)
+summary.multiSimmap<-function(object,...) describe.simmap(object,...)
+
+## for backward compatibility with any function using apeAce internally
+apeAce<-function(tree,x,model,fixedQ=NULL,...){
+	if(hasArg(output.liks)){ 
+		output.liks<-list(...)$output.liks
+		return(fitMk(tree,x,model,fixedQ,...))
+	} else { 
+		output.liks<-TRUE
+		return(fitMk(tree,x,model,fixedQ,output.liks=TRUE,...))
+	}
+}
+
+

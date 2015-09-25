@@ -1,14 +1,14 @@
 # function to perform phylogenetic principal components analysis
 # multiple morphological traits in Y
 # also can use lambda transformation in which lambda is optimized by ML or REML(in progress)
-# written by Liam Revell 2010, 2011, 2013 ref. Revell (2009; Evolution)
+# written by Liam Revell 2010, 2011, 2013, 2015 ref. Revell (2009; Evolution)
 
 phyl.pca<-function(tree,Y,method="BM",mode="cov",...){
 	## get optional argument
 	if(hasArg(opt)) opt<-list(...)$opt
 	else opt<-"ML"
 	# check tree
-	if(class(tree)!="phylo") stop("tree must be an object of class 'phylo.'")
+	if(!inherits(tree,"phylo")) stop("tree should be an object of class \"phylo\".")
 	# check mode
 	if(length(strsplit(mode,split="")[[1]])<=2){ 
 		message(paste("mode = '",mode,"' not a valid option; setting mode = 'cov'",sep=""))

@@ -1,16 +1,17 @@
 ## function fits Pagel '94 model of correlated evolution of two binary characters
-## uses ape::ace or geiger::fitDiscrete internally
-## written by Liam J. Revell 2014
+## uses fitMk, ape::ace, or geiger::fitDiscrete internally
+## written by Liam J. Revell 2014, 2015
 
 fitPagel<-function(tree,x,y,...){
+	if(!inherits(tree,"phylo")) stop("tree should be object of class \"phylo\".")
 	if(hasArg(method)) method<-list(...)$method
-	else method<-"ace"
+	else method<-"fitMk"
 	if(method=="fitDiscrete"){
 		chk<-.check.pkg("geiger")
 		if(!chk){
 			cat("  method = \"fitDiscrete\" requires the package \"geiger\"\n")
-			cat("  Defaulting to method = \"ace\"\n\n")
-			method<-"ace"
+			cat("  Defaulting to method = \"fitMk\"\n\n")
+			method<-"fitMk"
 			fitDiscrete<-function(...) NULL
 		}
 	}
@@ -27,11 +28,15 @@ fitPagel<-function(tree,x,y,...){
 	## fit independent model
 	iQ<-matrix(c(0,1,2,0,3,0,0,2,4,0,0,1,0,4,3,0),4,4,byrow=TRUE)
 	rownames(iQ)<-colnames(iQ)<-levels(xy)
-	fit.iQ<-if(method=="fitDiscrete") fitDiscrete(tree,xy,model=iQ) else ace(xy,tree,type="discrete",model=iQ)
+	fit.iQ<-if(method=="fitDiscrete") fitDiscrete(tree,xy,model=iQ) 
+		else if(method=="ace") ace(xy,tree,type="discrete",model=iQ)
+		else fitMk(tree,xy,model=iQ)
 	## fit dependendent model
 	dQ<-matrix(c(0,1,2,0,3,0,0,4,5,0,0,6,0,7,8,0),4,4,byrow=TRUE)
 	rownames(dQ)<-colnames(dQ)<-levels(xy)
-	fit.dQ<-if(method=="fitDiscrete") fitDiscrete(tree,xy,model=dQ) else ace(xy,tree,type="discrete",model=dQ)
+	fit.dQ<-if(method=="fitDiscrete") fitDiscrete(tree,xy,model=dQ) 
+		else if(method=="ace") ace(xy,tree,type="discrete",model=dQ)
+		else fitMk(tree,xy,model=dQ)
 	## back translate independent model
 	if(method=="fitDiscrete") iQ<-.Qmatrix.from.gfit(fit.iQ)
 	else {
@@ -60,7 +65,8 @@ fitPagel<-function(tree,x,y,...){
 		lik.ratio=2*(logLik(fit.dQ)-logLik(fit.iQ)),
 		P=pchisq(2*(logLik(fit.dQ)-logLik(fit.iQ)),
 		df=length(levels(x))+length(levels(y)),
-		lower.tail=FALSE))
+		lower.tail=FALSE),
+		method=method)
 	class(obj)<-"fitPagel"
 	obj
 }
@@ -82,6 +88,7 @@ print.fitPagel<-function(x,...){
 	cat("\nHypothesis test result:\n")
 	cat(paste("  likelihood-ratio: ",signif(x$lik.ratio,7),"\n"))
 	cat(paste("  p-value: ",signif(x$P,7),"\n"))
+	cat(paste("\nModel fitting method used was",x$method,"\n\n"))
 }
 
 ## function borrowed from geiger to pull the Q-matrix from a fit returned by fitDiscrete

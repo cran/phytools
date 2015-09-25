@@ -2,6 +2,7 @@
 # written by Liam J. Revell 2012, 2013, 2015
 
 bmPlot<-function(tree,type="BM",anc=0,sig2=1/1000,ngen=1000,...){
+	if(!inherits(tree,"phylo")) stop("tree should be an object of class \"phylo\".")
 	if(hasArg(return.tree)) return.tree<-list(...)$return.tree
 	else return.tree<-TRUE
 
@@ -32,13 +33,14 @@ bmPlot<-function(tree,type="BM",anc=0,sig2=1/1000,ngen=1000,...){
 		if(type=="BM") tr$X<-X
 		else if(type=="threshold"){
 			if(hasArg(thresholds)) thresholds<-list(...)$thresholds
-			else stop("no thresholds provided for type='threshold'")
+			else stop("no thresholds provided for type=\"threshold\"")
 			thresholds<-setNames(c(thresholds,Inf),letters[1:(length(thresholds)+1)])
 			xx<-lapply(X,function(x,y) sapply(x[2:length(x)],threshState,thresholds=y),y=thresholds)
 			maps<-lapply(tr$edge.length,function(x) rep(1,x))	
 			maps<-mapply(function(x,y) setNames(x,y),x=maps,y=xx)
 			maps<-lapply(maps,mergeAdjacent)
 			tr$maps<-maps
+			class(tr)<-c("simmap",setdiff(class(tr),"simmap"))
 		}
 	}
 

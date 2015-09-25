@@ -6,7 +6,7 @@ brownie.lite<-function(tree,x,maxit=2000,test="chisq",nsim=100,se=NULL,...){
 	if(hasArg(quiet)) quiet<-list(...)$quiet
 	else quiet<-FALSE
 	# some minor error checking
-	if(class(tree)!="phylo") stop("tree object must be of class 'phylo.'")
+	if(!inherits(tree,"phylo")) stop("tree should be an object of class \"phylo\".")
 	x<-matchDatatoTree(tree,x,"x")
 	x<-x[tree$tip.label]
 	if(!is.null(se)) se<-matchDatatoTree(tree,se,"se")

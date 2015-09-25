@@ -2,6 +2,7 @@
 ## written by Liam J. Revell 2014, 2015
 
 plotTree.wBars<-function(tree,x,scale=1,width=NULL,type="phylogram",method="plotTree",tip.labels=FALSE,...){
+	if(!inherits(tree,"phylo")) stop("tree should be an object of class \"phylo\".")
 	d<-scale*(max(x)-min(0,min(x)))
 	H<-nodeHeights(tree)
 	if(tip.labels==FALSE){

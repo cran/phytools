@@ -2,6 +2,7 @@
 ## written by Liam J. Revell 2013
 
 add.species.to.genus<-function(tree,species,genus=NULL,where=c("root","random")){
+	if(!inherits(tree,"phylo")) stop("tree should be an object of class \"phylo\".")
 	if(!is.ultrametric(tree))
 		warning("this code has only been tested with ultrametric tree\n  your tree may be returned without edge lengths")
 	where<-where[1]
