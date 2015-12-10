@@ -18,6 +18,7 @@ cophylo<-function(tr1,tr2,assoc=NULL,rotate=TRUE,...){
 	## now check if rotation is to be performed
 	if(rotate){
 		cat("Rotating nodes to optimize matching...\n")
+		flush.console()
 		x<-setNames(sapply(assoc[,2],match,table=tr2$tip.label),assoc[,1])
 		tr1<-tipRotate(tr1,x*Ntip(tr1)/Ntip(tr2),...)
 		best.tr1<-Inf
@@ -43,8 +44,10 @@ cophylo<-function(tr1,tr2,assoc=NULL,rotate=TRUE,...){
 
 ## called internally by plot.cophylo to plot a phylogram
 ## written by Liam J. Revell
-phylogram<-function(tree,part=1,direction="right",fsize=1,ftype="i",lwd=1){
-	d<-if(direction=="right") 1 else -1
+phylogram<-function(tree,part=1,direction="rightwards",fsize=1,ftype="i",lwd=1,...){
+	d<-if(direction=="rightwards") 1 else -1
+	## check if edge lenths
+	if(is.null(tree$edge.length)) tree<-compute.brlen(tree)
 	## rescale tree so it fits in one half of the plot
 	## with enough space for labels
 	if(ftype=="off") fsize<-0
@@ -84,6 +87,14 @@ phylogram<-function(tree,part=1,direction="right",fsize=1,ftype="i",lwd=1){
 			sub("_"," ",tree$tip.label[i]), pos=if(d<0) 4 else 2,offset=0,
 			cex=fsize,font=font)
 	}
+	PP<-list(type="phylogram",use.edge.length=TRUE,node.pos=1,
+		show.tip.label=if(ftype!="off") TRUE else FALSE,show.node.label=FALSE,
+		font=ftype,cex=fsize,adj=0,srt=0,no.margin=FALSE,label.offset=0,
+		x.lim=par()$usr[1:2],y.lim=par()$usr[3:4],
+		direction=direction,tip.color="black",Ntip=Ntip(cw),Nnode=cw$Nnode,
+		edge=cw$edge,xx=d*sapply(1:(Ntip(cw)+cw$Nnode),
+		function(x,y,z) y[match(x,z)],y=X,z=cw$edge),yy=y)
+	assign("last_plot.phylo",PP,envir=.PlotPhyloEnv)
 	## return rightmost or leftmost edge of tip labels
 	invisible(d*max(h+fsize*strwidth(tree$tip.label)))
 }
@@ -103,12 +114,45 @@ makelinks<-function(obj,x){
 ## written by Liam J. Revell 2015
 plot.cophylo<-function(x,...){
 	plot.new()
-	par(mar=c(0.1,0.1,0.1,0.1))
-	plot.window(xlim=c(-0.5,0.5),ylim=c(0,1))
+	if(hasArg(mar)) mar<-list(...)$mar
+	else mar<-c(0.1,0.1,0.1,0.1)
+	if(hasArg(xlim)) xlim<-list(...)$xlim
+	else xlim<-c(-0.5,0.5)
+	if(hasArg(scale.bar)) scale.bar<-list(...)$scale.bar
+	else scale.bar<-rep(0,2)
+	if(hasArg(ylim)) ylim<-list(...)$ylim
+	else ylim<-if(any(scale.bar>0)) c(-0.1,1) else c(0,1)
+	if(hasArg(fsize)) fsize<-list(...)$fsize
+	else fsize<-1
+	par(mar=mar)
+	plot.window(xlim=xlim,ylim=ylim)
 	x1<-phylogram(x$trees[[1]],part=0.4,...)
-	x2<-phylogram(x$trees[[2]],part=0.4,direction="left",...)
+	left<-get("last_plot.phylo",envir=.PlotPhyloEnv)
+	x2<-phylogram(x$trees[[2]],part=0.4,direction="leftwards",...)
+	right<-get("last_plot.phylo",envir=.PlotPhyloEnv)
 	if(!is.null(x$assoc)) makelinks(x,c(x1,x2))
 	else cat("No associations provided.\n")
+	if(any(scale.bar>0)) add.scalebar(x,scale.bar,fsize)
+	assign("last_plot.cophylo",list(left=left,right=right),envir=.PlotPhyloEnv)
+}
+
+## add scale bar
+## written by Liam J. Revell 2015
+add.scalebar<-function(obj,scale.bar,fsize){
+	if(scale.bar[1]>0){
+		s1<-(0.4-max(fsize*strwidth(obj$trees[[1]]$tip.label)))/max(nodeHeights(obj$trees[[1]]))
+		lines(c(-0.5,-0.5+scale.bar[1]*s1),rep(-0.05,2))
+		lines(rep(-0.5,2),c(-0.05,-0.06))
+		lines(rep(-0.5+scale.bar[1]*s1,2),c(-0.05,-0.06))
+		text(mean(c(-0.5,-0.5+scale.bar[1]*s1)),rep(-0.05,2),scale.bar[1],pos=1)
+	}
+	if(scale.bar[2]>0){
+		s2<-(0.4-max(fsize*strwidth(obj$trees[[2]]$tip.label)))/max(nodeHeights(obj$trees[[2]]))
+		lines(c(0.5-scale.bar[2]*s2,0.5),rep(-0.05,2))	
+		lines(rep(0.5-scale.bar[2]*s2,2),c(-0.05,-0.06))
+		lines(rep(0.5,2),c(-0.05,-0.06))
+		text(mean(c(0.5-scale.bar[2]*s2,0.5)),rep(-0.05,2),scale.bar[2],pos=1)
+	}
 }
 
 ## print an object of class "cophylo"
@@ -149,4 +193,28 @@ tipRotate<-function(tree,x,...){
 	}
 	attr(tree,"minRotate")<-min(oo,pp)
 	tree
+}
+
+## labeling methods for plotted "cophylo" object
+## written by Liam J. Revell 2015
+
+nodelabels.cophylo<-function(...,which=c("left","right")){
+	obj<-get("last_plot.cophylo",envir=.PlotPhyloEnv)
+	if(which[1]=="left") assign("last_plot.phylo",obj[[1]],envir=.PlotPhyloEnv)
+	else if(which[1]=="right") assign("last_plot.phylo",obj[[2]],envir=.PlotPhyloEnv)
+	nodelabels(...)
+}
+
+edgelabels.cophylo<-function(...,which=c("left","right")){
+	obj<-get("last_plot.cophylo",envir=.PlotPhyloEnv)
+	if(which[1]=="left") assign("last_plot.phylo",obj[[1]],envir=.PlotPhyloEnv)
+	else if(which[1]=="right") assign("last_plot.phylo",obj[[2]],envir=.PlotPhyloEnv)
+	edgelabels(...)
+}
+
+tiplabels.cophylo<-function(...,which=c("left","right")){
+	obj<-get("last_plot.cophylo",envir=.PlotPhyloEnv)
+	if(which[1]=="left") assign("last_plot.phylo",obj[[1]],envir=.PlotPhyloEnv)
+	else if(which[1]=="right") assign("last_plot.phylo",obj[[2]],envir=.PlotPhyloEnv)
+	tiplabels(...)
 }

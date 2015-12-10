@@ -18,16 +18,41 @@ contMap<-function(tree,x,res=100,fsize=NULL,ftype=NULL,lwd=4,legend=NULL,
 	steps<-0:res/res*max(h)
 	H<-nodeHeights(tree)
 	if(method=="fastAnc") a<-fastAnc(tree,x) 
-	else { 
+	else if(method=="anc.ML") { 
 		fit<-anc.ML(tree,x)
 		a<-fit$ace
 		if(!is.null(fit$missing.x)) x<-c(x,fit$missing.x)
+	} else if(method=="user"){
+		if(hasArg(anc.states)) anc.states<-list(...)$anc.states
+		else {
+			cat("No ancestral states have been provided. Using states estimated with fastAnc.\n\n")
+			a<-fastAnc(tree,x)
+		}
+		if(length(anc.states)<tree$Nnode){
+			nodes<-as.numeric(names(anc.states))
+			tt<-tree
+			for(i in 1:length(nodes)){
+				M<-matchNodes(tt,tree,method="distances")
+				ii<-M[which(M[,2]==nodes[i]),1]
+				tt<-bind.tip(tt,nodes[i],edge.length=0,where=ii)
+			}
+			a<-fastAnc(tt,c(x,anc.states))
+			M<-matchNodes(tree,tt,method="distances")
+			a<-a[as.character(M[,2])]
+			names(a)<-M[,1]
+		} else { 
+			if(is.null(names(anc.states))) names(anc.states)<-1:tree$Nnode+Ntip(tree)
+			a<-anc.states[as.character(1:tree$Nnode+Ntip(tree))]
+		}
 	}
-	y<-c(a,x[tree$tip.label]); names(y)[1:length(tree$tip)+tree$Nnode]<-1:length(tree$tip)
+	y<-c(a,x[tree$tip.label])
+	names(y)[1:Ntip(tree)+tree$Nnode]<-1:Ntip(tree)
 	A<-matrix(y[as.character(tree$edge)],nrow(tree$edge),ncol(tree$edge))
-	cols<-rainbow(1001,start=0,end=0.7); names(cols)<-0:1000
-	if(is.null(lims)) lims<-c(min(x),max(x))
-	trans<-0:1000/1000*(lims[2]-lims[1])+lims[1]; names(trans)<-0:1000
+	cols<-rainbow(1001,start=0,end=0.7)
+	names(cols)<-0:1000
+	if(is.null(lims)) lims<-c(min(y),max(y))
+	trans<-0:1000/1000*(lims[2]-lims[1])+lims[1]
+	names(trans)<-0:1000
 	for(i in 1:nrow(tree$edge)){
 		XX<-cbind(c(H[i,1],steps[intersect(which(steps>H[i,1]),which(steps<H[i,2]))]),
 			c(steps[intersect(which(steps>H[i,1]),which(steps<H[i,2]))],H[i,2]))-H[i,1]
@@ -62,14 +87,16 @@ getState<-function(x,trans){
 	return(state)
 }
 
-# function
-# written by Liam J. Revell 2012, 2013, 2014, 2015
+## S3 print method for objects of class "contMap"
+## uses print.densityMap internally
+## written by Liam J. Revell 2012, 2013, 2014, 2015
+
 plot.contMap<-function(x,...){
 	if(inherits(x,"contMap")){
 		lims<-x$lims
 		x<-list(tree=x$tree,cols=x$cols)
 		class(x)<-"densityMap"
-	} else stop("x should be an object of class 'contMap'")
+	} else stop("x should be an object of class \"contMap\"")
 	H<-nodeHeights(x$tree)
 	# get & set optional arguments
 	if(hasArg(legend)) legend<-list(...)$legend

@@ -14,7 +14,7 @@ contMap(tree, x, res=100, fsize=NULL, ftype=NULL, lwd=4, legend=NULL,
 	\item{res}{resolution for gradient plotting. Larger numbers indicate a finer (smoother) gradient.}
 	\item{fsize}{relative font size - can be a vector with the second element giving the font size for the legend.}
 	\item{ftype}{font type - see options in \code{\link{plotSimmap}}. As with \code{fsize}, this can be a vector with the second element giving font type for the legend.}
-	\item{lwd}{line width for branches.}
+	\item{lwd}{line width for branches. Can be a single integer number or a vector. In the latter case, the second number will be taken to be the desired legend width.}
 	\item{legend}{if \code{FALSE} no legend is plotted; if a numeric value, it gives the length of the legend in units of branch length. Default is 0.5 times the total tree length.}
 	\item{lims}{range for the color map. By default, this will be \code{c(min(x),max(x))}, and should always include this range.}
 	\item{outline}{logical value indicating whether or not to outline the branches of the tree in black.}
@@ -22,7 +22,7 @@ contMap(tree, x, res=100, fsize=NULL, ftype=NULL, lwd=4, legend=NULL,
 	\item{type}{type of plot desired. Options are \code{"phylogram"} for a rightward square phylogram; and \code{"fan"} for a circular phylogram.}
 	\item{direction}{plotting direction for \code{type="phylogram"}.}
 	\item{plot}{logical value indicating whether or not to plot the tree. If \code{plot=FALSE} then an object of class \code{"contMap"} will be returned without plotting.}
-	\item{...}{optional arguments for \code{plot.contMap} which include all the arguments of \code{contMap} except for \code{tree}, \code{x}, \code{res}, and \code{lims}. Also \code{method}, \code{"fastAnc"} or \code{"anc.ML"}, specifying which function to use for ancestral state estimation; and \code{hold} specifies whether or not to hold output to graphical device before plotting (defaults to \code{hold=TRUE}).}
+	\item{...}{optional arguments for \code{plot.contMap} which include all the arguments of \code{contMap} except for \code{tree}, \code{x}, \code{res}, and \code{lims}. Also \code{method}, \code{"fastAnc"}, \code{"anc.ML"}, or \code{"user"} (for user-supplied states) specifying which function to use for ancestral state estimation; \code{hold} specifies whether or not to hold output to graphical device before plotting (defaults to \code{hold=TRUE}); and \code{anc.states} a vector containing some or multiple ancestral user-supplied ancestral states at nodes.}
 }
 \description{
 	Function plots a tree with a mapped continuous character. The mapping is accomplished by estimating states at internal nodes using ML with \code{\link{fastAnc}}, and the interpolating the states along each edge using equation [2] of Felsenstein (1985).

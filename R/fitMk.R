@@ -13,6 +13,7 @@ fitMk<-function(tree,x,model="SYM",fixedQ=NULL,...){
 		states<-colnames(x)
 	} else {
 		x<-to.matrix(x,sort(unique(x)))
+		x<-x[tree$tip.label,]
 		m<-ncol(x)
 		states<-colnames(x)
 	}
@@ -29,8 +30,10 @@ fitMk<-function(tree,x,model="SYM",fixedQ=NULL,...){
 	if(is.null(fixedQ)){
 		if(is.character(model)){
 			rate<-matrix(NA,m,m)
-			if(model=="ER") k<-rate[]<-1
-			else if(model=="ARD"){
+			if(model=="ER"){ 
+				k<-rate[]<-1
+				diag(rate)<-NA
+			} else if(model=="ARD"){
 				k<-m*(m-1)
 				rate[col(rate)!=row(rate)]<-1:k
 			} else if(model=="SYM"){
@@ -80,7 +83,7 @@ fitMk<-function(tree,x,model="SYM",fixedQ=NULL,...){
 			comp[anc]<-sum(vv)
 			liks[anc,]<-vv/comp[anc]
 		}
-		if(output.liks) return(liks[1:M+N,])
+		if(output.liks)return(liks[1:M+N,,drop=FALSE]) 
 		logL<--sum(log(comp[1:M+N]))
 		return(if(is.na(logL)) Inf else logL)
 	}
@@ -110,7 +113,7 @@ print.fitMk<-function(x,digits=6,...){
 	cat("Object of class \"fitMk\".\n\n")
 	cat("Fitted (or set) value of Q:\n")
 	Q<-matrix(NA,length(x$states),length(x$states))
-	Q[]<-x$rates[x$index.matrix]
+	Q[]<-c(0,x$rates)[x$index.matrix+1]
 	diag(Q)<-0
 	diag(Q)<--rowSums(Q)
 	colnames(Q)<-rownames(Q)<-x$states
@@ -128,7 +131,7 @@ summary.fitMk<-function(object,...){
 	else quiet<-FALSE
 	if(!quiet) cat("Fitted (or set) value of Q:\n")
 	Q<-matrix(NA,length(object$states),length(object$states))
-	Q[]<-object$rates[object$index.matrix]
+	Q[]<-c(0,object$rates)[object$index.matrix+1]
 	diag(Q)<-0
 	diag(Q)<--rowSums(Q)
 	colnames(Q)<-rownames(Q)<-object$states
@@ -139,4 +142,10 @@ summary.fitMk<-function(object,...){
 
 ## logLik method for objects of class "fitMk"
 logLik.fitMk<-function(object,...) object$logLik
+
+## AIC method
+AIC.fitMk<-function(object,...,k=2){
+	np<-length(object$rates)
+	-2*logLik(object)+np*k
+}
 	

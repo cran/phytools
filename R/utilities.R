@@ -1,6 +1,78 @@
 # some utility functions
 # written by Liam J. Revell 2011, 2012, 2013, 2014, 2015
 
+## compute the probability of states changes along edges of the tree
+## written by Liam J. Revell 2015
+edgeProbs<-function(trees){
+	if(!inherits(trees,"multiSimmap")) stop("trees should be an object of class \"multiSimmap\".")
+	SS<-sapply(trees,getStates,"tips")
+	states<-sort(unique(as.vector(SS)))
+	m<-length(states)
+	TT<-sapply(states,function(x,y) sapply(y,paste,x,sep="->"),
+		y=states)
+	nn<-c(TT[upper.tri(TT)],TT[lower.tri(TT)])
+	## this function computes for a given edge
+	fn<-function(edge,trees,states){
+		obj<-sapply(trees,function(x,e,s) 
+		if(names(x$maps[[e]])[1]==
+			s[1]&&names(x$maps[[e]])[length(x$maps[[e]])]==s[2]) TRUE
+		else FALSE,e=edge,s=states)
+		sum(obj)/length(obj)
+	}
+	edge.probs<-matrix(0,nrow(trees[[1]]$edge),m,
+		dimnames=list(apply(trees[[1]]$edge,1,paste,collapse=","),nn))
+	k<-1
+	for(i in 1:m) for(j in 1:m){
+		if(i!=j){ 
+			edge.probs[,k]<-sapply(1:nrow(trees[[1]]$edge),fn,
+				trees=trees,states=states[c(i,j)])
+			k<-k+1
+		}
+	}
+	edge.probs<-cbind(edge.probs,1-rowSums(edge.probs))
+	colnames(edge.probs)[ncol(edge.probs)]<-"no change"
+	edge.probs
+}
+
+## get a position in the tree interactively
+## written by Liam J. Revell 2015
+get.treepos<-function(message=TRUE){
+	obj<-get("last_plot.phylo",envir=.PlotPhyloEnv)
+	if(obj$type=="phylogram"&&obj$direction=="rightwards"){
+		if(message){ 
+			cat("Click on the tree position you want to capture...\n")
+			flush.console()
+		}
+		x<-unlist(locator(1)) 	
+		y<-x[2] 	
+		x<-x[1]
+		d<-pos<-c()
+		for(i in 1:nrow(obj$edge)){
+			x0<-obj$xx[obj$edge[i,]]
+			y0<-obj$yy[obj$edge[i,2]]
+			if(x<x0[1]||x>x0[2]){
+				d[i]<-min(dist(rbind(c(x,y),c(x0[1],y0))),
+					dist(rbind(c(x,y),c(x0[2],y0))))
+				pos[i]<-if(x>x0[2]) 0 else diff(obj$xx[obj$edge[i,]])
+			} else {
+				d[i]<-abs(y0-y)
+				pos[i]<-obj$xx[obj$edge[i,2]]-x
+			}
+		}
+		ii<-which(d==min(d))
+		list(where=obj$edge[ii,2],pos=pos[ii])
+	} else stop("Does not work for the plotted tree type.")
+}
+
+## fastDist: uses fastHeight to compute patristic distance between a pair of species
+fastDist<-function(tree,sp1,sp2){
+	if(!inherits(tree,"phylo")) stop("tree should be an object of class \"phylo\".")
+	if(is.null(tree$edge.length)) stop("tree should have edge lengths.")
+	if(sp1==sp2) 0
+	else fastHeight(tree,sp1,sp1)+fastHeight(tree,sp2,sp2)-
+		2*fastHeight(tree,sp1,sp2)
+}
+
 # function reorders simmap tree
 # written Liam Revell 2011, 2013, 2015
 reorderSimmap<-function(tree,order="cladewise",index.only=FALSE,...){
@@ -175,11 +247,20 @@ drop.clade<-function(tree,tip){
 	tree
 }
 
+
 # function to re-root a phylogeny along an edge
 # written by Liam Revell 2011-2015
 
-reroot<-function(tree,node.number,position){
+reroot<-function(tree,node.number,position,interactive=FALSE,...){
 	if(!inherits(tree,"phylo")) stop("tree should be an object of class \"phylo\".")
+	if(interactive){
+		plotTree(tree,...)
+		cat("Click where you would like re-root the plotted tree\n")
+		flush.console()
+		obj<-get.treepos(message=FALSE)
+		node.number<-obj$where
+		position<-tree$edge.length[which(tree$edge[,2]==node.number)]-obj$pos
+	}
 	tt<-splitTree(tree,list(node=node.number,bp=position))
 	p<-tt[[1]]
 	d<-tt[[2]]
@@ -192,8 +273,9 @@ reroot<-function(tree,node.number,position){
 	cc<-p$edge[which(p$edge[,2]==bb),1]
 	dd<-setdiff(p$edge[which(p$edge[,1]==cc),2],bb)
 	p$edge.length[which(p$edge[,2]==dd)]<-p$edge.length[which(p$edge[,2]==dd)]+ee
-	tt<-paste.tree(p,d)
-	return(tt)
+	obj<-paste.tree(p,d)
+	if(interactive) plotTree(obj,...)
+	obj
 }
 
 ## function to add an arrow pointing to a tip or node in the tree
@@ -396,9 +478,11 @@ plot.describe.simmap<-function(x,...){
 		states<-colnames(x$ace)
 		if(hasArg(colors)) colors<-list(...)$colors
 		else colors<-setNames(palette()[1:length(states)],states)
-		plotTree(x$tree[[1]],lwd=lwd,offset=cex[2],...)
+		plotTree(if(is.null(x$ref.tree)) x$tree[[1]] else x$ref.tree,lwd=lwd,
+			offset=cex[2],...)
 		nodelabels(pie=x$ace,piecol=colors[colnames(x$ace)],cex=cex[1])
-		if(!is.null(x$tips)) tips<-x$tips else tips<-to.matrix(getStates(x$tree[[1]],"tips"),seq=states) 
+		if(!is.null(x$tips)) tips<-x$tips else tips<-to.matrix(getStates(x$tree[[1]],"tips"),
+			seq=states) 
 		tiplabels(pie=tips,piecol=colors[colnames(tips)],cex=cex[2])
 	} else if(inherits(x$tree,"phylo")){
 		states<-colnames(x$Tr)
@@ -418,22 +502,37 @@ describe.simmap<-function(tree,...){
 	else check.equal<-FALSE
 	if(hasArg(message)) message<-list(...)$message
 	else message<-FALSE
+	if(hasArg(ref.tree)) ref.tree<-list(...)$ref.tree
+	else ref.tree<-NULL
 	if(inherits(tree,"multiPhylo")){
 		if(check.equal){
 			TT<-sapply(tree,function(x,y) sapply(y,all.equal.phylo,x),y=tree)
 			check<-all(TT)
-			if(!check) warning("some trees not equal")
-		}
+			if(!check) cat("Note: Some trees are not equal.\nA \"reference\" tree will be computed if none was provided.\n\n")
+		} else check<-TRUE
 		YY<-getStates(tree)
 		states<-sort(unique(as.vector(YY)))
-		ZZ<-t(apply(YY,1,function(x,levels,Nsim) summary(factor(x,levels))/Nsim,levels=states,Nsim=length(tree)))
+		if(is.null(ref.tree)&&check) ZZ<-t(apply(YY,1,function(x,levels,Nsim) summary(factor(x,levels))/Nsim,levels=states,Nsim=length(tree)))
+		else {
+			if(is.null(ref.tree)){
+				cat("No reference tree provided & some trees are unequal.\nComputing majority-rule consensus tree.\n")
+				ref.tree<-consensus(tree,p=0.5)
+			}
+			YYp<-matrix(NA,ref.tree$Nnode,length(tree),dimnames=list(1:ref.tree$Nnode+Ntip(ref.tree),NULL))
+			for(i in 1:length(tree)){
+				M<-matchNodes(ref.tree,tree[[i]])
+				jj<-sapply(M[,2],function(x,y) if(x%in%y) which(as.numeric(y)==x) else NA,y=as.numeric(rownames(YY)))
+				YYp[,i]<-YY[jj,i]
+			}
+			ZZ<-t(apply(YYp,1,function(x,levels) summary(factor(x[!is.na(x)],levels))/sum(!is.na(x)),levels=states))
+		}
 		XX<-countSimmap(tree,states,FALSE)
 		XX<-XX[,-(which(as.vector(diag(-1,length(states)))==-1)+1)]
 		AA<-t(sapply(unclass(tree),function(x) c(colSums(x$mapped.edge),sum(x$edge.length))))
 		colnames(AA)[ncol(AA)]<-"total"
 		BB<-getStates(tree,type="tips")
 		CC<-t(apply(BB,1,function(x,levels,Nsim) summary(factor(x,levels))/Nsim,levels=states,Nsim=length(tree)))
-		x<-list(count=XX,times=AA,ace=ZZ,tips=CC,tree=tree)
+		x<-list(count=XX,times=AA,ace=ZZ,tips=CC,tree=tree,ref.tree=if(!is.null(ref.tree)) ref.tree else NULL)
 		class(x)<-"describe.simmap"
 	} else if(inherits(tree,"phylo")){
 		XX<-countSimmap(tree,message=FALSE)
@@ -477,6 +576,7 @@ fastMRCA<-function(tree,sp1,sp2){
 ## written by Liam J. Revell 2014, 2015
 fastHeight<-function(tree,sp1,sp2){
 	if(!inherits(tree,"phylo")) stop("tree should be an object of class \"phylo\".")
+	if(is.null(tree$edge.length)) stop("tree should have edge lengths.")
 	sp1<-which(tree$tip.label==sp1)
 	sp2<-which(tree$tip.label==sp2)
 	a1<-c(sp1,getAncestors(tree,sp1))
@@ -800,9 +900,18 @@ sampleFrom<-function(xbar=0,xvar=1,n=1,randn=NULL,type="norm"){
 
 # function adds a new tip to the tree
 # written by Liam J. Revell 2012, 2013, 2014, 2015
-bind.tip<-function(tree,tip.label,edge.length=NULL,where=NULL,position=0){
+bind.tip<-function(tree,tip.label,edge.length=NULL,where=NULL,position=0,interactive=FALSE,...){
 	if(!inherits(tree,"phylo")) stop("tree should be an object of class \"phylo\".")
-	if(is.null(where)) where<-length(tree$tip.label)+1
+	use.edge.length<-if(is.null(tree$edge.length)) FALSE else TRUE
+	if(use.edge.length==FALSE) tree<-compute.brlen(tree)
+	if(interactive==TRUE){
+		plotTree(tree,...)
+		cat(paste("Click where you would like to bind the tip \"",tip.label,"\"\n",sep=""))
+		flush.console()
+		obj<-get.treepos(message=FALSE)
+		where<-obj$where
+		position<-obj$pos
+	} else if(is.null(where)) where<-length(tree$tip.label)+1
 	if(where<=length(tree$tip.label)&&position==0){
 		pp<-1e-12
 		if(tree$edge.length[which(tree$edge[,2]==where)]<=1e-12){
@@ -827,18 +936,26 @@ bind.tip<-function(tree,tip.label,edge.length=NULL,where=NULL,position=0){
 		obj$edge.length[which(obj$edge[,2]==which(obj$tip.label==tip$tip.label))]<-0
 		obj$edge.length[which(obj$edge[,2]==which(obj$tip.label==tree$tip.label[where]))]<-0
 	}
-	return(obj)
+	root.time<-if(!is.null(obj$root.time)) obj$root.time else NULL
+	obj<-untangle(obj,"read.tree")
+	if(!is.null(root.time)) obj$root.time<-root.time
+	if(interactive) plotTree(obj,...)
+	if(!use.edge.length) obj$edge.length<-NULL
+	obj
 }
 
 # function collapses the subtree descended from node to a star tree
 # written by Liam J. Revell 2013, 2015
 collapse.to.star<-function(tree,node){
 	if(!inherits(tree,"phylo")) stop("tree should be an object of class \"phylo\".")
+	nel<-if(is.null(tree$edge.length)) TRUE else FALSE
+	if(nel) tree$edge.length<-rep(1,nrow(tree$edge))
 	tt<-splitTree(tree,split=list(node=node,bp=tree$edge.length[which(tree$edge[,2]==node)]))
 	ss<-starTree(species=tt[[2]]$tip.label,branch.lengths=diag(vcv(tt[[2]])))
 	ss$root.edge<-0
 	tree<-paste.tree(tt[[1]],ss)
-	return(tree)
+	if(nel) tree$edge.length<-NULL 
+	tree
 }
 
 # function returns the MRCA, or its height above the root, for a set of taxa (in tips)
@@ -857,6 +974,7 @@ findMRCA<-function(tree,tips=NULL,type=c("node","height")){
 		H<-nodeHeights(tree)
 		X<-sapply(tips,function(x,y,z) sapply(y,fastMRCA,sp1=x,tree=z),y=tips,z=tree)
 		Y<-apply(X,c(1,2),function(x,y,z) y[which(z==x)[1]],y=H,z=tree$edge)
+
 		if(type=="height") return(Y[which.min(Y)]) else return(X[which.min(Y)])
 	}
 }
@@ -901,7 +1019,9 @@ getStates<-function(tree,type=c("nodes","tips")){
 	type<-type[1]
 	if(inherits(tree,"multiPhylo")){
 		tree<-unclass(tree)
-		y<-sapply(tree,getStates,type=type)
+		obj<-lapply(tree,getStates,type=type)
+		nn<-names(obj[[1]])
+		y<-sapply(obj,function(x,n) x[n],n=nn)
 	} else if(inherits(tree,"phylo")){ 
 		if(type=="nodes"){
 			y<-setNames(sapply(tree$maps,function(x) names(x)[1]),tree$edge[,1])
@@ -959,6 +1079,8 @@ countSimmap<-function(tree,states=NULL,message=TRUE){
 # written by Liam J. Revell 2012, 2013, 2015
 matchNodes<-function(tr1,tr2,method=c("descendants","distances"),...){
 	if(!inherits(tr1,"phylo")||!inherits(tr1,"phylo")) stop("tr1 & tr2 should both be objects of class \"phylo\".")
+	if(hasArg(quiet)) quiet<-list(...)$quiet
+	else quiet<-FALSE
 	method<-method[1]
 	method<-matchType(method,c("descendants","distances"))
 	if(method=="descendants"){
@@ -997,7 +1119,7 @@ matchNodes<-function(tr1,tr2,method=c("descendants","distances"),...){
 				if(length(a)==1) Nodes[i,2]<-a
 				else {
 					Nodes[i,2]<-a[1]
-					warning("polytomy detected; some node matches may be arbitrary")
+					if(!quiet) warning("polytomy detected; some node matches may be arbitrary")
 				}
 			}
 		}
@@ -1006,6 +1128,7 @@ matchNodes<-function(tr1,tr2,method=c("descendants","distances"),...){
 }
 
 # function applies the branch lengths of a reference tree to a second tree, including mappings
+
 # written by Liam J. Revell 2012, 2015
 applyBranchLengths<-function(tree,edge.length){
 	if(inherits(tree,"multiPhylo")){
@@ -1033,6 +1156,7 @@ applyBranchLengths<-function(tree,edge.length){
 
 # function to compute phylogenetic VCV using joint Pagel's lambda
 # written by Liam Revell 2011
+
 phyl.vcv<-function(X,C,lambda){
 	C<-lambda.transform(lambda,C)
 	invC<-solve(C)
@@ -1117,6 +1241,7 @@ maxLambda<-function(tree){
 }
 
 # function reorders the columns of mapped.edge from a set of simmap trees
+
 # written by Liam J. Revell 2013, 2015
 orderMappedEdge<-function(trees,ordering=NULL){
 	if(!inherits(trees,"phylo")&&!inherits(trees,"multiPhylo")) 
@@ -1229,13 +1354,21 @@ expm<-function(Y){
 # function 'untangles' (or attempts to untangle) a tree with crossing branches
 # written by Liam J. Revell 2013, 2015
 untangle<-function(tree,method=c("reorder","read.tree")){
-	if(!inherits(tree,"phylo")) stop("tree should be an object of class \"phylo\".")
-	method<-method[1]
-	if(method=="reorder") tree<-reorder(reorder(tree,"pruningwise"))
-	else if(method=="read.tree"){
-		if(inherits(tree,"simmap")) tree<-read.simmap(text=write.simmap(tree))
-		else tree<-read.tree(text=write.tree(tree))
+	if(inherits(tree,"multiPhylo")){
+		tree<-lapply(tree,untangle,method=method)
+		class(tree)<-"multiPhylo"
+	} else {
+		if(!inherits(tree,"phylo")) stop("tree should be an object of class \"phylo\".")
+		obj<-attributes(tree)
+		method<-method[1]
+		if(method=="reorder") tree<-reorder(reorder(tree,"pruningwise"))
+		else if(method=="read.tree"){
+			if(inherits(tree,"simmap")) tree<-read.simmap(text=write.simmap(tree))
+			else tree<-read.tree(text=write.tree(tree))
+		}
+		ii<-!names(obj)%in%names(attributes(tree))
+		attributes(tree)<-c(attributes(tree),obj[ii])
 	}
-	return(tree)
+	tree
 }
 
