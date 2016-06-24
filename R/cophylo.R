@@ -1,11 +1,11 @@
 ## creates an object of class "cophylo"
-## written by Liam J. Revell 2015
+## written by Liam J. Revell 2015, 2016
 cophylo<-function(tr1,tr2,assoc=NULL,rotate=TRUE,...){
 	if(!inherits(tr1,"phylo")||!inherits(tr2,"phylo")) 
 		stop("tr1 & tr2 should be objects of class \"phylo\".")
 	## hack to make sure tip labels of each tree are in cladewise order
-	tr1<-read.tree(text=write.tree(tr1))
-	tr2<-read.tree(text=write.tree(tr2))
+	tr1<-untangle(tr1,"read.tree")
+	tr2<-untangle(tr2,"read.tree")
 	## if no association matrix check for exact matches
 	if(is.null(assoc)){
 		assoc<-intersect(tr1$tip.label,tr2$tip.label)
@@ -14,6 +14,17 @@ cophylo<-function(tr1,tr2,assoc=NULL,rotate=TRUE,...){
 			cat("No associations provided or found.\n")
 			rotate<-FALSE
 		}
+	}
+	## check to verify that all taxa in assoc are in tree
+	ii<-sapply(assoc[,1],"%in%",tr1$tip.label)
+	if(any(!ii)){ 
+		assoc<-assoc[ii,]
+		cat("Some species in assoc[,1] not in tr1. Removing species & links.\n")
+	}
+	ii<-sapply(assoc[,2],"%in%",tr2$tip.label)
+	if(any(!ii)){ 
+		assoc<-assoc[ii,]
+		cat("Some species in assoc[,2] not in tr2. Removing species & links.\n")
 	}
 	## now check if rotation is to be performed
 	if(rotate){
@@ -80,7 +91,7 @@ phylogram<-function(tree,part=1,direction="rightwards",fsize=1,ftype="i",lwd=1,.
 		fsize*strwidth(tree$tip.label)
 	for(i in 1:n){ 
 		lines(d*c(X[which(cw$edge[,2]==i),2],h[i]),rep(y[i],2),lwd=1,lty="dotted")
-		if(pts) points(d*X[which(cw$edge[,2]==i),2],y[i],pch=16,cex=0.7*sqrt(lwd))
+		if(pts) points(d*X[which(cw$edge[,2]==i),2],y[i],pch=16,cex=pts*0.7*sqrt(lwd))
 	}
 	## plot tip labels
 	font<-which(c("off","reg","b","i","bi")==ftype)-1
@@ -113,7 +124,7 @@ makelinks<-function(obj,x){
 }
 
 ## plot an object of class "cophylo"
-## written by Liam J. Revell 2015
+## written by Liam J. Revell 2015, 2016
 plot.cophylo<-function(x,...){
 	plot.new()
 	if(hasArg(mar)) mar<-list(...)$mar
@@ -124,17 +135,25 @@ plot.cophylo<-function(x,...){
 	else scale.bar<-rep(0,2)
 	if(hasArg(ylim)) ylim<-list(...)$ylim
 	else ylim<-if(any(scale.bar>0)) c(-0.1,1) else c(0,1)
-	if(hasArg(fsize)) fsize<-list(...)$fsize
-	else fsize<-1
+	obj<-list(...)
 	par(mar=mar)
 	plot.window(xlim=xlim,ylim=ylim)
-	x1<-phylogram(x$trees[[1]],part=0.4,...)
+	leftArgs<-rightArgs<-obj
+	if(!is.null(obj$fsize)){
+		if(length(obj$fsize)>1){
+			leftArgs$fsize<-obj$fsize[1]
+			rightArgs$fsize<-obj$fsize[2]
+			sb.fsize<- if(length(obj$fsize)>2) obj$fsize[3] else 1
+		} else sb.fsize<-1
+	} else sb.fsize<-1
+	x1<-do.call("phylogram",c(list(tree=x$trees[[1]],part=0.4),leftArgs))
 	left<-get("last_plot.phylo",envir=.PlotPhyloEnv)
-	x2<-phylogram(x$trees[[2]],part=0.4,direction="leftwards",...)
+	x2<-do.call("phylogram",c(list(tree=x$trees[[2]],part=0.4,
+		direction="leftwards"),rightArgs))
 	right<-get("last_plot.phylo",envir=.PlotPhyloEnv)
 	if(!is.null(x$assoc)) makelinks(x,c(x1,x2))
 	else cat("No associations provided.\n")
-	if(any(scale.bar>0)) add.scalebar(x,scale.bar,fsize)
+	if(any(scale.bar>0)) add.scalebar(x,scale.bar,sb.fsize)
 	assign("last_plot.cophylo",list(left=left,right=right),envir=.PlotPhyloEnv)
 }
 

@@ -1,5 +1,5 @@
 # function plots posterior density of mapped states from stochastic mapping
-# written by Liam J. Revell 2012, 2013, 2014, 2015
+# written by Liam J. Revell 2012, 2013, 2014, 2015, 2016
 
 densityMap<-function(trees,res=100,fsize=NULL,ftype=NULL,lwd=3,check=FALSE,legend=NULL,
 	outline=FALSE,type="phylogram",direction="rightwards",plot=TRUE,...){
@@ -38,6 +38,7 @@ densityMap<-function(trees,res=100,fsize=NULL,ftype=NULL,lwd=3,check=FALSE,legen
 	}	
 	H<-nodeHeights(tree)
 	message("sorry - this might take a while; please be patient")
+	tree$maps<-vector(mode="list",length=nrow(tree$edge))
 	for(i in 1:nrow(tree$edge)){
 		YY<-cbind(c(H[i,1],steps[intersect(which(steps>H[i,1]),which(steps<H[i,2]))]),
 			c(steps[intersect(which(steps>H[i,1]),which(steps<H[i,2]))],H[i,2]))-H[i,1]
@@ -150,8 +151,10 @@ plot.densityMap<-function(x,...){
 			}
 			dig<-max(sapply(strsplit(leg.txt[c(1,3)],split=""),ff))
 			add.color.bar(legend,cols,title=leg.txt[2],lims<-as.numeric(leg.txt[c(1,3)]),
-				digits=dig,prompt=FALSE,x=0,y=1-0.08*(N-1),lwd=lwd[2],
-				fsize=fsize[2],direction=direction)
+				digits=dig,prompt=FALSE,x=if(direction=="leftwards") max(H)-legend else 0,
+				y=1-0.08*(N-1),lwd=lwd[2],
+				fsize=fsize[2],
+				direction=if(!is.null(xlim)) if(xlim[2]<xlim[1]) "leftwards" else "rightwards" else "rightwards")
 		}
 	} else if(type=="fan"){
 		if(outline){
