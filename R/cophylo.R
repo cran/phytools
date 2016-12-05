@@ -3,6 +3,10 @@
 cophylo<-function(tr1,tr2,assoc=NULL,rotate=TRUE,...){
 	if(!inherits(tr1,"phylo")||!inherits(tr2,"phylo")) 
 		stop("tr1 & tr2 should be objects of class \"phylo\".")
+	## check optional arguments
+	if(hasArg(methods)) methods<-list(...)$methods
+	else methods<-"pre"
+	if("exhaustive"%in%methods) methods<-"exhaustive"
 	## hack to make sure tip labels of each tree are in cladewise order
 	tr1<-untangle(tr1,"read.tree")
 	tr2<-untangle(tr2,"read.tree")
@@ -30,26 +34,78 @@ cophylo<-function(tr1,tr2,assoc=NULL,rotate=TRUE,...){
 	if(rotate){
 		cat("Rotating nodes to optimize matching...\n")
 		flush.console()
-		x<-setNames(sapply(assoc[,2],match,table=tr2$tip.label),assoc[,1])
-		tr1<-tipRotate(tr1,x*Ntip(tr1)/Ntip(tr2),...)
-		best.tr1<-Inf
-		x<-setNames(sapply(assoc[,1],match,table=tr1$tip.label),assoc[,2])
-		tr2<-tipRotate(tr2,x*Ntip(tr2)/Ntip(tr1),...)
-		best.tr2<-Inf
-		while((best.tr2-attr(tr2,"minRotate"))>0||(best.tr1-attr(tr1,"minRotate"))>0){
-			best.tr1<-attr(tr1,"minRotate")
-			best.tr2<-attr(tr2,"minRotate")
+		if("exhaustive"%in%methods){
+			tt1<-allRotations(tr1)
+			tt2<-allRotations(tr2)
+			M1<-M2<-matrix(NA,length(tt1),length(tt2))
+			for(i in 1:length(tt1)){
+				for(j in 1:length(tt2)){
+					x<-setNames(sapply(assoc[,2],match,table=tt2[[j]]$tip.label),assoc[,1])
+					y<-setNames(sapply(assoc[,1],match,table=tt1[[i]]$tip.label),assoc[,2])
+					M1[i,j]<-attr(tipRotate(tt1[[i]],x*Ntip(tr1)/Ntip(tr2),methods="just.compute"),"minRotate")
+					M2[i,j]<-attr(tipRotate(tt2[[j]],y*Ntip(tr2)/Ntip(tr1),methods="just.compute"),"minRotate")
+				}
+			}
+			MM<-M1+M2
+			ij<-which(MM==min(MM),arr.ind=TRUE)
+			obj<-list()
+			for(i in 1:nrow(ij)){
+				tr1<-tt1[[ij[i,1]]]
+				attr(tr1,"minRotate")<-M1[ij[i,]]
+				tr2<-tt2[[ij[i,2]]]
+				attr(tr2,"minRotate")<-M2[ij[i,]]
+				tt<-list(tr1,tr2)
+				class(tt)<-"multiPhylo"
+				obj[[i]]<-list(trees=tt,assoc=assoc)
+				class(obj[[i]])<-"cophylo"
+			}
+			if(length(obj)>1) class(obj)<-"multiCophylo"
+			else obj<-obj[[1]]
+		} else if ("all"%in%methods){
+			tt1<-allRotations(tr1)
+			tt2<-allRotations(tr2)
+			obj<-vector(mode="list",length=length(tt1)*length(tt2))
+			ij<-1
+			for(i in 1:length(tt1)){
+				for(j in 1:length(tt2)){
+					x<-setNames(sapply(assoc[,2],match,table=tt2[[j]]$tip.label),assoc[,1])
+					y<-setNames(sapply(assoc[,1],match,table=tt1[[i]]$tip.label),assoc[,2])
+					obj[[ij]]<-list(trees=c(
+						tipRotate(tt1[[i]],x*Ntip(tr1)/Ntip(tr2),methods="just.compute"),
+						tipRotate(tt2[[j]],y*Ntip(tr2)/Ntip(tr1),methods="just.compute")),
+						assoc=assoc)
+					class(obj[[ij]])<-"cophylo"
+					ij<-ij+1
+				}
+			}
+			class(obj)<-"multiCophylo"
+		} else {
 			x<-setNames(sapply(assoc[,2],match,table=tr2$tip.label),assoc[,1])
-			tr1<-tipRotate(tr1,x*Ntip(tr1)/Ntip(tr2),...)
+			tr1<-tipRotate(tr1,x*Ntip(tr1)/Ntip(tr2),right=tr2,assoc=assoc,...)
+			best.tr1<-Inf
 			x<-setNames(sapply(assoc[,1],match,table=tr1$tip.label),assoc[,2])
-			tr2<-tipRotate(tr2,x*Ntip(tr2)/Ntip(tr1),...)
+			tr2<-tipRotate(tr2,x*Ntip(tr2)/Ntip(tr1),left=tr1,assoc=assoc,...)
+			best.tr2<-Inf
+			while((best.tr2-attr(tr2,"minRotate"))>0||(best.tr1-attr(tr1,"minRotate"))>0){
+				best.tr1<-attr(tr1,"minRotate")
+				best.tr2<-attr(tr2,"minRotate")
+				x<-setNames(sapply(assoc[,2],match,table=tr2$tip.label),assoc[,1])
+				tr1<-tipRotate(tr1,x*Ntip(tr1)/Ntip(tr2),right=tr2,assoc=assoc,...)
+				x<-setNames(sapply(assoc[,1],match,table=tr1$tip.label),assoc[,2])
+				tr2<-tipRotate(tr2,x*Ntip(tr2)/Ntip(tr1),left=tr1,assoc=assoc,...)
+			}
+			tt<-list(tr1,tr2)
+			class(tt)<-"multiPhylo"
+			obj<-list(trees=tt,assoc=assoc)
+			class(obj)<-"cophylo"
 		}
 		cat("Done.\n")
+	} else {
+		tt<-list(tr1,tr2)
+		class(tt)<-"multiPhylo"
+		obj<-list(trees=tt,assoc=assoc)
+		class(obj)<-"cophylo"
 	}
-	tt<-list(tr1,tr2)
-	class(tt)<-"multiPhylo"
-	obj<-list(trees=tt,assoc=assoc)
-	class(obj)<-"cophylo"
 	obj
 }
 
@@ -59,6 +115,8 @@ phylogram<-function(tree,part=1,direction="rightwards",fsize=1,ftype="i",lwd=1,.
 	if(hasArg(pts)) pts<-list(...)$pts
 	else pts<-TRUE
 	d<-if(direction=="rightwards") 1 else -1
+	## sub "_" for " "
+	tree$tip.label<-gsub("_"," ",tree$tip.label)
 	## check if edge lenths
 	if(is.null(tree$edge.length)) tree<-compute.brlen(tree)
 	## rescale tree so it fits in one half of the plot
@@ -97,7 +155,7 @@ phylogram<-function(tree,part=1,direction="rightwards",fsize=1,ftype="i",lwd=1,.
 	font<-which(c("off","reg","b","i","bi")==ftype)-1
 	if(font>0){
 		for(i in 1:n) text(d*max(h+fsize*strwidth(tree$tip.label)),y[i],
-			sub("_"," ",tree$tip.label[i]), pos=if(d<0) 4 else 2,offset=0,
+			tree$tip.label[i], pos=if(d<0) 4 else 2,offset=0,
 			cex=fsize,font=font)
 	}
 	PP<-list(type="phylogram",use.edge.length=TRUE,node.pos=1,
@@ -113,14 +171,27 @@ phylogram<-function(tree,part=1,direction="rightwards",fsize=1,ftype="i",lwd=1,.
 }
 
 ## plot links between tip taxa according to assoc
-## written by Liam J. Revell 2015
-makelinks<-function(obj,x){
+## written by Liam J. Revell 2015, 2016
+makelinks<-function(obj,x,link.type="curved",link.lwd=1,link.col="black",
+	link.lty="dashed"){
+	if(length(link.lwd)==1) link.lwd<-rep(link.lwd,nrow(obj$assoc))
+	if(length(link.col)==1) link.col<-rep(link.col,nrow(obj$assoc))
+	if(length(link.lty)==1) link.lty<-rep(link.lty,nrow(obj$assoc))
 	for(i in 1:nrow(obj$assoc)){
 		ii<-which(obj$trees[[1]]$tip.label==obj$assoc[i,1])
 		jj<-which(obj$trees[[2]]$tip.label==obj$assoc[i,2])
 		y<-c((ii-1)/(Ntip(obj$trees[[1]])-1),(jj-1)/(Ntip(obj$trees[[2]])-1))
-		lines(x,y,lty="dashed")
+		if(link.type=="straight") lines(x,y,lty=link.lty[i],
+			lwd=link.lwd[i],col=link.col[i])
+		else if(link.type=="curved") drawCurve(x,y,lty=link.lty[i],
+			lwd=link.lwd[i],col=link.col[i])
 	}
+}
+
+## plot method for class "multiCophylo"
+plot.multiCophylo<-function(x,...){
+	par(ask=TRUE)
+	for(i in 1:length(x)) plot.cophylo(x[[i]],...)
 }
 
 ## plot an object of class "cophylo"
@@ -135,6 +206,14 @@ plot.cophylo<-function(x,...){
 	else scale.bar<-rep(0,2)
 	if(hasArg(ylim)) ylim<-list(...)$ylim
 	else ylim<-if(any(scale.bar>0)) c(-0.1,1) else c(0,1)
+	if(hasArg(link.type)) link.type<-list(...)$link.type
+	else link.type<-"straight"
+	if(hasArg(link.lwd)) link.lwd<-list(...)$link.lwd
+	else link.lwd<-1
+	if(hasArg(link.col)) link.col<-list(...)$link.col
+	else link.col<-"black"
+	if(hasArg(link.lty))  link.lty<-list(...)$link.lty
+	else link.lty<-"dashed"
 	obj<-list(...)
 	par(mar=mar)
 	plot.window(xlim=xlim,ylim=ylim)
@@ -151,7 +230,8 @@ plot.cophylo<-function(x,...){
 	x2<-do.call("phylogram",c(list(tree=x$trees[[2]],part=0.4,
 		direction="leftwards"),rightArgs))
 	right<-get("last_plot.phylo",envir=.PlotPhyloEnv)
-	if(!is.null(x$assoc)) makelinks(x,c(x1,x2))
+	if(!is.null(x$assoc)) makelinks(x,c(x1,x2),link.type,link.lwd,link.col,
+		link.lty)
 	else cat("No associations provided.\n")
 	if(any(scale.bar>0)) add.scalebar(x,scale.bar,sb.fsize)
 	assign("last_plot.cophylo",list(left=left,right=right),envir=.PlotPhyloEnv)
@@ -184,36 +264,124 @@ print.cophylo<-function(x, ...){
     cat("(2) A table of associations between the tips of both trees.\n\n")
 }
 
-## written by Liam J. Revell 2015
+## print method for "multiCophylo" object
+print.multiCophylo<-function(x, ...)
+	cat("Object of class \"multiCophylo\" containg",length(x),"objects of class \"cophylo\".\n\n")
+
+## written by Liam J. Revell 2015, 2016
 tipRotate<-function(tree,x,...){
 	if(hasArg(fn)) fn<-list(...)$fn
 	else fn<-function(x) x^2
 	if(hasArg(methods)) methods<-list(...)$methods
 	else methods<-"pre"
+	if("exhaustive"%in%methods) methods<-"exhaustive"
 	if(hasArg(print)) print<-list(...)$print
 	else print<-FALSE
+	if(hasArg(max.exhaustive)) max.exhaustive<-list(...)$max.exhaustive
+	else max.exhaustive<-20
+	if(hasArg(rotate.multi)) rotate.multi<-list(...)$rotate.multi
+	else rotate.multi<-FALSE
+	if(rotate.multi) rotate.multi<-!is.binary.tree(tree)
+	if(hasArg(anim.cophylo)) anim.cophylo<-list(...)$anim.cophylo
+	else anim.cophylo<-FALSE
+	if(anim.cophylo){
+		if(hasArg(left)) left<-list(...)$left
+		else left<-NULL
+		if(hasArg(right)) right<-list(...)$right
+		else right<-NULL
+		if(hasArg(assoc)) assoc<-list(...)$assoc
+		else assoc<-NULL
+		if(is.null(left)&&is.null(right)) anim.cophylo<-FALSE
+		if(hasArg(only.accepted)) only.accepted<-list(...)$only.accepted
+		else only.accepted<-TRUE
+	}
 	tree<-reorder(tree)
 	nn<-1:tree$Nnode+length(tree$tip.label)
+	if("just.compute"%in%methods){
+		foo<-function(phy,x) sum(fn(x-setNames(1:length(phy$tip.label),phy$tip.label)[names(x)]))
+		oo<-pp<-foo(tree,x)
+	}
+	if("exhaustive"%in%methods){
+		if(Ntip(tree)>max.exhaustive){
+			cat(paste("\nmethods=\"exhaustive\" not permitted for more than",
+				max.exhaustive,"tips.\n",
+				"If you are sure you want to run an exhaustive search for a tree of this size\n",
+				"increasing argument max.exhaustive & re-run.\n",
+				"Setting methods to \"pre\".\n\n"))
+			methods<-"pre"
+		} else {
+			cat("Running exhaustive search. May be slow!\n")
+			oo<-Inf
+			tt<-allRotations(tree)
+			foo<-function(phy,x) sum(fn(x-setNames(1:length(phy$tip.label),phy$tip.label)[names(x)]))
+			pp<-sapply(tt,foo,x=x)
+			ii<-which(pp==min(pp))
+			ii<-if(length(ii)>1) sample(ii,1) else ii
+			tt<-tt[[ii]]
+			pp<-pp[ii]
+		}
+		if(print) message(paste("objective:",pp))
+		tree<-tt
+	}
+	ANIM.COPHYLO<-function(tree){
+		dev.hold()
+		if(is.null(left)) plot(cophylo(tree,right,assoc=assoc,rotate=FALSE),...)
+		else if(is.null(right)) plot(cophylo(left,tree,assoc=assoc,rotate=FALSE),...)
+		nodelabels.cophylo(node=i+Ntip(tree),pie=1,col="red",cex=0.4,
+			which=if(is.null(left)) "left" else "right")
+		dev.flush()
+	}
 	if("pre"%in%methods){
 		for(i in 1:tree$Nnode){
-			tt<-read.tree(text=write.tree(rotate(tree,nn[i])))
+			if(anim.cophylo) ANIM.COPHYLO(tree)
+			tt<-if(rotate.multi) rotate.multi(tree,nn[i]) else untangle(rotate(tree,nn[i]),"read.tree")
 			oo<-sum(fn(x-setNames(1:length(tree$tip.label),tree$tip.label)[names(x)]))
-			pp<-sum(fn(x-setNames(1:length(tt$tip.label),tt$tip.label)[names(x)]))
+			if(inherits(tt,"phylo")) pp<-sum(fn(x-setNames(1:length(tt$tip.label),tt$tip.label)[names(x)]))
+			if(anim.cophylo&&!only.accepted) ANIM.COPHYLO(tt)
+			else if(inherits(tt,"multiPhylo")){
+				foo<-function(phy,x) sum(fn(x-setNames(1:length(phy$tip.label),phy$tip.label)[names(x)]))
+				pp<-sapply(tt,foo,x=x)
+				if(anim.cophylo&&!only.accepted) nulo<-lapply(tt,ANIM.COPHYLO)
+				ii<-which(pp==min(pp))
+				ii<-if(length(ii)>1) sample(ii,1) else ii
+				tt<-tt[[ii]]
+				pp<-pp[ii]
+			}
 			if(oo>pp) tree<-tt
 			if(print) message(paste("objective:",min(oo,pp)))
 		}
 	}
 	if("post"%in%methods){
 		for(i in tree$Nnode:1){
-			tt<-read.tree(text=write.tree(rotate(tree,nn[i])))
+			if(anim.cophylo) ANIM.COPHYLO(tree)
+			tt<-if(rotate.multi) rotate.multi(tree,nn[i]) else untangle(rotate(tree,nn[i]),"read.tree")
 			oo<-sum(fn(x-setNames(1:length(tree$tip.label),tree$tip.label)[names(x)]))
-			pp<-sum(fn(x-setNames(1:length(tt$tip.label),tt$tip.label)[names(x)]))
+			if(inherits(tt,"phylo")) pp<-sum(fn(x-setNames(1:length(tt$tip.label),tt$tip.label)[names(x)]))
+			if(anim.cophylo&&!only.accepted) ANIM.COPHYLO(tt)
+			else if(inherits(tt,"multiPhylo")){
+				foo<-function(phy,x) sum(fn(x-setNames(1:length(phy$tip.label),phy$tip.label)[names(x)]))
+				pp<-sapply(tt,foo,x=x)
+				if(anim.cophylo&&!only.accepted) nulo<-lapply(tt,ANIM.COPHYLO)
+				ii<-which(pp==min(pp))
+				ii<-if(length(ii)>1) sample(ii,1) else ii
+				tt<-tt[[ii]]
+				pp<-pp[ii]
+			}
 			if(oo>pp) tree<-tt
 			if(print) message(paste("objective:",min(oo,pp)))
 		}
 	}
 	attr(tree,"minRotate")<-min(oo,pp)
+	if(anim.cophylo) ANIM.COPHYLO(tree)
 	tree
+}
+
+## multi2di for "multiPhylo" object
+
+MULTI2DI<-function(x){
+	obj<-lapply(x,multi2di)
+	class(obj)<-"multiPhylo"
+	obj
 }
 
 ## labeling methods for plotted "cophylo" object
@@ -239,3 +407,36 @@ tiplabels.cophylo<-function(...,which=c("left","right")){
 	else if(which[1]=="right") assign("last_plot.phylo",obj[[2]],envir=.PlotPhyloEnv)
 	tiplabels(...)
 }
+
+## function to draw sigmoidal links
+## modified from https://stackoverflow.com/questions/32046889/connecting-two-points-with-curved-lines-s-ish-curve-in-r
+
+drawCurve<-function(x,y,scale=0.01,...){
+	x1<-x[1]
+	x2<-x[2]
+	y1<-y[1]
+	y2<-y[2]
+	curve(plogis(x,scale=scale,location=(x1+x2)/2)*(y2-y1)+y1, 
+		x1,x2,add=TRUE,...)
+}
+
+## S3 summary method
+## written by Liam J. Revell 2016
+
+summary.cophylo<-function(object,...){
+	cat("\nCo-phylogenetic (\"cophylo\") object:",deparse(substitute(object)),
+		"\n\n")
+	cat(paste("Tree 1 (left tree) is an object of class \"phylo\" containing",
+		Ntip(object$trees[[1]]),"species.\n\n"))
+	cat(paste("Tree 2 (right tree) is an object of class \"phylo\" containing",
+		Ntip(object$trees[[2]]),"species.\n\n"))
+	cat("Association (assoc) table as follows:\n\n")
+	maxl<-max(sapply(strsplit(object$assoc[,1],""),length))
+	cat(paste("\tleft:",paste(rep(" ",maxl-5),collapse=""),
+		"\t----\tright:\n",sep=""))
+	nulo<-apply(object$assoc,1,function(x,maxl) cat(paste("\t",x[1],
+		paste(rep(" ",maxl-length(strsplit(x[1],split="")[[1]])),
+		collapse=""),"\t----\t",x[2],"\n",sep="")),maxl=maxl)
+	cat("\n")
+}
+

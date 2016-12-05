@@ -1,13 +1,13 @@
 Package: phytools
-Version: 0.5-38
-Date: 2016-6-23
+Version: 0.5-64
+Date: 2016-12-5
 Title: Phylogenetic Tools for Comparative Biology (and Other Things)
 Author: Liam J. Revell
 Maintainer: Liam J. Revell <liam.revell@umb.edu>
-Depends: R (>= 2.10), ape (>= 3.0-10), maps
-Imports: animation, clusterGeneration, graphics, grDevices, methods,
-        mnormt, msm, numDeriv, phangorn (>= 2.0.4), plotrix,
-        scatterplot3d, stats, utils
+Depends: R (>= 3.2.0), ape (>= 4.0), maps
+Imports: animation, clusterGeneration, coda, combinat, graphics,
+        grDevices, methods, mnormt, msm, numDeriv, phangorn (>= 2.1.1),
+        plotrix, scatterplot3d, stats, utils
 Suggests: geiger, rgl
 ZipData: no
 Description: Package contains various functions for phylogenetic analysis.
@@ -34,10 +34,11 @@ Description: Package contains various functions for phylogenetic analysis.
 	regression, a reduced major axis regression, a phylogenetic
 	canonical correlation analysis, and a phylogenetic ANOVA; projecting 
 	a tree onto a geographic map; simulating discrete character 
-	histories on the tree; and fitting a model in which a discrete 
-	character evolves under the threshold model. In addition to this 
-	phylogenetic comparative method functionality, the package also 
-	contains functions for a wide range of other purposes in 
+	histories on the tree; fitting a model in which a discrete character 
+	evolves under the threshold model; visualization of cospeciation; a 
+	simple statistical test for cospeciation between two trees. In 
+	addition to this phylogenetic comparative method functionality, the 
+	package also contains functions for a wide range of other purposes in 
 	phylogenetic biology. For instance, functionality in this package 
 	includes (but is not restricted to): adding taxa to a tree 
 	(including randomly, everywhere, or automatically to genera); 
@@ -47,13 +48,15 @@ Description: Package contains various functions for phylogenetic analysis.
 	XML file; converting a tree with a mapped character to a tree with
 	singleton nodes and one character state per edge; estimating a
 	phylogeny using the least squares method; simulating birth-death
-	trees under a range of conditions; rerooting trees; a wide range
-	of visualizations of trees; and a variety of other manipulations
-	and analyses that phylogenetic biologists may find useful for
-	their research.
+	trees under a range of conditions; rerooting trees; computing a 
+	consensus tree under multiple methods, including via minimization
+	of the distance to other trees in the set; a wide range of 
+	visualizations of trees; and a variety of other manipulations and 
+	analyses that phylogenetic biologists may find useful for their 
+	research.
 License: GPL (>= 2)
 URL: http://github.com/liamrevell/phytools
-Packaged: 2016-06-24 00:25:30 UTC; Liam
+Packaged: 2016-12-05 21:00:12 UTC; Liam
 Repository: CRAN
-Date/Publication: 2016-06-24 07:30:46
+Date/Publication: 2016-12-05 22:44:57
 NeedsCompilation: no

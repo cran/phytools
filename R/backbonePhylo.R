@@ -45,8 +45,10 @@ phylo.toBackbone<-function(x,trans=NULL,...){
 					x<-phylo.toBackbone(x,trans)
 				} else {
 					x$tip.clade[[obj$where]]<-list(label=as.character(clab),
-						N=N,depth=depth)
-					x$tip.label[obj$where]<-clab
+						N=N,depth=depth,
+						id=paste(sample(c(letters,LETTERS,0:9),6,replace=TRUE),
+						collapse=""))
+					x$tip.label[obj$where]<-x$tip.clade[[obj$where]]$id
 				}
 			} else {
 				if(clab=="") clab<-x$node.label[obj$where-Ntip(x)]
@@ -102,18 +104,22 @@ phylo.toBackbone<-function(x,trans=NULL,...){
 					x$tip.clade[[i]]$N<-1
 					x$tip.clade[[i]]$depth<-x$edge.length[which(x$edge[,2]==i)]
 				}
+				x$tip.clade[[i]]$id<-paste(sample(c(letters,LETTERS,0:9),6,
+					replace=TRUE),collapse="")
 			}
-			x$tip.label<-sapply(x$tip.clade,function(y) as.character(y$label))
+			x$tip.label<-sapply(x$tip.clade,function(y) y$id)
 			class(x)<-c("backbonePhylo","phylo")
 		} else {
 			for(i in 1:nrow(trans)){
 				ii<-which(x$tip.label==trans$tip.label[i])
-				x$tip.label[ii]<-as.character(trans$clade.label[i])
+				tmp<-as.character(trans$clade.label[i])
 				x$tip.clade[[length(x$tip.clade)+1]]<-
-					list(label=as.character(trans$clade.label[i]),
-					N=trans$N[i],depth=trans$depth[i])
-				clade.label<-sapply(x$tip.clade,function(y) y$label)
-				ii<-sapply(clade.label,function(x,y) if(x%in%y) which(y==x) else -1,
+					list(label=tmp,N=trans$N[i],depth=trans$depth[i],
+					id=paste(sample(c(letters,LETTERS,0:9),6,replace=TRUE),
+					collapse=""))
+				x$tip.label[ii]<-x$tip.clade[[length(x$tip.clade)]]$id
+				clade.id<-sapply(x$tip.clade,function(y) y$id)
+				ii<-sapply(clade.id,function(x,y) if(x%in%y) which(y==x) else -1,
 					y=x$tip.label)
 				x$tip.clade<-x$tip.clade[ii>0]
 				x$tip.clade<-x$tip.clade[ii[ii>0]]
@@ -172,11 +178,48 @@ plot.backbonePhylo<-function(x,...){
 	if(length(col)!=Ntip(x)){ 
 		if(!is.null(names(col))){ 
 			tmp<-setNames(rep("grey",Ntip(x)),sapply(x$tip.clade,function(x) x$label))
-			tmp[names(col)]<-col
+			for(i in 1:length(col)) tmp[which(names(tmp)==names(col)[i])]<-col[i]
 			col<-tmp
-		} else col<-setNames(rep(col[1],Ntip(x)),sapply(x$tip.clade,function(x) x$label))
+		} else col<-setNames(rep(col[1],Ntip(x)),sapply(x$tip.clade,
+			function(x) x$label))
 	}
-	if(is.null(names(col))) names(col)<-sapply(x$tip.clade,function(x) x$label)
+	if(is.null(names(col))) names(col)<-sapply(x$tip.clade,
+		function(x) x$label)
+	col<-col[sapply(x$tip.clade,function(x) x$label)]
+	names(col)<-sapply(x$tip.clade,function(x) x$id)
+	if(hasArg(lwd)) lwd<-list(...)$lwd
+	else lwd<-2
+	if(hasArg(sep)) sep<-list(...)$sep
+	else sep<-1
+	if(hasArg(fixed.height)) fixed.height<-list(...)$fixed.height
+	else fixed.height<-FALSE
+	if(hasArg(print.clade.size)) 
+		print.clade.size<-list(...)$print.clade.size
+	else print.clade.size<-FALSE
+	if(hasArg(fixed.n1)) fixed.n1<-list(...)$fixed.n1
+	else fixed.n1<-FALSE
+	if(hasArg(xlim)) xlim<-list(...)$xlim
+	else xlim<-NULL
+	if(hasArg(ylim)) ylim<-list(...)$ylim
+	else ylim<-NULL
+	if(fixed.height||print.clade.size){
+		obj<-x
+		for(i in 1:Ntip(obj)){
+			if(print.clade.size){
+					obj$tip.clade[[i]]$label<-if(x$tip.clade[[i]]$N>1||fixed.n1)
+						paste(x$tip.clade[[i]]$label," (n=",
+						x$tip.clade[[i]]$N,")",sep="")
+						else x$tip.clade[[i]]$label
+					ii<-which(names(col)==x$tip.clade[[i]]$label)
+					names(col)[ii]<-obj$tip.clade[[i]]$label
+			}
+			if(fixed.height)
+				obj$tip.clade[[i]]$N<-if(x$tip.clade[[i]]$N>1||fixed.n1) 
+					sum(sapply(x$tip.clade,function(y) y$N))/Ntip(x)
+					else 1
+		}
+		x<-obj
+	}
 	x<-scaleN(x,vscale)
 	tt<-backbone.toPhylo(x)
 	n<-sum(sapply(x$tip.clade,function(x) x$N))
@@ -202,27 +245,33 @@ plot.backbonePhylo<-function(x,...){
 		units="inches")))+1.37*par("cex")*strwidth("W",units="inches")
 	alp<-optimize(function(a,H,sw,pp) (a*1.04*max(H)+sw-pp)^2,H=X,sw=sw,pp=pp,
 		interval=c(0,1e6))$minimum
-	xlim<-c(min(X),max(X)+sw/alp)
-	plot.window(xlim=xlim,ylim=c(0,n))
+	if(is.null(xlim)) xlim<-c(min(X),max(X)+sw/alp)
+	if(is.null(ylim)) ylim<-c(0,n)
+	plot.window(xlim=xlim,ylim=ylim)
 	# plot horizontal edges
 	for(i in 1:nrow(X)){
 		if(cw$edge[i,2]>length(cw$tip.clade)) lines(X[i,],rep(y[cw$edge[i,2]],2),
-			lwd=2,lend=2)
+			lwd=lwd,lend=2)
 		else lines(c(X[i,1],X[i,2]-cw$tip.clade[[cw$edge[i,2]]]$depth),
-			rep(y[cw$edge[i,2]],2),lwd=2,lend=2)
+			rep(y[cw$edge[i,2]],2),lwd=lwd,lend=2)
 	}
 	# plot vertical relationships
 	for(i in 1:x$Nnode+length(x$tip.clade)) lines(X[which(cw$edge[,1]==i),1],
-		range(y[cw$edge[which(cw$edge[,1]==i),2]]),lwd=2,lend=2)
+		range(y[cw$edge[which(cw$edge[,1]==i),2]]),lwd=lwd,lend=2)
 	for(i in 1:length(x$tip.clade)){
+		if(x$tip.clade[[i]]$N==1){
+			tmp<-sep
+			sep<-1
+		} else tmp<-sep
 		xx<-c(X[which(cw$edge[,2]==i),2]-cw$tip.clade[[i]]$depth,
 			X[which(cw$edge[,2]==i),2],X[which(cw$edge[,2]==i),2])
 		yy<-c(y[cw$edge[which(cw$edge[,2]==i),2]],
 			y[cw$edge[which(cw$edge[,2]==i),2]]+cw$tip.clade[[i]]$N/2-
-			0.5,y[cw$edge[which(cw$edge[,2]==i),2]]-
-			cw$tip.clade[[i]]$N/2+0.5)
+			sep/2,y[cw$edge[which(cw$edge[,2]==i),2]]-
+			cw$tip.clade[[i]]$N/2+sep/2)
 		if(yy[2]<yy[3]) yy[2]<-yy[3]<-yy[1]
-		polygon(x=xx,y=yy,col=col[cw$tip.clade[[i]]$label],lwd=2)
+		polygon(x=xx,y=yy,col=col[cw$tip.clade[[i]]$id],lwd=lwd)
+		sep<-tmp
 	}
 	for(i in 1:length(cw$tip.clade)) 
 		text(X[which(cw$edge[,2]==i),2],y[i],cw$tip.clade[[i]]$label,pos=4,

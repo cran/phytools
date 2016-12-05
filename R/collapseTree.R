@@ -1,6 +1,6 @@
 ## function to interactively expand and contract subtrees on a phylogeny
 ## inspired by the phylogeny interface of sharksrays.org by Gavin Naylor
-## written by Liam J. Revell 2015
+## written by Liam J. Revell 2015, 2016
 
 collapseTree<-function(tree,...){
 	if(!inherits(tree,"phylo")) stop("tree should be an object of class \"phylo\".")
@@ -28,11 +28,11 @@ collapseTree<-function(tree,...){
 	if(hold) dev.hold()
 	fan(tree,...)
 	lastPP<-get("last_plot.phylo",envir=.PlotPhyloEnv)
-	circles(x=lastPP$xx[1:Ntip(tree)],y=lastPP$yy[1:Ntip(tree)],
-		r=0.004*(par()$usr[2]-par()$usr[1]))
-	circles(x=lastPP$xx[1:tree$Nnode+Ntip(tree)],
-		y=lastPP$yy[1:tree$Nnode+Ntip(tree)],
-		r=0.007*(par()$usr[2]-par()$usr[1]))
+	points(x=lastPP$xx[1:Ntip(tree)],y=lastPP$yy[1:Ntip(tree)],
+		pch=21,col="blue",bg="white",cex=0.8)
+	points(x=lastPP$xx[1:tree$Nnode+Ntip(tree)],
+		y=lastPP$yy[1:tree$Nnode+Ntip(tree)],pch=21,
+		col="blue",bg="white",cex=1.2)
 	check<-textbox(x=c(par()$usr[1],par()$usr[1]+
 		0.1*(par()$usr[2]-par()$usr[1])),
 		y=par()$usr[4],c("click to stop"),justify="c")
@@ -74,11 +74,11 @@ collapseTree<-function(tree,...){
 					tips=M[i,],maxY=maxY[i],...)
 				if(nodes||i==nrow(M)){
 					lastPP<-get("last_plot.phylo",envir=.PlotPhyloEnv)
-					circles(x=lastPP$xx[1:Ntip(tree)],y=lastPP$yy[1:Ntip(tree)],
-						r=0.004*(par()$usr[2]-par()$usr[1]))
-					circles(x=lastPP$xx[1:tree$Nnode+Ntip(tree)],
-						y=lastPP$yy[1:tree$Nnode+Ntip(tree)],
-						r=0.007*(par()$usr[2]-par()$usr[1]))
+					points(x=lastPP$xx[1:Ntip(tree)],y=lastPP$yy[1:Ntip(tree)],
+						pch=21,col="blue",bg="white",cex=0.8)
+					points(x=lastPP$xx[1:tree$Nnode+Ntip(tree)],
+						y=lastPP$yy[1:tree$Nnode+Ntip(tree)],pch=21,
+						col="blue",bg="white",cex=1.2)
 				}
 				dev.flush()
 			}
@@ -104,11 +104,11 @@ collapseTree<-function(tree,...){
 						tips=M[i,],maxY=NULL,...)
 					if(nodes||i==nrow(M)){
 						lastPP<-get("last_plot.phylo",envir=.PlotPhyloEnv)
-						circles(x=lastPP$xx[1:Ntip(tree)],y=lastPP$yy[1:Ntip(tree)],
-							r=0.004*(par()$usr[2]-par()$usr[1]))
-						circles(x=lastPP$xx[1:tree$Nnode+Ntip(tree)],
-							y=lastPP$yy[1:tree$Nnode+Ntip(tree)],
-							r=0.007*(par()$usr[2]-par()$usr[1]))
+						points(x=lastPP$xx[1:Ntip(tree)],y=lastPP$yy[1:Ntip(tree)],
+							pch=21,col="blue",bg="white",cex=0.8)
+						points(x=lastPP$xx[1:tree$Nnode+Ntip(tree)],
+							y=lastPP$yy[1:tree$Nnode+Ntip(tree)],pch=21,
+							col="blue",bg="white",cex=1.2)
 					}
 					dev.flush()
 				}
@@ -130,7 +130,8 @@ collapseTree<-function(tree,...){
 	## turn locator bell back on
 	options(locatorBell=TRUE)
 	if(drop.extinct){ 
-		if(!is.ultrametric(otree)) cat("Input tree was not ultrametric. Ignoring argument drop.extinct.\n")
+		if(!is.ultrametric(otree)) 
+			cat("Input tree was not ultrametric. Ignoring argument drop.extinct.\n")
 		else { 
 			th<-setNames(sapply(1:Ntip(tree),nodeheight,tree=tree),tree$tip.label)
 			tips<-names(th)[which(th<(mean(sapply(1:Ntip(otree),
@@ -142,7 +143,8 @@ collapseTree<-function(tree,...){
 }
 
 circles<-function(x,y,r,col="blue")
-	draw.circle(x,y,radius=r,border=col,col="white",nv=20)
+	nulo<-mapply(draw.circle,x=x,y=y,radius=r,MoreArgs=list(border=col,
+		col="white",nv=20))
 
 # simplified function to plot tree in type "fan"
 # written by Liam J. Revell 2015

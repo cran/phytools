@@ -4,12 +4,12 @@
 plotSimmap<-function(tree,colors=NULL,fsize=1.0,ftype="reg",lwd=2,
 	pts=FALSE,node.numbers=FALSE,mar=NULL,add=FALSE,offset=NULL,direction="rightwards",
 	type="phylogram",setEnv=TRUE,part=1.0,xlim=NULL,ylim=NULL,nodes="intermediate",
-	tips=NULL,maxY=NULL,hold=TRUE,split.vertical=FALSE){
+	tips=NULL,maxY=NULL,hold=TRUE,split.vertical=FALSE,lend=2){
 	if(inherits(tree,"multiPhylo")){
 		par(ask=TRUE)
 		for(i in 1:length(tree)) plotSimmap(tree[[i]],colors=colors,fsize=fsize,ftype=ftype,
 			lwd=lwd,pts=pts,node.numbers=node.numbers,mar,add,offset,direction,type,
-			setEnv,part,xlim,ylim,nodes,tips,maxY,hold)
+			setEnv,part,xlim,ylim,nodes,tips,maxY,hold,split.vertical,lend)
 	} else {
 		# check tree
 		if(!inherits(tree,"phylo")) stop("tree should be object of class \"phylo\"")
@@ -34,9 +34,10 @@ plotSimmap<-function(tree,colors=NULL,fsize=1.0,ftype="reg",lwd=2,
 		if(hold) null<-dev.hold()
 		if(type=="phylogram"){
 			plotPhylogram(tree,colors,fsize,ftype,lwd,pts,node.numbers,mar,add,offset,
-				direction,setEnv,xlim,ylim,nodes,tips,split.vertical)
+				direction,setEnv,xlim,ylim,nodes,tips,split.vertical,lend)
 		} else if(type=="fan"){
-			plotFan(tree,colors,fsize,ftype,lwd,mar,add,part,setEnv,xlim,ylim,tips,maxY)
+			plotFan(tree,colors,fsize,ftype,lwd,mar,add,part,setEnv,xlim,ylim,tips,
+				maxY,lend)
 		}
 		if(hold) null<-dev.flush()
 	}
@@ -45,7 +46,7 @@ plotSimmap<-function(tree,colors=NULL,fsize=1.0,ftype="reg",lwd=2,
 # function to plot simmap tree in type "phylogram"
 # written by Liam J. Revell 2011-2015
 plotPhylogram<-function(tree,colors,fsize,ftype,lwd,pts,node.numbers,mar,
-	add,offset,direction,setEnv,xlim,ylim,placement,tips,split.vertical){
+	add,offset,direction,setEnv,xlim,ylim,placement,tips,split.vertical,lend){
 	# set offset fudge (empirically determined)
 	if(split.vertical&&!setEnv){
 		cat("split.vertical requires setEnv=TRUE. Setting split.vertical to FALSE.\n")
@@ -125,9 +126,9 @@ plotPhylogram<-function(tree,colors,fsize,ftype,lwd,pts,node.numbers,mar,
  		for(j in 1:length(cw$maps[[i]])){
 			if(direction=="leftwards")
 				lines(c(x,x-cw$maps[[i]][j]),c(Y[cw$edge[i,2]],Y[cw$edge[i,2]]),
-					col=colors[names(cw$maps[[i]])[j]],lwd=lwd,lend=2)
+					col=colors[names(cw$maps[[i]])[j]],lwd=lwd,lend=lend)
 			else lines(c(x,x+cw$maps[[i]][j]),c(Y[cw$edge[i,2]],Y[cw$edge[i,2]]),
-					col=colors[names(cw$maps[[i]])[j]],lwd=lwd,lend=2)
+					col=colors[names(cw$maps[[i]])[j]],lwd=lwd,lend=lend)
 			if(pts) points(c(x,x+cw$maps[[i]][j]),c(Y[cw$edge[i,2]],Y[cw$edge[i,2]]),
 				pch=20,lwd=(lwd-1))
 			x<-x+if(direction=="leftwards") -cw$maps[[i]][j] else cw$maps[[i]][j]
@@ -171,7 +172,7 @@ plotPhylogram<-function(tree,colors,fsize,ftype,lwd,pts,node.numbers,mar,
 
 # function to plot simmap tree in type "fan"
 # written by Liam J. Revell 2013-2015
-plotFan<-function(tree,colors,fsize,ftype,lwd,mar,add,part,setEnv,xlim,ylim,tips,maxY){
+plotFan<-function(tree,colors,fsize,ftype,lwd,mar,add,part,setEnv,xlim,ylim,tips,maxY,lend){
 	# reorder
 	cw<-reorder(tree)
 	pw<-reorder(tree,"pruningwise")
@@ -215,12 +216,29 @@ plotFan<-function(tree,colors,fsize,ftype,lwd,mar,add,part,setEnv,xlim,ylim,tips
 	if(!add) plot.new()
 	plot.window(xlim=xlim,ylim=ylim,asp=1)
 	# plot radial lines (edges)
+	## first, the lines emerging from the root (if there are only two):
+	jj<-which(cw$edge[,1]==(Ntip(cw)+1))
+	if(length(jj)==2){
+		m.left<-cumsum(cw$maps[[jj[1]]])/sum(cw$maps[[jj[1]]])
+		xx.left<-c(x[jj[1],1],x[jj[1],1]+(x[jj[1],2]-x[jj[1],1])*m.left)
+		yy.left<-c(y[jj[1],1],y[jj[1],1]+(y[jj[1],2]-y[jj[1],1])*m.left)
+		m.right<-cumsum(cw$maps[[jj[2]]])/sum(cw$maps[[jj[2]]])
+		xx.right<-c(x[jj[2],1],x[jj[2],1]+(x[jj[2],2]-x[jj[2],1])*m.right)
+		yy.right<-c(y[jj[2],1],y[jj[2],1]+(y[jj[2],2]-y[jj[2],1])*m.right)
+		xx<-c(xx.left[length(xx.left):1],xx.right[2:length(xx.right)])
+		yy<-c(yy.left[length(yy.left):1],yy.right[2:length(yy.right)])
+		col<-colors[c(names(m.left)[length(m.left):1],names(m.right))]
+		segments(xx[2:length(xx)-1],yy[2:length(yy)-1],xx[2:length(xx)],yy[2:length(yy)],
+			col=col,lwd=lwd,lend=lend)
+	} else jj<-NULL
 	for(i in 1:nrow(cw$edge)){
-		maps<-cumsum(cw$maps[[i]])/sum(cw$maps[[i]])
-		xx<-c(x[i,1],x[i,1]+(x[i,2]-x[i,1])*maps)
-		yy<-c(y[i,1],y[i,1]+(y[i,2]-y[i,1])*maps)
-		for(i in 1:(length(xx)-1)) lines(xx[i+0:1],yy[i+0:1],col=colors[names(maps)[i]],
-			lwd=lwd,lend=2)
+		if(i%in%jj==FALSE){
+			maps<-cumsum(cw$maps[[i]])/sum(cw$maps[[i]])
+			xx<-c(x[i,1],x[i,1]+(x[i,2]-x[i,1])*maps)
+			yy<-c(y[i,1],y[i,1]+(y[i,2]-y[i,1])*maps)
+			for(i in 1:(length(xx)-1)) lines(xx[i+0:1],yy[i+0:1],col=colors[names(maps)[i]],
+				lwd=lwd,lend=lend)
+		}
 	}
 	# plot circular lines
 	for(i in 1:m+n){
@@ -331,13 +349,15 @@ plotTree<-function(tree,...){
 	else maxY<-NULL
 	if(hasArg(hold)) hold<-list(...)$hold
 	else hold<-TRUE
+	if(hasArg(lend)) lend<-list(...)$lend
+	else lend<-2
 	if(inherits(tree,"multiPhylo")){
 		par(ask=TRUE)
 		if(!is.null(color)) names(color)<-"1"
 		for(i in 1:length(tree)) plotTree(tree[[i]],color=color,fsize=fsize,ftype=ftype,
 			lwd=lwd,pts=pts,node.numbers=node.numbers,mar=mar,add=add,offset=offset,
 			direction=direction,type=type,setEnv=setEnv,part=part,xlim=xlim,ylim=ylim,
-			nodes=nodes,tips=tips,maxY=maxY,hold=hold)
+			nodes=nodes,tips=tips,maxY=maxY,hold=hold,lend=lend)
 	} else {
 		if(is.null(tree$edge.length)) tree<-compute.brlen(tree)
 		tree$maps<-as.list(tree$edge.length)
@@ -346,7 +366,7 @@ plotTree<-function(tree,...){
 		plotSimmap(tree,colors=color,fsize=fsize,ftype=ftype,lwd=lwd,pts=pts,
 			node.numbers=node.numbers,mar=mar,add=add,offset=offset,direction=direction,
 			type=type,setEnv=setEnv,part=part,xlim=xlim,ylim=ylim,nodes=nodes,tips=tips,maxY=maxY,
-			hold=hold)
+			hold=hold,lend=lend)
 	}
 }
 

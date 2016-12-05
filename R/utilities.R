@@ -1,6 +1,126 @@
 # some utility functions
 # written by Liam J. Revell 2011, 2012, 2013, 2014, 2015, 2016
 
+## convert object of class "birthdeath" into birth & death rates
+bd<-function(x){
+	if(class(x)!="birthdeath") stop("x should be an object of class 'birthdeath'")
+	b<-x$para[2]/(1-x$para[1])
+	d<-b-x$para[2]
+	setNames(c(b,d),c("b","d"))
+}
+
+## compute AIC weights
+aic.w<-function(aic){
+	d.aic<-aic-min(aic)
+	x<-exp(-1/2*d.aic)/sum(exp(-1/2*d.aic))
+	class(x)<-"aic.w"
+	x
+}
+
+print.aic.w<-function(x,...){
+	if(hasArg(signif)) signif<-list(...)$signif
+	else signif<-8
+	print(round(unclass(x),signif))
+}
+
+## function to compute all paths towards the tips from a node
+## written by  Liam J. Revell
+node.paths<-function(tree,node){
+	d<-Descendants(tree,node,"children")
+	paths<-as.list(d)
+	while(any(d>Ntip(tree))){
+		jj<-1
+		new.paths<-list()
+		for(i in 1:length(paths)){
+			if(paths[[i]][length(paths[[i]])]<=Ntip(tree)){ 
+				new.paths[[jj]]<-paths[[i]]
+				jj<-jj+1
+			} else {
+				ch<-Descendants(tree,paths[[i]][length(paths[[i]])],
+					"children")
+				for(j in 1:length(ch)){
+					new.paths[[jj]]<-c(paths[[i]],ch[j])
+					jj<-jj+1
+				}
+			}
+		}
+		paths<-new.paths
+		d<-sapply(paths,function(x) x[length(x)])
+	}
+	paths
+}
+
+## function to compute a modification of Grafen's edge lengths
+## written by Liam J. Revell 2016
+modified.Grafen<-function(tree,power=2){
+	max.np<-function(tree,node){
+		np<-node.paths(tree,node)
+		if(length(np)>0) max(sapply(np,length)) else 0
+	}
+	nn<-1:(Ntip(tree)+tree$Nnode)
+	h<-sapply(nn,max.np,tree=tree)+1
+	h<-(h/max(h))^power
+	edge.length<-vector()
+	for(i in 1:nrow(tree$edge)) 
+		edge.length[i]<-diff(h[tree$edge[i,2:1]])
+	tree$edge.length<-edge.length
+	tree
+}
+
+## function to compute all rotations
+## written by Liam J. Revell 2016
+allRotations<-function(tree){
+	if(!is.binary.tree(tree)){
+		was.binary<-FALSE
+		if(is.null(tree$edge.length)){ 
+			tree<-compute.brlen(tree)
+			had.edge.lengths<-FALSE
+		} else had.edge.lengths<-TRUE
+		tree<-multi2di(tree)
+	} else was.binary<-TRUE
+	nodes<-1:tree$Nnode+Ntip(tree)
+	trees<-vector(mode="list",length=2^length(nodes))
+	ii<-2
+	trees[[1]]<-tree
+	for(i in 1:length(nodes)){
+		N<-ii-1
+		for(j in 1:N){
+			trees[[ii]]<-rotate(trees[[j]],nodes[i])
+			ii<-ii+1
+		}
+	}
+	trees<-lapply(trees,untangle,"read.tree")
+	if(!was.binary){
+		trees<-lapply(trees,di2multi)
+		if(!had.edge.lengths) trees<-lapply(trees,
+			function(x){
+				x$edge.length<-NULL
+				x
+			})
+	}
+	class(trees)<-"multiPhylo"
+	trees
+}
+
+## function to rotate a multifurcation in all possible ways
+## written by Liam J. Revell 2016
+rotate.multi<-function(tree,node){
+	kids<-Children(tree,node)
+	if(length(kids)>2){
+		ii<-sapply(kids,function(x,y) which(y==x),y=tree$edge[,2])
+		jj<-permn(ii)
+		foo<-function(j,i,t){
+			t$edge[i,]<-t$edge[j,]
+			if(!is.null(t$edge.length))
+				t$edge.length[i]<-t$edge.length[j]
+			untangle(t,"read.tree")
+		}
+		obj<-lapply(jj[2:length(jj)],foo,i=ii,t=tree)
+		class(obj)<-"multiPhylo"
+	} else obj<-untangle(rotate(tree,node),"read.tree")
+	obj
+}
+
 ## wrapper for bind.tree that takes objects of class "simmap"
 ## written by Liam J. Revell 2016
 bind.tree.simmap<-function(x,y,where="root"){
@@ -787,21 +907,23 @@ lambdaTree<-function(tree,lambda){
 }
 
 ## di2multi method for tree with mapped state
-## written by Liam J. Revell 2013, 2015
-di2multi.simmap<-function(tree,tol=1e-08){
-	if(!inherits(tree,"phylo")) stop("tree should be an object of class \"phylo\".")
-	if(is.null(tree$maps)){
+## written by Liam J. Revell 2013, 2015, 2016
+di2multi.simmap<-function(phy,...){
+	if(hasArg(tol)) tol<-list(...)$tol
+	else tol<-1e-08
+	if(!inherits(phy,"phylo")) stop("tree should be an object of class \"phylo\".")
+	if(is.null(phy$maps)){
 		cat("Warning: tree does not contain mapped state. Using di2multi.\n")
-		return(di2multi(tree,tol))
+		return(di2multi(phy,tol))
 	}
-	N<-length(tree$tip.label)
-	n<-length(intersect(which(tree$edge.length<tol),which(tree$edge[,2]>N)))
-	if(n==0) return(tree)
-	edge<-tree$edge
+	N<-length(phy$tip.label)
+	n<-length(intersect(which(phy$edge.length<tol),which(phy$edge[,2]>N)))
+	if(n==0) return(phy)
+	edge<-phy$edge
 	edge[edge>N]<--edge[edge>N]+N
-	edge.length<-tree$edge.length
-	maps<-tree$maps
-	Nnode<-tree$Nnode
+	edge.length<-phy$edge.length
+	maps<-phy$maps
+	Nnode<-phy$Nnode
 	for(i in 1:n){
 		ii<-intersect(which(edge.length<tol),which(edge[,2]<0))[1]
 		node<-edge[ii,2]
@@ -816,12 +938,12 @@ di2multi.simmap<-function(tree,tol=1e-08){
 	mm<-1:Nnode+N
 	for(i in 1:length(edge)) if(edge[i]%in%nn) edge[i]<-mm[which(nn==edge[i])]
 	mapped.edge<-makeMappedEdge(edge,maps)
-	tt<-list(edge=edge,Nnode=Nnode,tip.label=tree$tip.label,edge.length=edge.length,
+	tt<-list(edge=edge,Nnode=Nnode,tip.label=phy$tip.label,edge.length=edge.length,
 		maps=maps,mapped.edge=mapped.edge)
 	class(tt)<-"phylo"
-	if(!is.null(attr(tree,"order"))) attr(tt,"order")<-attr(tree,"order")
-	if(!is.null(tree$node.states)) tt$node.states<-getStates(tt,"nodes")
-	if(!is.null(tree$states)) tt$states<-getStates(tt,"tips")
+	if(!is.null(attr(phy,"order"))) attr(tt,"order")<-attr(phy,"order")
+	if(!is.null(phy$node.states)) tt$node.states<-getStates(tt,"nodes")
+	if(!is.null(phy$states)) tt$states<-getStates(tt,"tips")
 	return(tt)
 }
 
