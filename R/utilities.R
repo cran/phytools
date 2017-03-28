@@ -1,6 +1,122 @@
 # some utility functions
 # written by Liam J. Revell 2011, 2012, 2013, 2014, 2015, 2016
 
+## function forces a tree to be ultrametric using two different methods
+## written by Liam J. Revell 2017
+
+force.ultrametric<-function(tree,method=c("nnls","extend")){
+	method<-method[1]
+	if(method=="nnls") tree<-nnls.tree(cophenetic(tree),tree,
+		rooted=TRUE,trace=0)
+	else if(method=="extend"){
+		h<-diag(vcv(tree))
+		d<-max(h)-h
+		ii<-sapply(1:Ntip(tree),function(x,y) which(y==x),
+			y=tree$edge[,2])
+		tree$edge.length[ii]<-tree$edge.length[ii]+d
+	} else 
+		cat("method not recognized: returning input tree\n\n")
+	tree
+}
+
+## function to create curved clade labels for a fan tree
+## written by Liam J. Revell 2017
+
+arc.cladelabels<-function(tree=NULL,text,node,ln.offset=1.02,
+	lab.offset=1.06,cex=1,orientation="curved",...){
+	obj<-get("last_plot.phylo",envir=.PlotPhyloEnv)
+	if(obj$type!="fan") stop("method works only for type=\"fan\"")
+	h<-max(sqrt(obj$xx^2+obj$yy^2))
+	if(hasArg(mark.node)) mark.node<-list(...)$mark.node
+	else mark.node<-TRUE
+	if(mark.node) points(obj$xx[node],obj$yy[node],pch=21,
+		bg="red")
+	if(is.null(tree)){
+		tree<-list(edge=obj$edge,tip.label=1:obj$Ntip,
+			Nnode=obj$Nnode)
+		class(tree)<-"phylo"
+	}
+	d<-getDescendants(tree,node)
+	d<-sort(d[d<=Ntip(tree)])
+	deg<-atan(obj$yy[d]/obj$xx[d])*180/pi
+	ii<-intersect(which(obj$yy[d]>=0),which(obj$xx[d]<0))
+	deg[ii]<-180+deg[ii]
+	ii<-intersect(which(obj$yy[d]<0),which(obj$xx[d]<0))
+	deg[ii]<-180+deg[ii]
+	ii<-intersect(which(obj$yy[d]<0),which(obj$xx[d]>=0))
+	deg[ii]<-360+deg[ii]
+	draw.arc(x=0,y=0,radius=ln.offset*h,deg1=min(deg),
+		deg2=max(deg))
+	if(orientation=="curved")
+		arctext(text,radius=lab.offset*h,
+			middle=mean(range(deg*pi/180)),cex=cex)
+	else if(orientation=="horizontal"){
+		x0<-lab.offset*cos(median(deg)*pi/180)*h
+		y0<-lab.offset*sin(median(deg)*pi/180)*h
+		text(x=x0,y=y0,label=text,
+		adj=c(if(x0>=0) 0 else 1,if(y0>=0) 0 else 1),
+		offset=0)
+	}
+}
+
+## function to return a node index interactively from a plotted tree
+## written by Liam J. Revell 2017
+getnode<-function(...){
+	if(hasArg(env)) env<-list(...)$env
+	else env<-get("last_plot.phylo",envir=.PlotPhyloEnv)
+	xy<-unlist(locator(n=1))
+	points(xy[1],xy[2])
+	d<-sqrt((xy[1]-env$xx)^2+(xy[2]-env$yy)^2)
+	ii<-which(d==min(d))[1]
+	ii
+}
+
+## function mostly to interactively label nodes by clicking
+## written by Liam J. Revell 2017
+labelnodes<-function(text,node=NULL,interactive=TRUE,
+	shape=c("circle","ellipse","rect"),...){
+	shape<-shape[1]
+	if(hasArg(circle.exp)) circle.exp<-list(...)$circle.exp
+	else circle.exp<-1.3
+	if(hasArg(rect.exp)) rect.exp<-list(...)$rect.exp
+	else rect.exp<-1.6
+	if(hasArg(cex)) cex<-list(...)$cex
+	else cex<-1
+	obj<-get("last_plot.phylo",envir=.PlotPhyloEnv)
+	h<-cex*strheight("A")
+	w<-cex*strwidth(text)
+	rad<-circle.exp*h*diff(par()$usr[1:2])/diff(par()$usr[3:4])
+	if(is.null(node)){
+		if(!interactive){
+			cat("No nodes provided. Setting interactive mode to TRUE.\n")
+			interactive<-TRUE
+		}
+		node<-vector(length=length(text))
+	}
+	for(i in 1:length(text)){
+		if(interactive){
+			cat(paste("Click on the node you would like to label ",
+				text[i],".\n",sep=""))
+			flush.console()
+			ii<-getnode(env=obj)
+			node[i]<-ii
+		} else ii<-node[i]
+		if(shape=="circle")
+			draw.circle(obj$xx[ii],obj$yy[ii],rad,col="white")
+		else if(shape=="ellipse")
+			draw.ellipse(obj$xx[ii],obj$yy[ii],0.8*w[i],h,
+				col="white")
+		else if(shape=="rect")
+			rect(xleft=obj$xx[ii]-0.5*rect.exp*w[i],
+				ybottom=obj$yy[ii]-0.5*rect.exp*h,
+				xright=obj$xx[ii]+0.5*rect.exp*w[i],
+				ytop=obj$yy[ii]+0.5*rect.exp*h,col="white",
+				ljoin=1)
+		text(obj$xx[ii],obj$yy[ii],label=text[i],cex=cex)
+	}
+	invisible(node)
+}
+
 ## convert object of class "birthdeath" into birth & death rates
 bd<-function(x){
 	if(class(x)!="birthdeath") stop("x should be an object of class 'birthdeath'")
@@ -173,6 +289,14 @@ as.phylo.simmap<-function(x,...){
 as.multiPhylo.multiSimmap<-function(x,...){
 	obj<-lapply(x,as.phylo)
 	class(obj)<-setdiff(class(x),"multiSimmap")
+	obj
+}
+
+## generic function to convert object of class "phylo" to "multiPhylo"
+## written by Liam J. Revell 2016
+as.multiPhylo.phylo<-function(x,...){
+	obj<-list(x)
+	class(obj)<-"multiPhylo"
 	obj
 }
 
@@ -1183,8 +1307,8 @@ collapse.to.star<-function(tree,node){
 	tree
 }
 
-# function returns the MRCA, or its height above the root, for a set of taxa (in tips)
-# written by Liam Revell 2012, 2013, 2015
+## function returns the MRCA, or its height above the root, for a set of taxa (in tips)
+## written by Liam Revell 2012, 2013, 2015, 2016
 findMRCA<-function(tree,tips=NULL,type=c("node","height")){
 	type<-type[1]
 	if(!inherits(tree,"phylo")) stop("tree should be an object of class \"phylo\".")
@@ -1195,12 +1319,10 @@ findMRCA<-function(tree,tips=NULL,type=c("node","height")){
 			X<-apply(X,c(1,2),function(x,y,z) y[which(z==x)[1]],y=H,z=tree$edge)
 		}
 		return(X)
-	} else {
-		H<-nodeHeights(tree)
-		X<-sapply(tips,function(x,y,z) sapply(y,fastMRCA,sp1=x,tree=z),y=tips,z=tree)
-		Y<-apply(X,c(1,2),function(x,y,z) y[which(z==x)[1]],y=H,z=tree$edge)
-
-		if(type=="height") return(Y[which.min(Y)]) else return(X[which.min(Y)])
+    } else {
+		node<-getMRCA(tree,tips)
+		if (type == "node") return(node)
+		else if(type=="height") return(nodeheight(tree,node))
 	}
 }
 

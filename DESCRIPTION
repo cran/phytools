@@ -1,13 +1,13 @@
 Package: phytools
-Version: 0.5-64
-Date: 2016-12-5
+Version: 0.6-00
+Date: 2017-03-28
 Title: Phylogenetic Tools for Comparative Biology (and Other Things)
 Author: Liam J. Revell
 Maintainer: Liam J. Revell <liam.revell@umb.edu>
 Depends: R (>= 3.2.0), ape (>= 4.0), maps
 Imports: animation, clusterGeneration, coda, combinat, graphics,
-        grDevices, methods, mnormt, msm, numDeriv, phangorn (>= 2.1.1),
-        plotrix, scatterplot3d, stats, utils
+        grDevices, methods, mnormt, msm, nlme, numDeriv, phangorn (>=
+        2.1.1), plotrix, scatterplot3d, stats, utils
 Suggests: geiger, rgl
 ZipData: no
 Description: Package contains various functions for phylogenetic analysis.
@@ -35,8 +35,8 @@ Description: Package contains various functions for phylogenetic analysis.
 	canonical correlation analysis, and a phylogenetic ANOVA; projecting 
 	a tree onto a geographic map; simulating discrete character 
 	histories on the tree; fitting a model in which a discrete character 
-	evolves under the threshold model; visualization of cospeciation; a 
-	simple statistical test for cospeciation between two trees. In 
+	evolves under the threshold model; visualization of cospeciation; and 
+	a simple statistical test for cospeciation between two trees. In 
 	addition to this phylogenetic comparative method functionality, the 
 	package also contains functions for a wide range of other purposes in 
 	phylogenetic biology. For instance, functionality in this package 
@@ -56,7 +56,7 @@ Description: Package contains various functions for phylogenetic analysis.
 	research.
 License: GPL (>= 2)
 URL: http://github.com/liamrevell/phytools
-Packaged: 2016-12-05 21:00:12 UTC; Liam
+Packaged: 2017-03-28 19:49:24 UTC; liamj
 Repository: CRAN
-Date/Publication: 2016-12-05 22:44:57
+Date/Publication: 2017-03-28 21:11:25 UTC
 NeedsCompilation: no

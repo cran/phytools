@@ -1,7 +1,7 @@
 ## function to perform phylogenetic principal components analysis
 ## multiple morphological traits in Y
 ## also can use lambda transformation in which lambda is optimized by ML or REML (in progress)
-## written by Liam Revell 2010, 2011, 2013, 2015, 2016 ref. Revell (2009; Evolution)
+## written by Liam Revell 2010, 2011, 2013, 2015, 2016, 2017 ref. Revell (2009; Evolution)
 
 phyl.pca<-function(tree,Y,method="BM",mode="cov",...){
 	## get optional argument
@@ -52,6 +52,15 @@ phyl.pca<-function(tree,Y,method="BM",mode="cov",...){
 			C=C,maximum=TRUE)
 		else if(opt=="REML") temp<-optimize(f=remlMlambda,interval=c(0,maxLambda(tree)),
 			tree=tree,X=Y,maximum=TRUE)
+		else if(opt=="fixed"){
+			if(hasArg(lambda)) lambda<-list(...)$lambda
+			else {
+				cat("  opt=\"fixed\" requires the user to specify lambda.\n")
+				cat("  setting lambda to 1.0.\n")
+				lambda<-1.0
+			}
+			temp<-list(maximum=lambda,objective=likMlambda(lambda,X=Y,C=C))
+		}	
 		lambda<-temp$maximum
 		logL<-as.numeric(temp$objective)
 		temp<-phyl.vcv(Y,C,lambda)
@@ -121,7 +130,7 @@ summary.phyl.pca<-function(object, ...){
 
 ## S3 biplot method for "phyl.pca"
 ## modified from code provided by Joan Maspons
-## written by Liam J. Revell 2015
+## written by Liam J. Revell 2015, 2017
 biplot.phyl.pca<-function(x,...){
 	to.do<-list(...)
 	if(hasArg(choices)){ 
@@ -129,7 +138,7 @@ biplot.phyl.pca<-function(x,...){
 		to.do$choices<-NULL
 	} else choices<-c(1,2)
 	to.do$x<-x$S[,choices]
-	to.do$y<-x$L[,choices]
+	to.do$y<-x$Evec[,choices]
 	do.call(biplot,to.do)
 }
 
