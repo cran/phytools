@@ -1,5 +1,218 @@
-# some utility functions
-# written by Liam J. Revell 2011, 2012, 2013, 2014, 2015, 2016
+## some utility functions
+## written by Liam J. Revell 2011, 2012, 2013, 2014, 2015, 2016, 2017
+
+## function to expand clades in a plot by a given factor
+## written by Liam J. Revell 2017
+expand.clade<-function(tree,node,factor=5){
+	cw<-reorder(tree)
+	tips<-setNames(rep(1,Ntip(tree)),cw$tip.label)
+	get.tips<-function(node,tree){
+    		dd<-getDescendants(tree,node)
+    		tree$tip.label[dd[dd<=Ntip(tree)]]
+	}
+	desc<-unlist(lapply(node,get.tips,tree=cw))
+	for(i in 2:Ntip(cw)){
+		tips[i]<-tips[i-1]+
+			if(names(tips)[i]%in%desc){
+				1 
+			} else if(names(tips)[i-1]%in%desc){
+				1
+			} else 1/factor
+	}
+	obj<-list(tree=tree,tips=tips)
+	class(obj)<-"expand.clade"
+	obj
+}
+
+## S3 print method for the object class "expand.clade"
+print.expand.clade<-function(x,...){
+	cat("An object of class \"expand.clade\" consisting of:\n")
+	cat(paste("(1) A phylogenetic tree (x$tree) with",Ntip(x$tree),
+		"tips and\n   ",x$tree$Nnode,"internal nodes.\n"))
+	cat("(2) A vector (x$tips) containing the desired tip-spacing.\n\n")
+}
+
+## S3 plot method for the object class "expand.clade"
+plot.expand.clade<-function(x,...){
+	args<-list(...)
+	args$tree<-x$tree
+	args$tips<-x$tips
+	if(inherits(args$tree,"simmap")) do.call(plotSimmap,args)
+	else do.call(plotTree,args)
+}
+
+## function to add a geological or other temporal legend to a plotted tree
+## written by Liam J. Revell 2017
+geo.legend<-function(leg=NULL,colors=NULL,alpha=0.2,...){
+	if(hasArg(cex)) cex<-list(...)$cex
+	else cex<-par()$cex
+	if(hasArg(plot)) plot<-list(...)$plot
+	else plot<-TRUE
+	if(hasArg(show.lines)) show.lines<-list(...)$show.lines
+	else show.lines<-TRUE
+	obj<-get("last_plot.phylo",envir=.PlotPhyloEnv)
+	if(is.null(colors)){
+		colors<-setNames(c(
+			rgb(255,242,127,255,maxColorValue=255),
+			rgb(255,230,25,255,maxColorValue=255),
+			rgb(253,154,82,255,maxColorValue=255),
+			rgb(127,198,78,255,maxColorValue=255),
+			rgb(52,178,201,255,maxColorValue=255),
+			rgb(129,43,146,255,maxColorValue=255),
+			rgb(240,64,40,255,maxColorValue=255),
+			rgb(103,165,153,255,maxColorValue=255),
+			rgb(203,140,55,255,maxColorValue=255),
+			rgb(179,225,182,255,maxColorValue=255),
+			rgb(0,146,112,255,maxColorValue=255),
+			rgb(127,160,86,255,maxColorValue=255),
+			rgb(247,67,112,255,maxColorValue=255)),
+			c("Quaternary","Neogene","Paleogene",
+			"Cretaceous","Jurassic","Triassic",
+			"Permian","Carboniferous","Devonian",
+			"Silurian","Ordovician","Cambrian",
+			"Precambrian"))
+	}
+	if(is.null(leg)){
+		leg<-rbind(c(2.588,0),
+			c(23.03,2.588),
+			c(66.0,23.03),
+			c(145.0,66.0),
+			c(201.3,145.0),
+			c(252.17,201.3),
+			c(298.9,252.17),
+			c(358.9,298.9),
+			c(419.2,358.9),
+			c(443.8,419.2),
+			c(485.4,443.8),
+			c(541.0,485.4),
+			c(4600,541.0))
+		rownames(leg)<-c("Quaternary","Neogene","Paleogene",
+			"Cretaceous","Jurassic","Triassic",
+			"Permian","Carboniferous","Devonian",
+			"Silurian","Ordovician","Cambrian",
+			"Precambrian")
+		t.max<-max(obj$xx)
+		ii<-which(leg[,2]<=t.max)
+		leg<-leg[ii,]
+		leg[max(ii),1]<-t.max
+	}
+	colors<-sapply(colors,make.transparent,alpha=alpha)
+	if(plot){	
+		y<-c(rep(0,2),rep(par()$usr[4],2))
+		ylabel<--1/25*obj$Ntip
+		for(i in 1:nrow(leg)){
+			strh<-strheight(rownames(leg)[i])
+			polygon(c(leg[i,1:2],leg[i,2:1]),y,
+				col=colors[rownames(leg)[i]],border=NA)
+			if(show.lines){
+				lines(x=rep(leg[i,1],2),y=c(0,par()$usr[4]),
+					lty="dotted",col="grey")
+				lines(x=c(leg[i,1],mean(leg[i,])-0.8*cex*
+					get.asp()*strheight(rownames(leg)[i])),
+					y=c(0,ylabel),lty="dotted",col="grey")
+				lines(x=c(leg[i,2],mean(leg[i,])+0.8*cex*
+					get.asp()*strheight(rownames(leg)[i])),
+					y=c(0,ylabel),lty="dotted",col="grey")
+				lines(x=rep(mean(leg[i,])-0.8*cex*
+					get.asp()*strheight(rownames(leg)[i]),2),
+					y=c(ylabel,par()$usr[3]),lty="dotted",col="grey")
+				lines(x=rep(mean(leg[i,])+0.8*cex*
+					get.asp()*strheight(rownames(leg)[i]),2),
+					y=c(ylabel,par()$usr[3]),lty="dotted",col="grey")
+			}
+			polygon(x=c(leg[i,1],
+				mean(leg[i,])-0.8*cex*get.asp()*strh,
+				mean(leg[i,])-0.8*cex*get.asp()*strh,
+				mean(leg[i,])+0.8*cex*get.asp()*strh,
+				mean(leg[i,])+0.8*cex*get.asp()*strh,
+				leg[i,2]),y=c(0,ylabel,par()$usr[3],
+				par()$usr[3],ylabel,0),
+				col=colors[rownames(leg)[i]],border=NA)
+			text(x=mean(leg[i,])+
+				if(obj$direction=="leftwards") 0.12*strh else -0.12*strh,
+				y=ylabel,labels=rownames(leg)[i],
+				srt=90,adj=c(1,0.5),cex=cex)
+		}
+	}
+	invisible(list(leg=leg,colors=colors))
+}
+
+## borrowed from mapplots
+get.asp<-function(){
+	pin<-par("pin")
+	usr<-par("usr")
+	asp<-(pin[2]/(usr[4]-usr[3]))/(pin[1]/(usr[2]-usr[1]))
+	asp
+}
+
+round.polygon<-function(x,y,col="transparent"){
+	## just space holding for now	
+}
+
+## draw a box around a clade
+## written by Liam J. Revell 2017
+
+cladebox<-function(tree,node,color=NULL,...){
+	if(is.null(color)) color<-make.transparent("yellow",0.2)
+	obj<-get("last_plot.phylo",envir=.PlotPhyloEnv)
+	h<-max(nodeHeights(tree))
+	parent<-tree$edge[which(tree$edge[,2]==node),1]
+	x0<-max(c(obj$xx[node]+obj$xx[parent])/2,obj$xx[node]-0.05*h)
+	x1<-obj$x.lim[2]
+	dd<-getDescendants(tree,node)
+	y0<-min(range(obj$yy[dd]))-0.5
+	y1<-max(range(obj$yy[dd]))+0.5
+	polygon(c(x0,x1,x1,x0),c(y0,y0,y1,y1),col=color,
+		border=0)
+}
+
+## draw tip labels as linking lines to text
+## written by Liam J. Revell 2017
+
+linklabels<-function(text,tips,link.type=c("bent","curved","straight"),
+	...){
+	lastPP<-get("last_plot.phylo",envir=.PlotPhyloEnv)
+	if(!(lastPP$direction%in%c("leftwards","rightwards")))
+		stop("direction should be \"rightwards\" or \"leftwards\".")
+	if(hasArg(cex)) cex<-list(...)$cex
+	else cex<-1
+	if(hasArg(col)) col<-list(...)$col
+	else col<-"black"
+	if(hasArg(lty)) lty<-list(...)$lty
+	else lty<-"dashed"
+	if(hasArg(lwd)) lwd<-list(...)$lwd
+	else lwd<-1
+	if(hasArg(link.offset)) link.offset<-list(...)$link.offset
+	else link.offset<-0.1*max(lastPP$xx)
+	if(hasArg(font)) font<-list(...)$font
+	else font<-3
+	link.type<-link.type[1]
+	xpos<-lastPP$xx[tips]+strwidth("i")
+	ypos<-lastPP$yy[tips]
+	xmax<-rep(max(lastPP$xx),length(tips))+link.offset
+	ylab<-seq(min(lastPP$yy),max(lastPP$yy),
+		by=(max(lastPP$yy)-min(lastPP$yy))/(length(tips)-1))
+	ylab<-ylab[rank(ypos)]
+	text(xmax,ylab,gsub("_"," ",text),pos=4,font=font,cex=cex,
+		offset=0)
+	if(link.type=="curved"){
+		for(i in 1:length(tips))
+			drawCurve(c(xpos[i],xmax[i]),c(ypos[i],ylab[i]),
+				scale=0.05,lty=lty,col=col,lwd=lwd)
+	} else if(link.type=="bent"){
+		tipmax<-max(lastPP$xx)
+		for(i in 1:length(tips)){
+			ff<-strwidth("W")
+			segments(xpos[i],ypos[i],tipmax+link.offset/2,ypos[i],
+				lty=lty,col=col,lwd=lwd)
+			segments(tipmax+link.offset/2,ypos[i],tipmax+
+				link.offset/2+ff,ylab[i],lty=lty,col=col,lwd=lwd)
+			segments(tipmax+link.offset/2+ff,ylab[i],xmax[i],ylab[i],
+				lty=lty,col=col,lwd=lwd)
+		}
+	} else if(link.type=="straight")
+		segments(xpos,ypos,xmax,ylab,lty=lty,col=col)
+}
 
 ## function forces a tree to be ultrametric using two different methods
 ## written by Liam J. Revell 2017
@@ -22,13 +235,29 @@ force.ultrametric<-function(tree,method=c("nnls","extend")){
 ## function to create curved clade labels for a fan tree
 ## written by Liam J. Revell 2017
 
-arc.cladelabels<-function(tree=NULL,text,node,ln.offset=1.02,
+arc.cladelabels<-function(tree=NULL,text,node=NULL,ln.offset=1.02,
 	lab.offset=1.06,cex=1,orientation="curved",...){
 	obj<-get("last_plot.phylo",envir=.PlotPhyloEnv)
 	if(obj$type!="fan") stop("method works only for type=\"fan\"")
 	h<-max(sqrt(obj$xx^2+obj$yy^2))
 	if(hasArg(mark.node)) mark.node<-list(...)$mark.node
 	else mark.node<-TRUE
+	if(hasArg(interactive)) interactive<-list(...)$interactive
+	else {
+		if(is.null(node)) interactive<-TRUE
+		else interactive<-FALSE
+	}
+	if(interactive) node<-getnode()
+	if(hasArg(lwd)) lwd<-list(...)$lwd
+	else lwd<-par()$lwd
+	if(hasArg(col)) col<-list(...)$col
+	else col<-par()$col
+	if(hasArg(lend)) lend<-list(...)$lend
+	else lend<-par()$lend
+	if(hasArg(clockwise)) clockwise<-list(...)$clockwise
+	else clockwise<-TRUE
+	if(hasArg(n)) n<-list(...)$n
+	else n<-0.05
 	if(mark.node) points(obj$xx[node],obj$yy[node],pch=21,
 		bg="red")
 	if(is.null(tree)){
@@ -46,16 +275,17 @@ arc.cladelabels<-function(tree=NULL,text,node,ln.offset=1.02,
 	ii<-intersect(which(obj$yy[d]<0),which(obj$xx[d]>=0))
 	deg[ii]<-360+deg[ii]
 	draw.arc(x=0,y=0,radius=ln.offset*h,deg1=min(deg),
-		deg2=max(deg))
+		deg2=max(deg),lwd=lwd,col=col,lend=lend,n=n)
 	if(orientation=="curved")
 		arctext(text,radius=lab.offset*h,
-			middle=mean(range(deg*pi/180)),cex=cex)
+			middle=mean(range(deg*pi/180)),cex=cex,
+			clockwise=clockwise)
 	else if(orientation=="horizontal"){
 		x0<-lab.offset*cos(median(deg)*pi/180)*h
 		y0<-lab.offset*sin(median(deg)*pi/180)*h
 		text(x=x0,y=y0,label=text,
 		adj=c(if(x0>=0) 0 else 1,if(y0>=0) 0 else 1),
-		offset=0)
+		offset=0,cex=cex)
 	}
 }
 
@@ -64,8 +294,10 @@ arc.cladelabels<-function(tree=NULL,text,node,ln.offset=1.02,
 getnode<-function(...){
 	if(hasArg(env)) env<-list(...)$env
 	else env<-get("last_plot.phylo",envir=.PlotPhyloEnv)
+	if(hasArg(show.pt)) show.pt<-list(...)$show.pt
+	else show.pt<-FALSE
 	xy<-unlist(locator(n=1))
-	points(xy[1],xy[2])
+	if(show.pt) points(xy[1],xy[2])
 	d<-sqrt((xy[1]-env$xx)^2+(xy[2]-env$yy)^2)
 	ii<-which(d==min(d))[1]
 	ii
@@ -617,13 +849,13 @@ reroot<-function(tree,node.number,position=NULL,interactive=FALSE,...){
 }
 
 ## function to add an arrow pointing to a tip or node in the tree
-## written by Liam J. Revell 2014
+## written by Liam J. Revell 2014, 2017
 
 add.arrow<-function(tree=NULL,tip,...){
 	lastPP<-get("last_plot.phylo",envir=.PlotPhyloEnv)
 	if(!is.null(tree)){
-		if(class(tree)=="contMap") tree<-tree$tree
-		else if(class(tree)=="densityMap") tree<-tree$tree
+		if(inherits(tree,"contMap")) tree<-tree$tree
+		else if(inherits(tree,"densityMap")) tree<-tree$tree
 	}
 	if(is.numeric(tip)){
 		ii<-tip
@@ -664,7 +896,11 @@ add.arrow<-function(tree=NULL,tip,...){
 		y0=lastPP$yy[ii]+sin(theta)*strw+sin(theta-arra/2)*hedl*asp,
 		x1=lastPP$xx[ii]+cos(theta)*strw,
 		y1=lastPP$yy[ii]+sin(theta)*strw,
-		col=col,lwd=lwd,lend="round") 
+		col=col,lwd=lwd,lend="round")
+	invisible(list(x0=lastPP$xx[ii]+cos(theta)*(strw+arrl),
+		y0=lastPP$yy[ii]+sin(theta)*(strw+arrl),
+		x1=lastPP$xx[ii]+cos(theta)*strw,
+		y1=lastPP$yy[ii]+sin(theta)*strw))
 }
 
 ## function to ladderize phylogeny with mapped discrete character
@@ -718,12 +954,13 @@ rep.multiPhylo<-function(x,...){
 }
 
 ## function to rescale simmap style trees
-## written by Liam J. Revell 2012, 2013, 2014, 2015
+## written by Liam J. Revell 2012, 2013, 2014, 2015, 2017
 rescaleSimmap<-function(tree,...){
 	if(inherits(tree,"multiPhylo")){
+		cls<-class(tree)
 		trees<-unclass(tree)
 		trees<-lapply(trees,rescaleSimmap,...)
-		class(trees)<-"multiPhylo"
+		class(trees)<-cls
 		return(trees)
 	} else if(inherits(tree,"phylo")){
 		if(hasArg(lambda)) lambda<-list(...)$lambda

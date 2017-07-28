@@ -9,7 +9,7 @@ plotSimmap(tree, colors=NULL, fsize=1.0, ftype="reg", lwd=2, pts=FALSE,
    direction="rightwards", type="phylogram", setEnv=TRUE, part=1.0, 
    xlim=NULL, ylim=NULL, nodes="intermediate", tips=NULL, maxY=NULL, 
    hold=TRUE, split.vertical=FALSE,
-   lend=2,asp=NA)
+   lend=2, asp=NA, plot=TRUE)
 \method{plot}{simmap}(x, ...)
 \method{plot}{multiSimmap}(x, ...)
 }
@@ -25,7 +25,7 @@ plotSimmap(tree, colors=NULL, fsize=1.0, ftype="reg", lwd=2, pts=FALSE,
 	\item{add}{a logical value indicating whether or not to add the plotted tree to the current plot (\code{TRUE}) or create a new plot (\code{FALSE}, the default).}
 	\item{offset}{offset for the tip labels. Primarily to be used internally by \code{\link{densityMap}}.}
 	\item{direction}{plotting direction. Options are \code{"rightwards"} (the default), \code{"leftwards"}, \code{"upwards"} or \code{"downwards"}. For \code{method="fan"} \code{direction} is ignored.}
-	\item{type}{plot type. Can be \code{"phylogram"} or \code{"fan"}. Only a subset of options are presently available for \code{type="fan"}.}
+	\item{type}{plot type. Can be \code{"phylogram"}, \code{"fan"}, or \code{"cladogram"}. Only a subset of options are presently available for \code{type="fan"}.}
 	\item{setEnv}{logical value indicating whether or not to set the environment \code{.PlotPhyloEnv}. Setting this to \code{TRUE} (the default) will allow compatibility with ape labeling functions such as \code{\link{nodelabels}}.}
 	\item{part}{value between 0 and 1 for \code{type="fan"} indicating what fraction of the full circular tree to use as plotting area. For instance, \code{part=0.5} will plot a half fan phylogeny. It also affects the axis scaling used.}
 	\item{xlim}{x-limits for the plot.}
@@ -37,6 +37,7 @@ plotSimmap(tree, colors=NULL, fsize=1.0, ftype="reg", lwd=2, pts=FALSE,
 	\item{split.vertical}{split the color of the vertically plotted edges by the state of the daughter edges. Only applies if the edge state changes exactly at a node.}
 	\item{lend}{line end style. See \code{\link{par}}.}
 	\item{asp}{aspect ratio. See \code{\link{plot.window}}.}
+	\item{plot}{logical value indicating whether or not to actually plot the tree. (See equivalent argument in \code{\link{plot.phylo}}.)}
 	\item{x}{for S3 plotting method, object of class \code{"simmap"} or \code{"multiSimmap"}.}
 	\item{...}{for S3 plotting method, other arguments to be passed to \code{\link{plotSimmap}}.}
 }
