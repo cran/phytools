@@ -1,7 +1,7 @@
-# function performs ancestral character estimation under the threshold model
-# written by Liam J. Revell 2012, 2013, 2014
+## function performs ancestral character estimation under the threshold model
+## written by Liam J. Revell 2012, 2013, 2014, 2017
 
-ancThresh<-function(tree,x,ngen=1000,sequence=NULL,method="mcmc",model=c("BM","OU","lambda"),control=list(),...){
+ancThresh<-function(tree,x,ngen=10000,sequence=NULL,method="mcmc",model=c("BM","OU","lambda"),control=list(),...){
 
 	if(!inherits(tree,"phylo")) stop("tree should be an object of class \"phylo\".")
 	
@@ -64,7 +64,7 @@ ancThresh<-function(tree,x,ngen=1000,sequence=NULL,method="mcmc",model=c("BM","O
 		pr.anc=PrA,
 		pr.th=0.01,
 		burnin=round(0.2*ngen),
-		plot=TRUE,
+		plot=FALSE,
 		print=TRUE,
 		piecol=setNames(palette()[1:length(seq)],seq),
 		tipcol="input",
@@ -98,7 +98,7 @@ ancThresh<-function(tree,x,ngen=1000,sequence=NULL,method="mcmc",model=c("BM","O
 	   else if(model=="lambda") matrix(NA,ngen/con$sample+1,m+3,dimnames=list(NULL,c("gen",names(th),"lambda","logLik")))
 
 	C<-matrix(NA,ngen/con$sample+1,tree$Nnode+n,dimnames=list(NULL,c(tree$tip.label,1:tree$Nnode+n)))
-	A[1,]<-sapply(a,threshState,thresholds=th)
+	A[1,]<-threshState(a,thresholds=th)
 	B[1,]<-if(model=="BM") c(0,th,lik1) else if(model=="OU") c(0,th,alpha,lik1) else if(model=="lambda") c(0,th,lambda,lik1)
 	C[1,]<-c(l[tree$tip.label],a[as.character(1:tree$Nnode+n)])
 
@@ -141,7 +141,7 @@ ancThresh<-function(tree,x,ngen=1000,sequence=NULL,method="mcmc",model=c("BM","O
 			}
 		}
 		lik2<-likLiab(lp,ap,Vp,invVp,detVp)+log(probMatch(X,lp,thp,seq))
-		p.odds<-min(c(1,exp(lik2+logPrior(sapply(ap,threshState,thresholds=thp),thp,con)-lik1-logPrior(sapply(a,threshState,thresholds=th),th,con))))
+		p.odds<-min(c(1,exp(lik2+logPrior(threshState(ap,thresholds=thp),thp,con)-lik1-logPrior(threshState(a,thresholds=th),th,con))))
 
 		if(p.odds>runif(n=1)){
 			a<-ap; l<-lp; th<-thp
@@ -151,7 +151,7 @@ ancThresh<-function(tree,x,ngen=1000,sequence=NULL,method="mcmc",model=c("BM","O
 			logL<-lik2
 		} else logL<-lik1
 		if(i%%con$sample==0){ 
-			A[i/con$sample+1,]<-sapply(a,threshState,thresholds=th)
+			A[i/con$sample+1,]<-threshState(a,thresholds=th)
 			B[i/con$sample+1,]<-if(model=="BM") c(i,th[colnames(B)[1+1:m]],logL) else if(model=="OU") c(i,th[colnames(B)[1+1:m]],alpha,logL) else if(model=="lambda") c(i,th[colnames(B)[1+1:m]],lambda,logL)
 			C[i/con$sample+1,]<-c(l[tree$tip.label],a[as.character(1:tree$Nnode+n)])
 		}
@@ -165,8 +165,66 @@ ancThresh<-function(tree,x,ngen=1000,sequence=NULL,method="mcmc",model=c("BM","O
 		temp<-summary(mcmc[burnin:nrow(mcmc),i])/(nrow(mcmc)-burnin+1)
 		ace[i,names(temp)]<-temp
 	}
-	if(con$plot) plotThresh(tree,X,list(ace=ace,mcmc=mcmc,par=param,liab=liab),burnin=con$burnin,piecol=con$piecol,tipcol=con$tipcol,...)
-	return(list(ace=ace,mcmc=mcmc,par=param,liab=liab))
+	obj<-list(ace=ace,mcmc=mcmc,par=param,liab=liab,
+		tree=tree,x=x,model=model,
+		seq=seq,
+		ngen=ngen,sample=con$sample,
+		burnin=con$burnin)
+	class(obj)<-"ancThresh"
+	if(con$plot) plot(obj)
+	obj
+}
+
+## some S3 methods (added in 2017)
+
+print.ancThresh<-function(x,...){
+	cat("\nObject containing the results from an MCMC analysis\nof the threshold model using ancThresh.\n\n")
+	cat("List with the following components:\n")
+	cat(paste("ace:\tmatrix with posterior probabilities assuming",x$burnin,
+		"\n\tburn-in generations.\n"))
+	cat("mcmc:\tposterior sample of liabilities at tips & internal\n")
+	cat(paste("\tnodes (a matrix with",nrow(x$mcmc),"rows &",ncol(x$mcmc),"columns).\n"))
+	cat("par:\tposterior sample of the relative positions of the\n")
+	cat(paste("\tthresholds, the log-likelihoods, and any other\n",
+		"\tmodel variables (a matrix with",nrow(x$par),"rows).\n\n"))
+	cat("The MCMC was run under the following conditions:\n")
+	cat(paste("\tseq =",paste(x$seq,collapse=" <-> "),
+		"\n\tmodel =",x$model,"\n\tnumber of generations =",x$ngen,
+		"\n\tsample interval=",x$sample,
+		"\n\tburn-in =",x$burnin,"\n\n"))
+}
+
+plot.ancThresh<-function(x,...){
+	if(hasArg(burnin)) burnin<-list(...)$burnin 
+	else burnin<-x$burnin
+	args<-list(...)
+	if(is.null(args$lwd)) args$lwd<-1
+	if(is.null(args$ylim)) args$ylim<-c(-0.1*Ntip(x$tree),Ntip(x$tree))
+	if(is.null(args$offset)) args$offset<-0.5
+	if(is.null(args$ftype)) args$ftype="i"
+	args$tree<-x$tree	
+	do.call(plotTree,args)
+	ii<-which(x$par[,1]==burnin)+1
+	LIAB<-as.matrix(x$liab)[ii:nrow(x$liab),]
+	THRESH<-as.matrix(x$par)[ii:nrow(x$par),1:length(x$seq)+1]
+	STATES<-matrix(NA,nrow(LIAB),ncol(LIAB),dimnames=dimnames(LIAB))
+	for(i in 1:nrow(LIAB)) STATES[i,]<-threshState(LIAB[i,],THRESH[i,])
+	PP<-t(apply(STATES,2,function(x,levs) summary(factor(x,levels=levs))/length(x),
+		levs=x$seq))
+	if(hasArg(piecol)) piecol<-list(...)$piecol
+	else piecol<-setNames(colorRampPalette(c("blue",
+		"yellow"))(length(x$seq)),x$seq)
+	if(hasArg(node.cex)) node.cex<-list(...)$node.cex
+	else node.cex<-0.6
+	nodelabels(pie=PP[1:x$tree$Nnode+Ntip(x$tree),],
+		piecol=piecol,cex=node.cex)
+	if(hasArg(tip.cex)) tip.cex<-list(...)$tip.cex
+	else tip.cex<-0.4
+	tiplabels(pie=PP[x$tree$tip.label,],piecol=piecol,
+		cex=tip.cex)
+	legend(x=par()$usr[1],y=par()$usr[1],legend=x$seq,pch=21,pt.bg=piecol,
+		pt.cex=2.2,bty="n")
+	invisible(PP)
 }
 
 # plots ancestral states from the threshold model
@@ -217,7 +275,7 @@ plotThresh<-function(tree,x,mcmc,burnin=NULL,piecol,tipcol="input",legend=TRUE,.
 	if(tipcol=="input") tiplabels(pie=X,piecol=piecol[colnames(X)],cex=0.6)
 	else if(tipcol=="estimated") {
 		XX<-matrix(NA,nrow(liab),length(tree$tip),dimnames=list(rownames(liab),colnames(liab)[1:length(tree$tip)]))
-		for(i in 1:nrow(liab)) XX[i,]<-sapply(liab[i,1:length(tree$tip)],threshState,thresholds=param[i,1:ncol(X)+1])
+		for(i in 1:nrow(liab)) XX[i,]<-threshState(liab[i,1:length(tree$tip)],thresholds=param[i,1:ncol(X)+1])
 		X<-t(apply(XX,2,function(x) summary(factor(x,levels=colnames(X)))))
 		tiplabels(pie=X/rowSums(X),piecol=piecol[colnames(X)],cex=0.6)
 	}
@@ -277,12 +335,20 @@ threshDIC<-function(tree,x,mcmc,burnin=NULL,sequence=NULL,method="pD"){
 
 # internal functions for ancThresh, plotThresh, and threshDIC
 
-# returns a state based on position relative to thresholds
-threshState<-function(x,thresholds){
+## returns a state based on position relative to thresholds
+## threshStateC is a function from phangorn>=2.3.1
+threshState<-if(packageVersion("phangorn")>='2.3.1'){
+	function(x,thresholds){
+    res <- names(thresholds)[threshStateC(x, thresholds)]
+    names(res) <- names(x)
+    res
+  }
+} else function(x,thresholds){
 	t<-c(-Inf,thresholds,Inf)
 	names(t)[length(t)]<-names(t)[length(t)-1] 
-	i<-1; while(x>t[i]) i<-i+1
-	return(names(t)[i])
+	i<-1
+	while(x>t[i]) i<-i+1
+	names(t)[i]
 }
 
 # likelihood function for the liabilities
@@ -294,14 +360,15 @@ likLiab<-function(l,a,V,invV,detV){
 
 # function for the log-prior
 logPrior<-function(a,t,control){
-	pp<-sum(log(diag(control$pr.anc[names(a),a])))+
-		if(length(t)>2) sum(dexp(t[2:(length(t)-1)],rate=control$pr.th,log=TRUE)) else 0				
+#	pp<-sum(log(diag(control$pr.anc[names(a),a])))+
+  pp<-sum(log(control$pr.anc[cbind(names(a),a)])) +
+    if(length(t)>2) sum(dexp(t[2:(length(t)-1)],rate=control$pr.th,log=TRUE)) else 0				
 	return(pp)		
 }
 
 # check if the liability predictions match observed data
 allMatch<-function(x,l,thresholds){
-	result<-all(sapply(l,threshState,thresholds=thresholds)==x)
+	result<-all(threshState(l,thresholds=thresholds)==x)
 	if(!is.na(result)) return(result)
 	else return(FALSE)
 }
@@ -309,7 +376,7 @@ allMatch<-function(x,l,thresholds){
 # check if the liability predictions match observed data & return a probability
 # (this allows states to be uncertain)
 probMatch<-function(X,l,thresholds,sequence){
-	Y<-to.matrix(sapply(l,threshState,thresholds=thresholds),sequence)
+	Y<-to.matrix(threshState(l,thresholds=thresholds),sequence)
 	return(prod(rowSums(X*Y)))
 }
 

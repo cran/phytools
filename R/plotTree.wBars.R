@@ -52,7 +52,9 @@ plotTree.boxplot<-function(tree,x,args.plotTree=list(),
 ## written by Liam J. Revell 2016, 2017
 
 plotTree.barplot<-function(tree,x,args.plotTree=list(),
-	args.barplot=list()){
+	args.barplot=list(), ...){
+	if(hasArg(add)) add<-list(...)$add
+	else add<-FALSE
 	cw<-reorder(tree)
 	if(is.data.frame(x)) x<-as.matrix(x)
 	if(is.matrix(x)){
@@ -87,8 +89,9 @@ plotTree.barplot<-function(tree,x,args.plotTree=list(),
 		args.plotTree$mar[3]<-args.barplot$mar[3]
 	if(is.null(args.plotTree$ftype)) args.plotTree$ftype<-"i"
 	if(is.null(args.plotTree$lwd)) args.plotTree$lwd<-1
-	par(mfrow=c(1,2))
+	if(!add) par(mfrow=c(1,2))
 	do.call(plotTree,args.plotTree)
+	if(!is.null(args.plotTree$plot)&&args.plotTree$plot==FALSE) par(new=TRUE)
 	par(mar=args.barplot$mar)
 	obj<-do.call(barplot,args.barplot)
 	axis(1)

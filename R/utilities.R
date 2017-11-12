@@ -1,6 +1,18 @@
 ## some utility functions
 ## written by Liam J. Revell 2011, 2012, 2013, 2014, 2015, 2016, 2017
 
+## function to rescale a tree according to an EB model
+## written by Liam J. Revell 2017
+
+ebTree<-function(tree,r){
+	if(r!=0){
+		H<-nodeHeights(tree)
+		e<-(exp(r*H[,2])-exp(r*H[,1]))/r
+		tree$edge.length<-e
+	}
+	tree
+}
+
 ## function to expand clades in a plot by a given factor
 ## written by Liam J. Revell 2017
 expand.clade<-function(tree,node,factor=5){
@@ -1222,7 +1234,6 @@ vcvPhylo<-function(tree,anc.nodes=TRUE,...){
 	}
 	if(hasArg(model)) model<-list(...)$model
 	else model<-"BM"
-
 	if(hasArg(tol)) tol<-list(...)$tol
 	else tol<-1e-12
 	if(model=="OU"){
@@ -1236,7 +1247,13 @@ vcvPhylo<-function(tree,anc.nodes=TRUE,...){
 			tree<-lambdaTree(tree,lambda)
 		} else model<-"BM"
 		model<-"BM"
-	}	
+	}
+	if(model=="EB"){
+		if(hasArg(r)){
+			r<-list(...)$r
+			tree<-ebTree(tree,r)
+		} else model<-"BM"
+	}
 	# done settings
 	n<-length(tree$tip.label)
 	h<-nodeHeights(tree)[order(tree$edge[,2]),2]
@@ -1310,29 +1327,22 @@ di2multi.simmap<-function(phy,...){
 
 # returns the heights of each node
 # written by Liam J. Revell 2011, 2012, 2013, 2015, 2016
+# modified by Klaus Schliep 2017
 nodeHeights<-function(tree,...){
-	if(hasArg(root.edge)) root.edge<-list(...)$root.edge
-	else root.edge<-FALSE
-	if(root.edge) ROOT<-if(!is.null(tree$root.edge)) tree$root.edge else 0
-	else ROOT<-0 
-	if(!inherits(tree,"phylo")) stop("tree should be an object of class \"phylo\".")
-	if(attr(tree,"order")!="cladewise"||is.null(attr(tree,"order"))) t<-reorder(tree)
-	else t<-tree
-	root<-length(t$tip.label)+1
-	X<-matrix(NA,nrow(t$edge),2)
-	for(i in 1:nrow(t$edge)){
-		if(t$edge[i,1]==root){
-			X[i,1]<-0.0
-			X[i,2]<-t$edge.length[i]
-		} else {
-			X[i,1]<-X[match(t$edge[i,1],t$edge[,2]),2]
-			X[i,2]<-X[i,1]+t$edge.length[i]
-		}
-	}
-	if(attr(tree,"order")!="cladewise"||is.null(attr(tree,"order")))
-		o<-apply(matrix(tree$edge[,2]),1,function(x,y) which(x==y),y=t$edge[,2])
-	else o<-1:nrow(t$edge)
-	return(X[o,]+ROOT)
+    if(hasArg(root.edge)) root.edge<-list(...)$root.edge
+    else root.edge<-FALSE
+    if(root.edge) ROOT<-if(!is.null(tree$root.edge)) tree$root.edge else 0
+    else ROOT<-0 
+    nHeight <- function(tree){
+        tree <- reorder(tree)
+        edge <- tree$edge
+        el <- tree$edge.length
+        res <- numeric(max(tree$edge))
+        for(i in seq_len(nrow(edge))) res[edge[i,2]] <- res[edge[i,1]] + el[i] 
+        res
+    }
+    nh <- nHeight(tree)
+    return(matrix(nh[tree$edge], ncol=2L)+ROOT)
 }
 
 ## function drops all the leaves from the tree & collapses singleton nodes
