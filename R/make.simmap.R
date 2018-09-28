@@ -1,5 +1,5 @@
-# function creates a stochastic character mapped tree as a modified "phylo" object
-# written by Liam Revell 2013, 2014, 2015, 2016, 2017
+## function creates a stochastic character mapped tree as a modified "phylo" object
+## written by Liam Revell 2013, 2014, 2015, 2016, 2017, 2018
 
 make.simmap<-function(tree,x,model="SYM",nsim=1,...){
 	if(inherits(tree,"multiPhylo")){
@@ -44,7 +44,7 @@ make.simmap<-function(tree,x,model="SYM",nsim=1,...){
 		tree<-bt<-reorder.phylo(tree,"cladewise")
 		if(!is.binary.tree(bt)) bt<-multi2di(bt)
 		# some preliminaries
-		N<-length(tree$tip)
+		N<-Ntip(tree)
 		m<-ncol(xx)
 		root<-N+1
 		# get conditional likelihoods & model
@@ -238,7 +238,7 @@ smap<-function(tree,x,N,m,root,L,Q,pi,logL){
 	NN[which(tree$edge[,1]==root),1]<-rstate(L[as.character(root),]*pi/sum(L[as.character(root),]*pi)) # assign root
 	for(j in 1:nrow(tree$edge)){
 		# conditioned on the start value, assign end value of node (if internal)
-		p<-expm(Q*tree$edge.length[j])[NN[j,1],]*L[as.character(tree$edge[j,2]),]
+		p<-EXPM(Q*tree$edge.length[j])[NN[j,1],]*L[as.character(tree$edge[j,2]),]
 		NN[j,2]<-rstate(p/sum(p))
 		NN[which(tree$edge[,1]==tree$edge[j,2]),1]<-NN[j,2]
 		# now simulate on the branches
