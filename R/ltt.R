@@ -60,7 +60,8 @@ ltt<-function(tree,plot=TRUE,drop.extinct=FALSE,log.lineages=TRUE,gamma=TRUE,...
 			tree.length<-max(node.height) # tree length
 			n.extinct<-sum(node.height[tree$edge[,2]<=length(tree$tip),2]<(tree.length-tol))
 			# fudge things a little bit
-			node.height[tree$edge[,2]<=length(tree$tip),2]<-node.height[tree$edge[,2]<=length(tree$tip),2]+1.1*tol
+			node.height[tree$edge[,2]<=length(tree$tip),2]<-
+				node.height[tree$edge[,2]<=length(tree$tip),2]+1.1*tol
 			time<-c(0,node.height[,2]); names(time)<-as.character(c(root,tree$edge[,2]))
 			temp<-vector()
 			time<-time[order(time)]
@@ -69,7 +70,8 @@ ltt<-function(tree,plot=TRUE,drop.extinct=FALSE,log.lineages=TRUE,gamma=TRUE,...
 			for(i in 1:(length(time)-1)){
 				ltt[i]<-0
 				for(j in 1:nrow(node.height))
-					ltt[i]<-ltt[i]+(time[i]>=(node.height[j,1]-tol)&&time[i]<=(node.height[j,2]-tol))
+					ltt[i]<-ltt[i]+(time[i]>=(node.height[j,1]-
+						tol)&&time[i]<=(node.height[j,2]-tol))
 			}
 			ltt[i+1]<-0
 			for(j in 1:nrow(node.height))
@@ -99,8 +101,8 @@ ltt<-function(tree,plot=TRUE,drop.extinct=FALSE,log.lineages=TRUE,gamma=TRUE,...
 	obj
 }
 
-# function computes the gamma-statistic & a two-tailed P-value
-# written by Liam Revell 2011
+## function computes the gamma-statistic & a two-tailed P-value
+## written by Liam J. Revell 2011, 2019
 
 gammatest<-function(x){
 	n<-max(x$ltt)
@@ -111,7 +113,22 @@ gammatest<-function(x){
 	for(i in 1:(n-1)) for(k in 1:i) doublesum<-doublesum+k*g[k]
 	gamma<-(1/(n-2)*doublesum-T/2)/(T*sqrt(1/(12*(n-2))))
 	p<-2*pnorm(abs(gamma),lower.tail=F)
-	return(list(gamma=gamma,p=p))
+	object<-list(gamma=gamma,p=p)
+	class(object)<-"gammatest"
+	object
+}
+
+## print method for object class "gammatest"
+## written by Liam J. Revell 2019
+
+print.gammatest<-function(x,...){
+	if(hasArg(digits)) digits<-list(...)$digits
+	else digits<-4
+	cat("\nAn object of class \"gammatest\" with:\n")
+	cat(paste("(1) Pybus & Harvey's gamma = ",
+		round(x$gamma,digits),sep=""))
+	cat(paste("\n(2) p-value = ",round(x$p,digits),
+		"\n\n",sep=""))
 }
 
 ## S3 print method for object of class "ltt"
@@ -246,3 +263,43 @@ plot.gtt<-function(x,...){
 print.gtt<-function(x,...)
 	cat("Object of class \"gtt\".\n\n")
 	
+## perform the MCCR test of Pybus & Harvey (2000)
+## written by Liam J. Revell 2018
+
+mccr<-function(obj,rho=1,nsim=100,...){
+	N<-round(Ntip(obj$tree)/rho)
+	tt<-pbtree(n=N,nsim=nsim)
+	foo<-function(x,m) drop.tip(x,sample(x$tip.label,m))
+	tt<-lapply(tt,foo,m=N-Ntip(obj$tree))
+	g<-sapply(tt,function(x) ltt(x,plot=FALSE)$gamma)
+	P<-if(obj$gamma>median(g)) 2*mean(g>=obj$gamma) else 2*mean(g<=obj$gamma)
+	result<-list(gamma=obj$gamma,"P(two-tailed)"=P,null.gamma=g)
+	class(result)<-"mccr"
+	result
+}
+
+## print method for "mccr" object class
+
+print.mccr<-function(x,digits=4,...){
+	cat("Object of class \"mccr\" consisting of:\n\n")
+	cat(paste("(1) A value for Pybus & Harvey's \"gamma\"",
+		" statistic of ",round(x$gamma,digits),".\n\n",sep=""))
+	cat(paste("(2) A two-tailed p-value from the MCCR test of ",
+		round(x$'P(two-tailed)',digits),".\n\n", sep = ""))
+	cat(paste("(3) A simulated null-distribution of gamma from ",
+		length(x$null.gamma)," simulations.\n\n",sep=""))
+}
+
+## plot method for "mccr" object class
+
+plot.mccr<-function(x,...){
+	hist(x$null.gamma,breaks=min(c(max(12,round(length(x$null.gamma)/10)),20)),
+		xlim=range(c(x$gamma,x$null.gamma)),
+		main=expression(paste("null distribution of ",
+		gamma)),xlab=expression(gamma),col="lightgrey")
+	arrows(x0=x$gamma,y0=par()$usr[4],y1=0,length=0.12,
+		col=make.transparent("blue",0.5),lwd=2)
+	text(x$gamma,0.98*par()$usr[4],
+		expression(paste("observed value of ",gamma)),
+		pos=if(x$gamma>mean(x$null.gamma)) 2 else 4)
+}

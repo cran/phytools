@@ -10,11 +10,15 @@
 # "scattergram" plots a phylogenetic scatterplot matrix
 # written by Liam J. Revell 2012, 2013, 2014, 2015, 2016, 2017
 
-fancyTree<-function(tree,type=c("extinction","traitgram3d","droptip","densitymap","contmap","phenogram95","scattergram"),...,control=list()){
-	type<-matchType(type,c("extinction","traitgram3d","droptip","densitymap","contmap","phenogram95","scattergram"))
-	if(!inherits(tree,"phylo")&&type%in%c("extinction","traitgram3d","droptip")) stop("tree should be an object of class \"phylo\".")
-	else if(!inherits(tree,"multiPhylo")&&type=="densitymap") stop("for type='densitymap' tree should be an object of class \"multiPhylo\".")
-	if(type=="extinction") extinctionTree(tree)
+fancyTree<-function(tree,type=c("extinction","traitgram3d","droptip",
+	"densitymap","contmap","phenogram95","scattergram"),...,control=list()){
+	type<-matchType(type,c("extinction","traitgram3d","droptip","densitymap",
+		"contmap","phenogram95","scattergram"))
+	if(!inherits(tree,"phylo")&&type%in%c("extinction","traitgram3d",
+		"droptip")) stop("tree should be an object of class \"phylo\".")
+	else if(!inherits(tree,"multiSimmap")&&type=="densitymap") 
+		stop("for type='densitymap' tree should be an object of class \"multiSimmap\".")
+	if(type=="extinction") extinctionTree(tree,...)
 	else if(type=="traitgram3d") invisible(traitgram3d(tree,...,control=control))
 	else if(type=="droptip") return(droptipTree(tree,...))
 	else if(type=="densitymap") plotDensityMap(tree,...)
@@ -25,107 +29,87 @@ fancyTree<-function(tree,type=c("extinction","traitgram3d","droptip","densitymap
 }
 
 ## phyloScattergram internal function
-## written by Liam J. Revell 2013, 2014, 2017
+## written by Liam J. Revell 2013, 2014, 2017, 2019
 
-phyloScattergram<-function(tree,...){
-	if(hasArg(X)) X<-list(...)$X
-	else stop("phenotypic data should be provided in the matrix X")
+phyloScattergram<-function(tree,X=NULL,...){
+	if(is.null(X)) stop("phenotypic data should be provided in the matrix X")
 	if(is.data.frame(X)) X<-as.matrix(X)
-	if(hasArg(fsize)) fsize<-list(...)$fsize
-	else fsize<-0.7
-	if(hasArg(colors)) colors<-list(...)$colors
-	else if(!is.null(tree$maps)) 
-		colors<-setNames(palette()[1:ncol(tree$mapped.edge)],
-		sort(colnames(tree$mapped.edge)))
-	if(hasArg(label)) label<-list(...)$label
-	else label<-"radial"
-	if(hasArg(hold)) hold<-list(...)$hold
-	else hold<-TRUE
+	if(hasArg(plot)) plot<-list(...)$plot
+	else plot<-TRUE
+	if(hasArg(fixed.lims)) fixed.lims<-list(...)$fixed.lims
+	else fixed.lims<-FALSE
 	if(hasArg(quiet)) quiet<-list(...)$quiet
 	else quiet<-FALSE
-	m<-ncol(X)
-	if(hold) null<-dev.hold()
-	if(!quiet&&hold){ 
+	if(!quiet){ 
 		cat("Computing multidimensional phylogenetic scatterplot matrix...\n")
 		flush.console()
 	}
-	par(mfrow=c(m,m))
-	par(cex=fsize)
-	par(mar=c(0,0,0,0))
-	par(oma=c(5,5,3,3))
 	m<-ncol(X)
 	A<-apply(X,2,fastAnc,tree=tree)
 	cmaps<-list()
-	for(i in 1:m) for(j in 1:m){
-		if(i==j) cmaps[[i]]<-contMap(tree,X[,i],
-			legend=FALSE,lwd=2,outline=F,fsize=fsize)
-		else { 
-			phylomorphospace(tree,X[,c(j,i)],A=A[,c(j,i)],lwd=1,
-				node.by.map=TRUE,axes=FALSE,node.size=c(0,1),
-				colors=colors,label=label,xlab="",ylab="")
-			if(i==1) axis(side=3) # top row
-			if(i==m) axis(side=1) # first column
-			if(j==1) axis(side=2) # bottom row
-			if(j==m) axis(side=4) # last column
-		}
-	}
-	par(cex=0.9)
+	lims<-if(fixed.lims) range(X) else NULL
+	for(i in 1:m) cmaps[[i]]<-contMap(tree,X[,i],
+		legend=FALSE,lwd=2,outline=FALSE,plot=FALSE,
+		lims=lims)
 	if(is.null(colnames(X))) colnames(X)<-paste("V",1:m,sep="")
-	invisible(mapply(title,xlab=colnames(X),
-		adj=seq(0,(m-1)/m,1/m)+1/(2*m),MoreArgs=list(outer=TRUE,cex=0.9)))
-	invisible(mapply(title,ylab=colnames(X)[m:1],
-		adj=seq(0,(m-1)/m,1/m)+1/(2*m),MoreArgs=list(outer=TRUE,cex=0.9)))
-	if(hold) null<-dev.flush()
 	obj<-list(tree=tree,contMaps=cmaps,X=X,A=A)
 	class(obj)<-"phyloScattergram"
+	if(plot) plot(obj,...)
 	obj
 }
 
 plot.phyloScattergram<-function(x,...){
 	if(hasArg(fsize)) fsize<-list(...)$fsize
 	else fsize<-0.7
+	if(hasArg(ftype)) ftype<-list(...)$ftype
+	else ftype<-"i"
 	if(hasArg(colors)) colors<-list(...)$colors
-	else if(!is.null(x$tree$maps)) 
+	else if(!is.null(x$tree$maps))
 		colors<-setNames(palette()[1:ncol(x$tree$mapped.edge)],
 		sort(colnames(x$tree$mapped.edge)))
 	if(hasArg(label)) label<-list(...)$label
 	else label<-"radial"
 	m<-ncol(x$X)
+	dev.hold()
 	par(mfrow=c(m,m))
-	par(cex=fsize)
 	par(mar=c(0,0,0,0))
 	par(oma=c(5,5,3,3))
 	for(i in 1:m) for(j in 1:m){
 		if(i==j) plot(x$contMaps[[i]],legend=FALSE,
-			lwd=2,outline=FALSE,fsize=fsize)
+			lwd=2,outline=FALSE,fsize=fsize,ftype=ftype)
 		else { 
 			phylomorphospace(x$tree,x$X[,c(j,i)],A=x$A[,c(j,i)],lwd=1,
 				node.by.map=TRUE,axes=FALSE,node.size=c(0,1),
-				colors=colors,label=label,xlab="",ylab="")
+				colors=colors,label=label,xlab="",ylab="",
+				fsize=fsize/0.7,ftype=ftype)
 			if(i==1) axis(side=3) # top row
 			if(i==m) axis(side=1) # first column
 			if(j==1) axis(side=2) # bottom row
 			if(j==m) axis(side=4) # last column
 		}
 	}
+	old.cex<-par()$cex
 	par(cex=0.9)
 	if(is.null(colnames(x$X))) colnames(x$X)<-paste("V",1:m,sep="")
 	invisible(mapply(title,xlab=colnames(x$X),
 		adj=seq(0,(m-1)/m,1/m)+1/(2*m),MoreArgs=list(outer=TRUE,cex=0.9)))
 	invisible(mapply(title,ylab=colnames(x$X)[m:1],
 		adj=seq(0,(m-1)/m,1/m)+1/(2*m),MoreArgs=list(outer=TRUE,cex=0.9)))
+	dev.flush()
+	par(cex=old.cex)
 }
 
-print.phyloScattergram<-function(x,...)
+print.phyloScattergram<-function(x,...){
 	cat(paste("\nObject of class \"phyloScattergram\" for",ncol(x$X),
-		"continuous traits.\n\n"))
+		"continuous traits.\n"))
+	cat("To replot enter \"plot(object_name)\" at the prompt.\n\n")
+}
+	
+## phenogram95 internal function
+## written by Liam J. Revell 2013, 2014, 2019
 
-# phenogram95 internal function
-# written by Liam J. Revell 2013, 2014
-
-phenogram95<-function(tree,...){
-	if(hasArg(x)) x<-list(...)$x
-	else stop("no phenotypic data provided")
+phenogram95<-function(tree,x=NULL,...){
+	if(is.null(x)) stop("no phenotypic data provided")
 	if(hasArg(spread.labels)) spread.labels<-list(...)$spread.labels
 	else spread.labels<-TRUE
 	if(hasArg(link)) link<-list(...)$link
@@ -179,23 +163,39 @@ phenogram95<-function(tree,...){
 	null<-dev.flush()
 }
 
-# extinctionTree internal function
-# written by Liam J. Revell 2012
+## extinctionTree internal function
+## written by Liam J. Revell 2012, 2019
 
-extinctionTree<-function(tree){
+extinctionTree<-function(tree,...){
+	if(hasArg(fsize)) fsize<-list(...)$fsize
+	else fsize<-1
+	if(hasArg(ftype)) ftype<-list(...)$ftype
+	else ftype<-"i"
+	if(hasArg(lwd)) lwd<-list(...)$lwd
+	else lwd<-2
+	if(hasArg(colors)) colors<-list(...)$colors
+	else colors<-palette()[1:2]
+	ftype<-which(c("off","reg","b","i","bi")==ftype)-1
+	if(!ftype) fsize=0.1 
 	edges<-rep(0,nrow(tree$edge))
 	names(edges)<-tree$edge[,2]
 	extant<-getExtant(tree)
 	ca<-findMRCA(tree,extant)
 	root.node<-length(tree$tip)+1
 	if(ca!=root.node){
-		z<-setdiff(getDescendants(tree,root.node),getDescendants(tree,ca))
+		z<-setdiff(getDescendants(tree,root.node),
+			getDescendants(tree,ca))
 		edges[as.character(z)]<-1
 	}
 	z<-getDescendants(tree,ca)
 	y<-lapply(z,getDescendants,tree=tree)
-	for(i in 1:length(z)) if(!any(tree$tip.label[y[[i]]]%in%extant)) edges[as.character(z[i])]<-1
-	plot.phylo(tree,edge.color=edges+1,edge.lty=edges+1,edge.width=2,no.margin=TRUE)
+	for(i in 1:length(z)) 
+		if(!any(tree$tip.label[y[[i]]]%in%extant)) 
+			edges[as.character(z[i])]<-1
+	ape::plot.phylo(tree,edge.color=colors[edges+1],edge.lty=edges+1,
+		edge.width=lwd,no.margin=TRUE,cex=fsize,
+		show.tip.label=if(ftype==0) FALSE else TRUE, 
+		font=ftype)
 }
 
 # traitgram3d internal function
@@ -225,7 +225,8 @@ traitgram3d<-function(tree,...,control){
 	if(hasArg(angle)) angle<-list(...)$angle
 	else angle<-30
 	# done other optional arguments
-	xx<-phylomorphospace3d(tree,X,A,control=control,method=method,angle=angle,zlim=range(nodeHeights(tree)))
+	xx<-phylomorphospace3d(tree,X,A,control=control,method=method,
+		angle=angle,zlim=range(nodeHeights(tree)))
 	return(xx)
 }
 
@@ -241,7 +242,8 @@ droptipTree<-function(tree,...){
 	ca<-findMRCA(tree,keep)
 	root.node<-length(tree$tip)+1
 	if(ca!=root.node){
-		z<-setdiff(getDescendants(tree,root.node),getDescendants(tree,ca))
+		z<-setdiff(getDescendants(tree,root.node),
+			getDescendants(tree,ca))
 		edges[as.character(z)]<-1
 	}
 	z<-getDescendants(tree,ca)
@@ -252,10 +254,13 @@ droptipTree<-function(tree,...){
 		return(y)
 	}
 	y<-lapply(z,foo,tree=tree)
-	for(i in 1:length(z)) if(!any(tree$tip.label[y[[i]]]%in%keep)) edges[as.character(z[i])]<-1
+	for(i in 1:length(z)) if(!any(tree$tip.label[y[[i]]]%in%keep)) 
+		edges[as.character(z[i])]<-1
 	par(mfrow=c(2,1))
-	plot.phylo(tree,edge.color=edges+1,edge.lty=edges+1,edge.width=2,no.margin=TRUE)
-	dtree<-drop.tip(tree,tip); dtree$root.edge<-max(nodeHeights(tree))-max(nodeHeights(dtree))
+	plot.phylo(tree,edge.color=edges+1,edge.lty=edges+1,
+		edge.width=2,no.margin=TRUE)
+	dtree<-drop.tip(tree,tip); dtree$root.edge<-
+		max(nodeHeights(tree))-max(nodeHeights(dtree))
 	plot.phylo(dtree,edge.width=2,no.margin=TRUE,root.edge=TRUE)
 	return(dtree)
 }
@@ -288,7 +293,6 @@ plotContMap<-function(tree,...){
 	if(hasArg(x)) x<-list(...)$x
 	else stop("need to provide vector 'x' of phenotypic trait values")
 	if(hasArg(res)) res<-list(...)$res
-
 	else res<-100
 	if(hasArg(fsize)) fsize<-list(...)$fsize
 	else fsize<-NULL
@@ -306,5 +310,3 @@ plotContMap<-function(tree,...){
 	else sig<-3
 	contMap(tree,x,res,fsize,ftype,lwd,legend,lims,outline,sig)
 }
-
-

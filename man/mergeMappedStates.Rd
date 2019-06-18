@@ -5,15 +5,17 @@
 mergeMappedStates(tree, old.states, new.state)
 }
 \arguments{
-	\item{tree}{a modified object of class \code{"phylo"} or \code{"multiPhylo"} with a mapped discrete character.}
+	\item{tree}{an object of class \code{"simmap"} or \code{"multiSimmap"} containing one or more phylogenetic trees with a mapped discrete character.}
 	\item{old.states}{states to merge.}
 	\item{new.state}{name for new state.}
 }
 \description{
-	This function merges two or mapped states on the tree to get one new state. For instance, one could merge the states \code{"C"}, \code{"G"}, and \code{"T"} to get the state \code{"not-A"}.
+	This function merges two or mapped states on the tree to get one new state.
+	
+	For instance, one could merge the states \code{"C"}, \code{"G"}, and \code{"T"} and define the new the state \code{"not-A"}.
 }
 \value{
-	A modified object of class \code{"phylo"} or \code{"multiPhylo"}.
+	An object of class \code{"simmap"} or \code{"multiSimmap"}.
 }
 \references{
 	Revell, L. J. (2012) phytools: An R package for phylogenetic comparative biology (and other things). \emph{Methods Ecol. Evol.}, \bold{3}, 217-223.
