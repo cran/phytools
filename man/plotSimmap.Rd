@@ -9,7 +9,7 @@ plotSimmap(tree, colors=NULL, fsize=1.0, ftype="reg", lwd=2, pts=FALSE,
    direction="rightwards", type="phylogram", setEnv=TRUE, part=1.0, 
    xlim=NULL, ylim=NULL, nodes="intermediate", tips=NULL, maxY=NULL, 
    hold=TRUE, split.vertical=FALSE,
-   lend=2, asp=NA, plot=TRUE)
+   lend=2, asp=NA, outline=FALSE, plot=TRUE)
 \method{plot}{simmap}(x, ...)
 \method{plot}{multiSimmap}(x, ...)
 }
@@ -23,7 +23,7 @@ plotSimmap(tree, colors=NULL, fsize=1.0, ftype="reg", lwd=2, pts=FALSE,
 	\item{node.numbers}{a logical value indicating whether or not node numbers should be plotted.}
 	\item{mar}{vector containing the margins for the plot to be passed to \code{\link{par}}. If not specified, the default margins are [0.1,0.1,0.1,0.1].}
 	\item{add}{a logical value indicating whether or not to add the plotted tree to the current plot (\code{TRUE}) or create a new plot (\code{FALSE}, the default).}
-	\item{offset}{offset for the tip labels. Primarily to be used internally by \code{\link{densityMap}}.}
+	\item{offset}{offset for the tip labels. For \code{type="phylogram"} this is in the units of the edge lengths of the tree. For \code{type="fan"}, however, \code{offset} is in the unit of character widths.}
 	\item{direction}{plotting direction. Options are \code{"rightwards"} (the default), \code{"leftwards"}, \code{"upwards"} or \code{"downwards"}. For \code{method="fan"} \code{direction} is ignored.}
 	\item{type}{plot type. Can be \code{"phylogram"}, \code{"fan"}, or \code{"cladogram"}. Only a subset of options are presently available for \code{type="fan"}.}
 	\item{setEnv}{logical value indicating whether or not to set the environment \code{.PlotPhyloEnv}. Setting this to \code{TRUE} (the default) will allow compatibility with ape labeling functions such as \code{\link{nodelabels}}.}
@@ -37,6 +37,7 @@ plotSimmap(tree, colors=NULL, fsize=1.0, ftype="reg", lwd=2, pts=FALSE,
 	\item{split.vertical}{split the color of the vertically plotted edges by the state of the daughter edges. Only applies if the edge state changes exactly at a node.}
 	\item{lend}{line end style. See \code{\link{par}}.}
 	\item{asp}{aspect ratio. See \code{\link{plot.window}}.}
+	\item{outline}{logical value indicating whether or not to draw a black outline around the plotted edges of the tree.}
 	\item{plot}{logical value indicating whether or not to actually plot the tree. (See equivalent argument in \code{\link{plot.phylo}}.)}
 	\item{x}{for S3 plotting method, object of class \code{"simmap"} or \code{"multiSimmap"}.}
 	\item{...}{for S3 plotting method, other arguments to be passed to \code{\link{plotSimmap}}.}

@@ -18,8 +18,8 @@ mcmcMk<-function(tree,x,model="ER",ngen=10000,...){
 	if(hasArg(prop.var)) prop.var<-list(...)$prop.var
 	else prop.var<-0.01/max(nodeHeights(tree))
 	if(hasArg(prior.rate)) prior.rate<-list(...)$prior.rate
-	else prior.rate<-if(is.matrix(x)) ncol(x)/sum(tree$edge.length) else
-		length(unique(x))/sum(tree$edge.length)
+	else prior.rate<-if(is.matrix(x)) sum(tree$edge.length)/ncol(x) else
+		sum(tree$edge.length)/length(unique(x))
 	if(hasArg(print)) print<-list(...)$print
 	else print<-100
 	if(is.matrix(x)){
@@ -70,9 +70,9 @@ mcmcMk<-function(tree,x,model="ER",ngen=10000,...){
 	PS<-matrix(NA,ngen,k+2,dimnames=list(1:ngen,c("gen",nn,"logLik")))
 	PS[1,]<-c(1,q,likQ)
 	cat("Running MCMC....\n")
+	accept<-0
 	if(print){
-		cat(paste(colnames(PS),collapse=" \t"))
-		cat("\n")
+		cat(paste(paste(colnames(PS),collapse=" \t"),"\taccept\n",sep=""))
 		i<-1
 		cat(paste(round(PS[i,1]),paste(round(PS[i,1:k+1],4),collapse="\t"),
 			round(PS[i,ncol(PS)],4),sep="\t"))
@@ -87,13 +87,15 @@ mcmcMk<-function(tree,x,model="ER",ngen=10000,...){
 		if(por>runif(n=1)){
 			q<-qp
 			likQ<-likQp
+			if(print) accept<-accept+1/print
 		}
 		PS[i,]<-c(i,q,likQ)
 		if(print) if(i%%print==1){
 			cat(paste(round(PS[i,1]),paste(round(PS[i,1:k+1],4),collapse="\t"),
-				round(PS[i,ncol(PS)],4),sep="\t"))
+				round(PS[i,ncol(PS)],4),round(accept,3),sep="\t"))
 			cat("\n")
 			flush.console()
+			accept<-0
 		}
 		if(plot) plot(1:i,PS[1:i,"logLik"],col="darkgrey",xlab="generation",
 				ylab="log(L)",xlim=c(0,ngen),type="l")
@@ -118,9 +120,10 @@ print.mcmcMk<-function(x,...){
 }
 
 plot.mcmcMk<-function(x,...){
+	if(hasArg(main)) main<-list(...)$main
+	else main<-"Likelihood profile from MCMC"
 	plot(x[,"gen"],x[,"logLik"],type="s",xlab="generation",ylab="log(L)",
-		col="grey",bty="l",main="Likelihood profile from MCMC",
-		font.main=1)
+		col="grey",bty="l",main=main,font.main=1)
 }
 
 summary.mcmcMk<-function(object,...){
@@ -211,7 +214,9 @@ plot.density.mcmcMk<-function(x,...){
 	if(hasArg(ylim)) ylim<-list(...)$ylim
 	else ylim<-c(0,1.1*max(sapply(x,function(x) x$y)))
 	if(length(x)==1){
-		plot(x[[1]],main="estimated posterior density for q",
+		if(hasArg(main)) main<-list(...)$main
+		else main<-"estimated posterior density for q"
+		plot(x[[1]],main=main,
 			bty="l",font.main=1,xlim=xlim,ylim=ylim,
 			xlab="q")
 		polygon(x[[1]],col=make.transparent("blue",0.5))
@@ -219,9 +224,11 @@ plot.density.mcmcMk<-function(x,...){
 		text(x=mean(attr(x,"summary")$HPD95[1,]),
 			y=1.01*max(x[[1]]$y),"95% HPD",pos=3)
 	} else if(length(x)==2&&show.matrix==FALSE){
+		if(hasArg(main)) main<-list(...)$main
+		else main<-expression(paste("estimated posterior density for ",
+			Q[ij]))
 		plot(x[[1]],xlim=xlim,ylim=ylim,
-			main=expression(paste("estimated posterior density for ",
-			Q[ij])),xlab="q",bty="l")
+			main=main,xlab="q",bty="l")
 		polygon(x[[1]],col=make.transparent("blue",0.25))
 		lines(x=attr(x,"summary")$HPD95[1,],
 			y=rep(max(x[[1]]$y),2)+0.01*diff(ylim))

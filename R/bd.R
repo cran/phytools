@@ -1,5 +1,5 @@
 ## likelihood functions for birth-death & Yule model with incomplete sampling
-## written by Liam J. Revell 2017, 2018, 2019
+## written by Liam J. Revell 2017, 2018, 2019, 2020
 ## based on likelihood functions in Stadler (2012)
 
 lik.bd<-function(theta,t,rho=1,N=NULL){
@@ -45,7 +45,8 @@ fit.bd<-function(tree,b=NULL,d=NULL,rho=1,...){
 	}
     obj<-list(b=fit$par[1],d=fit$par[2],rho=rho,logL=-fit$objective,
         opt=list(counts=fit$counts,convergence=fit$convergence,
-        message=fit$message),model="birth-death")
+        message=fit$message),model="birth-death",
+		lik=function(theta) -lik.bd(theta,t=T,rho=rho))
     class(obj)<-"fit.bd"
     obj
 }
@@ -59,22 +60,28 @@ fit.yule<-function(tree,b=NULL,d=NULL,rho=1,...){
     T<-sort(branching.times(tree),decreasing=TRUE)
 	fit<-optimize(lik.bd,interval,t=T,rho=rho)
 	obj<-list(b=fit$minimum,d=0,rho=rho,logL=-fit$objective,
-		opt=list(convergence=0),model="Yule")
+		opt=list(convergence=0),model="Yule",
+		lik=function(theta) -lik.bd(c(theta,0),t=T,rho=rho))
     class(obj)<-"fit.bd"
     obj
 }
 
 ## S3 print method for object class 'fit.bd'
 
+SIGNIF<-function(x,dd){
+	tens<-if(abs(x)>1) ceiling(log10(abs(x))) else 0
+	signif(x,dd+tens)
+}
+
 print.fit.bd<-function(x,...){
     if(hasArg(digits)) digits<-list(...)$digits
     else digits<-4
 	cat(paste("\nFitted",x$model,"model:\n\n"))
-    cat(paste("ML(b/lambda) =",round(x$b,digits),"\n"))
+    cat(paste("ML(b/lambda) =",SIGNIF(x$b,digits),"\n"))
     if(x$model=="birth-death") 
-		cat(paste("ML(d/mu) =",round(x$d,digits),"\n"))
-    cat(paste("log(L) =",round(x$logL,digits),"\n"))
-    cat(paste("\nAssumed sampling fraction (rho) =",x$rho,"\n"))
+		cat(paste("ML(d/mu) =",SIGNIF(x$d,digits),"\n"))
+    cat(paste("log(L) =",SIGNIF(x$logL,digits),"\n"))
+    cat(paste("\nAssumed sampling fraction (rho) =",SIGNIF(x$rho,digits),"\n"))
     if(x$opt$convergence==0) cat("\nR thinks it has converged.\n\n")
     else cat("\nR thinks optimization may not have converged.\n\n")
 }

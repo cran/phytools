@@ -1,5 +1,5 @@
 ## some utility functions
-## written by Liam J. Revell 2011, 2012, 2013, 2014, 2015, 2016, 2017, 2018, 2019
+## written by Liam J. Revell 2011, 2012, 2013, 2014, 2015, 2016, 2017, 2018, 2019, 2020
 
 ## di2multi & multi2di for "contMap" & "densityMap" object classes
 
@@ -738,7 +738,7 @@ edgeProbs<-function(trees){
 }
 
 ## get a position in the tree interactively
-## written by Liam J. Revell 2015, 2016
+## written by Liam J. Revell 2015, 2016, 2020
 get.treepos<-function(message=TRUE,...){
 	obj<-get("last_plot.phylo",envir=.PlotPhyloEnv)
 	if(obj$type=="phylogram"&&obj$direction=="rightwards"){
@@ -769,7 +769,10 @@ get.treepos<-function(message=TRUE,...){
 			}
 		}
 		ii<-which(d==min(d))
-		list(where=obj$edge[ii,2],pos=pos[ii])
+		## check to make sure the root is not closer:
+		root.d<-dist(rbind(c(x,y),c(obj$xx[obj$Ntip+1],obj$yy[obj$Ntip+1])))
+		if(root.d<min(d)) return(list(where=obj$Ntip+1,pos=0))
+		else list(where=obj$edge[ii,2],pos=pos[ii])
 	} else stop("Does not work for the plotted tree type.")
 }
 
@@ -916,7 +919,7 @@ getExtant<-function(tree,tol=1e-8){
 getExtinct<-function(tree,tol=1e-8) setdiff(tree$tip.label,getExtant(tree,tol))
 
 # function splits tree at split
-# written by Liam Revell 2011, 2014, 2015
+# written by Liam Revell 2011, 2014, 2015, 2020
 
 splitTree<-function(tree,split){
 	if(!inherits(tree,"phylo")) stop("tree should be an object of class \"phylo\".")
@@ -943,23 +946,33 @@ splitTree<-function(tree,split){
 	trees
 }
 
-
 # function drops entire clade
-# written by Liam Revell 2011, 2015
+# written by Liam Revell 2011, 2015, 2020
 
 drop.clade<-function(tree,tip){
-	if(!inherits(tree,"phylo")) stop("tree should be an object of class \"phylo\".")
-	nn<-if(!is.null(tree$node.label)) c(tree$node.label,"NA") else "NA"
-	tree<-drop.tip(tree,tip,trim.internal=FALSE)
-	while(sum(tree$tip.label%in%nn)>1)
-		tree<-drop.tip(tree,tree$tip.label[tree$tip.label%in%nn],
-			trim.internal=FALSE)
+	## step 1, check to make sure tips form a monophyletic clade
+	node<-getMRCA(tree,tip)
+	desc<-getDescendants(tree,node)
+	chk<-tree$tip.label[desc[desc<=Ntip(tree)]]
+	if(!setequal(tip,chk)){
+		cat("Caution: Species in tip do not form a monophyletic clade.\n")
+		cat("         Pruning all tips descended from ancestor.\n\n")
+		tip<-chk
+	}
+	## step 2, find all edges in the clade & set them to zero length
+	ee<-sapply(desc,function(node,edge) which(edge==node), 
+		edge=tree$edge[,2])
+	tree$edge.length[ee]<-0
+	## step 3, bind a tip labeled "NA" to the node
+	tree<-bind.tip(tree,"NA",0,node)
+	## step 4, prune the other tips
+	tree<-drop.tip(tree,tip)
+	## step 5, return tree
 	tree
 }
 
-
 ## function to re-root a phylogeny along an edge
-## written by Liam J. Revell 2011-2016, 2019
+## written by Liam J. Revell 2011-2016, 2019, 2020
 
 reroot<-function(tree,node.number,position=NULL,interactive=FALSE,...){
 	if(!inherits(tree,"phylo")) stop("tree should be an object of class \"phylo\".")
@@ -971,20 +984,32 @@ reroot<-function(tree,node.number,position=NULL,interactive=FALSE,...){
 		node.number<-obj$where
 		position<-tree$edge.length[which(tree$edge[,2]==node.number)]-obj$pos
 	}
-	if(is.null(position)) position<-tree$edge.length[which(tree$edge[,2]==node.number)]
-	tt<-splitTree(tree,list(node=node.number,bp=position))
-	p<-tt[[1]]
-	d<-tt[[2]]
-	tip<-if(length(which(p$tip.label=="NA"))>0) "NA" else p$tip.label[which(p$tip.label%in%tree$node.label)]
-	p<-ape::root.phylo(p,outgroup=tip,resolve.root=TRUE)
-	bb<-which(p$tip.label==tip)
-	p$tip.label[bb]<-"NA"
-	ee<-p$edge.length[which(p$edge[,2]==bb)]
-	p$edge.length[which(p$edge[,2]==bb)]<-0
-	cc<-p$edge[which(p$edge[,2]==bb),1]
-	dd<-setdiff(p$edge[which(p$edge[,1]==cc),2],bb)
-	p$edge.length[which(p$edge[,2]==dd)]<-p$edge.length[which(p$edge[,2]==dd)]+ee
-	obj<-paste.tree(p,d)
+	if(node.number==(Ntip(tree)+1))
+		cat("Note: you chose to re-root the tree at it's current root.\n")
+	if(is.null(position)){
+		if(node.number==(Ntip(tree)+1)) position=0
+		else position<-tree$edge.length[which(tree$edge[,2]==node.number)]
+	} else {
+		if(node.number==(Ntip(tree)+1))
+			cat("      A value of position != 0 has been reset to zero.\n")
+	}
+	if(hasArg(edgelabel)) edgelabel<-list(...)$edgelabel
+	else edgelabel<-FALSE
+	if(node.number!=(Ntip(tree)+1)){
+		tt<-splitTree(tree,list(node=node.number,bp=position))
+		p<-tt[[1]]
+		d<-tt[[2]]
+		tip<-if(length(which(p$tip.label=="NA"))>0) "NA" else p$tip.label[which(p$tip.label%in%tree$node.label)]
+		p<-ape::root.phylo(p,outgroup=tip,resolve.root=TRUE,edgelabel=edgelabel)
+		bb<-which(p$tip.label==tip)
+		p$tip.label[bb]<-"NA"
+		ee<-p$edge.length[which(p$edge[,2]==bb)]
+		p$edge.length[which(p$edge[,2]==bb)]<-0
+		cc<-p$edge[which(p$edge[,2]==bb),1]
+		dd<-setdiff(p$edge[which(p$edge[,1]==cc),2],bb)
+		p$edge.length[which(p$edge[,2]==dd)]<-p$edge.length[which(p$edge[,2]==dd)]+ee
+		obj<-paste.tree(p,d)
+	} else obj<-tree
 	if(interactive) plotTree(obj,...)
 	obj
 }
@@ -1551,13 +1576,13 @@ roundBranches<-function(tree,digits=0){
 }
 
 # function to merge mapped states
-# written by Liam J. Revell 2013, 2015
+# written by Liam J. Revell 2013, 2015, 2019
 mergeMappedStates<-function(tree,old.states,new.state){
-	if(inherits(tree,"multiPhylo")){
+	if(inherits(tree,"multiSimmap")){
 		tree<-unclass(tree)
 		tree<-lapply(tree,mergeMappedStates,old.states=old.states,new.state=new.state)
-		class(tree)<-"multiPhylo"
-	} else if(inherits(tree,"phylo")) {
+		class(tree)<-c("multiSimmap","multiPhylo")
+	} else if(inherits(tree,"simmap")) {
 		maps<-tree$maps
 		rr<-function(map,oo,nn){ 
 			for(i in 1:length(map)) if(names(map)[i]%in%oo) names(map)[i]<-nn
@@ -1597,7 +1622,7 @@ mergeMappedStates<-function(tree,old.states,new.state){
 		}
 		tree$maps<-maps
 		tree$mapped.edge<-mapped.edge
-	} else stop("tree should be an object of class \"phylo\" or \"multiPhylo\".")
+	} else stop("tree should be an object of class \"simmap\" or \"multiSimmap\".")
 	return(tree)
 }
 

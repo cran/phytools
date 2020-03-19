@@ -1,15 +1,17 @@
 ## functions plot stochastic character mapped trees
-## written by Liam Revell 2011-2017
+## written by Liam Revell 2011-2020
 
 plotSimmap<-function(tree,colors=NULL,fsize=1.0,ftype="reg",lwd=2,
 	pts=FALSE,node.numbers=FALSE,mar=NULL,add=FALSE,offset=NULL,direction="rightwards",
 	type="phylogram",setEnv=TRUE,part=1.0,xlim=NULL,ylim=NULL,nodes="intermediate",
-	tips=NULL,maxY=NULL,hold=TRUE,split.vertical=FALSE,lend=2,asp=NA,plot=TRUE){
+	tips=NULL,maxY=NULL,hold=TRUE,split.vertical=FALSE,lend=2,asp=NA,outline=FALSE,
+	plot=TRUE){
 	if(inherits(tree,"multiPhylo")){
 		par(ask=TRUE)
-		for(i in 1:length(tree)) plotSimmap(tree[[i]],colors=colors,fsize=fsize,ftype=ftype,
-			lwd=lwd,pts=pts,node.numbers=node.numbers,mar,add,offset,direction,type,
-			setEnv,part,xlim,ylim,nodes,tips,maxY,hold,split.vertical,lend,asp,plot)
+		for(i in 1:length(tree)) plotSimmap(tree[[i]],colors=colors,fsize=fsize,
+			ftype=ftype,lwd=lwd,pts=pts,node.numbers=node.numbers,mar,add,offset,
+			direction,type,setEnv,part,xlim,ylim,nodes,tips,maxY,hold,split.vertical,
+			lend,asp,outline,plot)
 	} else {
 		# check tree
 		if(!inherits(tree,"phylo")) stop("tree should be object of class \"phylo\"")
@@ -33,17 +35,59 @@ plotSimmap<-function(tree,colors=NULL,fsize=1.0,ftype="reg",lwd=2,
 		if(is.null(mar)) mar=rep(0.1,4)
 		if(hold) null<-dev.hold()
 		if(type=="phylogram"){
-			if(direction%in%c("upwards","downwards"))
-				updownPhylogram(tree,colors,fsize,ftype,lwd,pts,node.numbers,mar,add,offset,
-					direction,setEnv,xlim,ylim,nodes,tips,split.vertical,lend,asp,plot)
-			else plotPhylogram(tree,colors,fsize,ftype,lwd,pts,node.numbers,mar,add,offset,
-					direction,setEnv,xlim,ylim,nodes,tips,split.vertical,lend,asp,plot)
+			if(direction%in%c("upwards","downwards")){
+				if(outline){
+					fg<-par()$fg
+					par(fg="transparent")
+					black<-colors
+					black[]<-"black"
+					updownPhylogram(tree,colors=black,fsize,ftype,lwd=lwd+2,pts,
+						node.numbers,mar,add,offset,direction,setEnv,xlim,ylim,nodes,
+						tips,split.vertical,lend,asp,plot)
+					par(fg=fg)
+				}
+				updownPhylogram(tree,colors,fsize,ftype,lwd,pts,node.numbers,mar,
+				add=if(outline) TRUE else add,offset,direction,setEnv,xlim,ylim,nodes,
+				tips,split.vertical,lend,asp,plot)
+			} else {
+				if(outline){
+					fg<-par()$fg
+					par(fg="transparent")
+					black<-colors
+					black[]<-"black"
+					plotPhylogram(tree,colors=black,fsize,ftype,lwd=lwd+2,pts,
+						node.numbers,mar,add,offset,direction,setEnv,xlim,ylim,nodes,
+						tips,split.vertical,lend,asp,plot)
+					par(fg=fg)
+				}
+				plotPhylogram(tree,colors,fsize,ftype,lwd,pts,node.numbers,mar,
+				add=if(outline) TRUE else add,offset,direction,setEnv,xlim,ylim,nodes,
+				tips,split.vertical,lend,asp,plot)
+			}
 		} else if(type=="fan"){
-			plotFan(tree,colors,fsize,ftype,lwd,mar,add,part,setEnv,xlim,ylim,tips,
-				maxY,lend,plot)
+			if(outline){
+				fg<-par()$fg
+				par(fg="transparent")
+				black<-colors
+				black[]<-"black"
+				plotFan(tree,colors=black,fsize,ftype,lwd=lwd+2,mar,add,part,setEnv,
+					xlim,ylim,tips,maxY,lend,plot,offset)
+				par(fg=fg)
+			}
+			plotFan(tree,colors,fsize,ftype,lwd,mar,add=if(outline) TRUE else add,part,
+				setEnv,xlim,ylim,tips,maxY,lend,plot,offset)
 		} else if(type=="cladogram"){
-			plotCladogram(tree,colors,fsize,ftype,lwd,mar,add,offset,direction,xlim,ylim,
-				nodes,tips,lend,asp,plot)
+			if(outline){
+				fg<-par()$fg
+				par(fg="transparent")
+				black<-colors
+				black[]<-"black"
+				plotCladogram(tree,colors=black,fsize,ftype,lwd=lwd+2,mar,add,offset,
+					direction,xlim,ylim,nodes,tips,lend,asp,plot)
+				par(fg=fg)
+			}
+			plotCladogram(tree,colors,fsize,ftype,lwd,mar,add=if(outline) TRUE else add,
+				offset,direction,xlim,ylim,nodes,tips,lend,asp,plot)
 		}
 		if(hold) null<-dev.flush()
 	}
@@ -315,7 +359,7 @@ plotPhylogram<-function(tree,colors,fsize,ftype,lwd,pts,node.numbers,mar,
 
 # function to plot simmap tree in type "fan"
 # written by Liam J. Revell 2013-2017
-plotFan<-function(tree,colors,fsize,ftype,lwd,mar,add,part,setEnv,xlim,ylim,tips,maxY,lend,plot){
+plotFan<-function(tree,colors,fsize,ftype,lwd,mar,add,part,setEnv,xlim,ylim,tips,maxY,lend,plot,offset=0){
 	if(!plot) cat("plot=FALSE option is not permitted for type=\"fan\". Tree will be plotted.\n")
 	# reorder
 	cw<-reorder(tree)
@@ -343,10 +387,10 @@ plotFan<-function(tree,colors,fsize,ftype,lwd,mar,add,part,setEnv,xlim,ylim,tips
 	# optimize x & y limits
 	par(mar=mar)
 	offsetFudge<-1.37 # empirically determined
-	offset<-0
+	OFFSET<-0
 	pp<-par("pin")[1]
  	sw<-fsize*(max(strwidth(cw$tip.label,units="inches")))+
-		offsetFudge*offset*fsize*strwidth("W",units="inches") 
+		offsetFudge*OFFSET*fsize*strwidth("W",units="inches") 
 	alp<-optimize(function(a,H,sw,pp) (2*a*1.04*max(H)+2*sw-pp)^2,H=R,sw=sw,pp=pp,
 		interval=c(0,1e6))$minimum
 	if(part<=0.25) x.lim<-y.lim<-c(0,max(R)+sw/alp)
@@ -396,7 +440,8 @@ plotFan<-function(tree,colors,fsize,ftype,lwd,mar,add,part,setEnv,xlim,ylim,tips
 		ii<-which(cw$edge[,2]==i)
 		aa<-Y[ii,2]/(2*pi)*360
 		adj<-if(aa>90&&aa<270) c(1,0.25) else c(0,0.25)
-		tt<-if(aa>90&&aa<270) paste(cw$tip.label[i]," ",sep="") else paste(" ",
+		tt<-if(aa>90&&aa<270) paste(cw$tip.label[i],paste(rep(" ",offset),
+			collapse=""),sep="") else paste(paste(rep(" ",offset),collapse=""),
 			cw$tip.label[i],sep="")
 		aa<-if(aa>90&&aa<270) 180+aa else aa
 		if(ftype) text(x[ii,2],y[ii,2],tt,srt=aa,adj=adj,cex=fsize,font=ftype)
