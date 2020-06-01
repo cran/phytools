@@ -1015,58 +1015,64 @@ reroot<-function(tree,node.number,position=NULL,interactive=FALSE,...){
 }
 
 ## function to add an arrow pointing to a tip or node in the tree
-## written by Liam J. Revell 2014, 2017
+## written by Liam J. Revell 2014, 2017, 2020
 
 add.arrow<-function(tree=NULL,tip,...){
-	lastPP<-get("last_plot.phylo",envir=.PlotPhyloEnv)
-	if(!is.null(tree)){
-		if(inherits(tree,"contMap")) tree<-tree$tree
-		else if(inherits(tree,"densityMap")) tree<-tree$tree
-	}
-	if(is.numeric(tip)){
-		ii<-tip
-		if(!is.null(tree)&&ii<=Ntip(tree)) tip<-tree$tip.label[ii]
-		else tip<-""
-	} else if(is.character(tip)&&!is.null(tree)) ii<-which(tree$tip.label==tip)
-	if(hasArg(offset)) offset<-list(...)$offset
-	else offset<-1
-	strw<-lastPP$cex*(strwidth(tip)+offset*mean(strwidth(c(LETTERS,letters))))
-	if(hasArg(arrl)) arrl<-list(...)$arrl
-	else { 
-		if(lastPP$type=="fan") arrl<-0.3*max(lastPP$xx)
-		else if(lastPP$type=="phylogram") arrl<-0.15*max(lastPP$xx)
-	}
-	if(hasArg(hedl)) hedl<-list(...)$hedl
-	else hedl<-arrl/3
-	if(hasArg(angle)) angle<-list(...)$angle
-	else angle<-45
-	arra<-angle*pi/180
-	asp<-if(lastPP$type=="fan") 1 else (par()$usr[4]-par()$usr[3])/(par()$usr[2]-par()$usr[1])
-	if(hasArg(col)) col<-list(...)$col
-	else col<-"black"
-	if(hasArg(lwd)) lwd<-list(...)$lwd
-	else lwd<-2
-	if(lastPP$type=="fan") theta<-atan2(lastPP$yy[ii],lastPP$xx[ii])
-	else if(lastPP$type=="phylogram") theta<-0	
-	segments(x0=lastPP$xx[ii]+cos(theta)*(strw+arrl),
-		y0=lastPP$yy[ii]+sin(theta)*(strw+arrl),
-		x1=lastPP$xx[ii]+cos(theta)*strw,
-		y1=lastPP$yy[ii]+sin(theta)*strw,
-		col=col,lwd=lwd,lend="round")
-	segments(x0=lastPP$xx[ii]+cos(theta)*strw+cos(theta+arra/2)*hedl,
-		y0=lastPP$yy[ii]+sin(theta)*strw+sin(theta+arra/2)*hedl*asp,
-		x1=lastPP$xx[ii]+cos(theta)*strw,
-		y1=lastPP$yy[ii]+sin(theta)*strw,
-		col=col,lwd=lwd,lend="round")
-	segments(x0=lastPP$xx[ii]+cos(theta)*strw+cos(theta-arra/2)*hedl,
-		y0=lastPP$yy[ii]+sin(theta)*strw+sin(theta-arra/2)*hedl*asp,
-		x1=lastPP$xx[ii]+cos(theta)*strw,
-		y1=lastPP$yy[ii]+sin(theta)*strw,
-		col=col,lwd=lwd,lend="round")
-	invisible(list(x0=lastPP$xx[ii]+cos(theta)*(strw+arrl),
-		y0=lastPP$yy[ii]+sin(theta)*(strw+arrl),
-		x1=lastPP$xx[ii]+cos(theta)*strw,
-		y1=lastPP$yy[ii]+sin(theta)*strw))
+	if(length(tip)>1){ 
+		object<-sapply(tip,add.arrow,tree=tree,...)
+		invisible(object)
+	} else {
+		lastPP<-get("last_plot.phylo",envir=.PlotPhyloEnv)
+		if(!is.null(tree)){
+			if(inherits(tree,"contMap")) tree<-tree$tree
+			else if(inherits(tree,"densityMap")) tree<-tree$tree
+		}
+		if(is.numeric(tip)){
+			ii<-tip
+			if(!is.null(tree)&&ii<=Ntip(tree)) tip<-tree$tip.label[ii]
+			else tip<-""
+		} else if(is.character(tip)&&!is.null(tree)) ii<-which(tree$tip.label==tip)
+		if(hasArg(offset)) offset<-list(...)$offset
+		else offset<-1
+		strw<-lastPP$cex*(strwidth(tip)+offset*mean(strwidth(c(LETTERS,letters))))
+		if(hasArg(arrl)) arrl<-list(...)$arrl
+		else { 
+			if(lastPP$type=="fan") arrl<-0.3*max(lastPP$xx)
+			else if(lastPP$type=="phylogram") arrl<-0.15*max(lastPP$xx)
+		}
+		if(hasArg(hedl)) hedl<-list(...)$hedl
+		else hedl<-arrl/3
+		if(hasArg(angle)) angle<-list(...)$angle
+		else angle<-45
+		arra<-angle*pi/180
+		asp<-if(lastPP$type=="fan") 1 else (par()$usr[4]-par()$usr[3])/(par()$usr[2]-
+			par()$usr[1])
+		if(hasArg(col)) col<-list(...)$col
+		else col<-"black"
+		if(hasArg(lwd)) lwd<-list(...)$lwd	
+		else lwd<-2
+		if(lastPP$type=="fan") theta<-atan2(lastPP$yy[ii],lastPP$xx[ii])
+		else if(lastPP$type=="phylogram") theta<-0	
+		segments(x0=lastPP$xx[ii]+cos(theta)*(strw+arrl),
+			y0=lastPP$yy[ii]+sin(theta)*(strw+arrl),
+			x1=lastPP$xx[ii]+cos(theta)*strw,
+			y1=lastPP$yy[ii]+sin(theta)*strw,
+			col=col,lwd=lwd,lend="round")
+		segments(x0=lastPP$xx[ii]+cos(theta)*strw+cos(theta+arra/2)*hedl,
+			y0=lastPP$yy[ii]+sin(theta)*strw+sin(theta+arra/2)*hedl*asp,
+			x1=lastPP$xx[ii]+cos(theta)*strw,
+			y1=lastPP$yy[ii]+sin(theta)*strw,
+			col=col,lwd=lwd,lend="round")
+		segments(x0=lastPP$xx[ii]+cos(theta)*strw+cos(theta-arra/2)*hedl,
+			y0=lastPP$yy[ii]+sin(theta)*strw+sin(theta-arra/2)*hedl*asp,
+			x1=lastPP$xx[ii]+cos(theta)*strw,
+			y1=lastPP$yy[ii]+sin(theta)*strw,
+			col=col,lwd=lwd,lend="round")
+		invisible(list(x0=lastPP$xx[ii]+cos(theta)*(strw+arrl),
+			y0=lastPP$yy[ii]+sin(theta)*(strw+arrl),
+			x1=lastPP$xx[ii]+cos(theta)*strw,
+			y1=lastPP$yy[ii]+sin(theta)*strw))
+		}
 }
 
 ## function to ladderize phylogeny with mapped discrete character
@@ -1218,7 +1224,7 @@ print.describe.simmap<-function(x,...){
 }
 
 ## S3 plot method for object of class 'describe.simmap'
-## written by Liam J. Revell 2014, 2015
+## written by Liam J. Revell 2014, 2015, 2020
 plot.describe.simmap<-function(x,...){
 	if(hasArg(lwd)) lwd<-list(...)$lwd
 	else lwd<-2
@@ -1227,22 +1233,26 @@ plot.describe.simmap<-function(x,...){
 	if(length(cex)==1) cex<-rep(cex,2)
 	if(hasArg(type)) type<-list(...)$type
 	else type<-"phylogram"
+	if(hasArg(offset)) offset<-list(...)$offset
+	else offset<-0
+	if(hasArg(fsize)) fsize<-list(...)$fsize
+	else fsize<-1
 	if(inherits(x$tree,"multiPhylo")){
 		states<-colnames(x$ace)
 		if(hasArg(colors)) colors<-list(...)$colors
 		else colors<-setNames(palette()[1:length(states)],states)
 		plotTree(if(is.null(x$ref.tree)) x$tree[[1]] else x$ref.tree,lwd=lwd,
-			offset=cex[2],...)
+			offset=cex[2]+offset*fsize,...)
 		nodelabels(pie=x$ace,piecol=colors[colnames(x$ace)],cex=cex[1])
-		if(!is.null(x$tips)) tips<-x$tips else tips<-to.matrix(getStates(x$tree[[1]],"tips"),
-			seq=states) 
+		if(!is.null(x$tips)) tips<-x$tips 
+		else tips<-to.matrix(getStates(x$tree[[1]],"tips"),seq=states) 
 		tiplabels(pie=tips[if(is.null(x$ref.tree)) x$tree[[1]]$tip.label else 
 			x$ref.tree$tip.label,],piecol=colors[colnames(tips)],cex=cex[2])
 	} else if(inherits(x$tree,"phylo")){
 		states<-colnames(x$Tr)
 		if(hasArg(colors)) colors<-list(...)$colors
 		else colors<-setNames(palette()[1:length(states)],states)
-		plotSimmap(x$tree,lwd=lwd,colors=colors,type=type)
+		plotSimmap(x$tree,lwd=lwd,colors=colors,type=type,offset=offset)
 	}
 }
 

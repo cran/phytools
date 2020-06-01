@@ -24,6 +24,11 @@ collapseTree(tree, ...)
 \seealso{
 	\code{\link{plotTree}}, \code{\link{plotSimmap}} 
 }
+\examples{
+\dontrun{
+data(anoletree)
+pruned<-collapseTree(anoletree)}
+}
 \keyword{phylogenetics}
 \keyword{plotting}
-
+\keyword{utilities}

@@ -1,7 +1,8 @@
 ## function performs ancestral character estimation under the threshold model
-## written by Liam J. Revell 2012, 2013, 2014, 2017, 2019
+## written by Liam J. Revell 2012, 2013, 2014, 2017, 2019, 2020
 
-ancThresh<-function(tree,x,ngen=10000,sequence=NULL,method="mcmc",model=c("BM","OU","lambda"),control=list(),...){
+ancThresh<-function(tree,x,ngen=100000,sequence=NULL,method="mcmc",
+	model=c("BM","OU","lambda"),control=list(),...){
 
 	if(!inherits(tree,"phylo")) stop("tree should be an object of class \"phylo\".")
 	
@@ -163,6 +164,7 @@ ancThresh<-function(tree,x,ngen=10000,sequence=NULL,method="mcmc",model=c("BM","
 	ace<-matrix(0,tree$Nnode,m,dimnames=list(colnames(A),seq))
 	burnin<-which(param[,"gen"]==con$burnin)
 	for(i in 1:tree$Nnode){
+		mcmc[[i]]<-as.factor(mcmc[[i]])
 		temp<-summary(mcmc[burnin:nrow(mcmc),i])/(nrow(mcmc)-burnin+1)
 		ace[i,names(temp)]<-temp
 	}

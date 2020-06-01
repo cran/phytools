@@ -193,7 +193,7 @@ plot.ltt<-function(x,...){
 }
 
 ## S3 plot method for object of class "multiLtt"
-## written by Liam J. Revell 2015
+## written by Liam J. Revell 2015, 2020
 
 plot.multiLtt<-function(x,...){
 	max.lineages<-max(sapply(x,function(x) max(x$ltt)))
@@ -203,7 +203,7 @@ plot.multiLtt<-function(x,...){
 	else logl<-TRUE	
 	if(is.null(args$xlim)) args$xlim<-c(0,max.time)
 	if(is.null(args$ylim)) 
-		args$ylim<-if(logl) c(0,log(max.lineages)) else c(0,max.lineages)
+		args$ylim<-if(logl) c(0,log(max.lineages)) else c(1,max.lineages)
 	args$x<-x[[1]]
 	do.call(plot,args)
 	args$add<-TRUE
@@ -223,6 +223,9 @@ plot.multiLtt<-function(x,...){
 ## written by Liam J. Revell 2017
 
 gtt<-function(tree,n=100,...){
+	if(!inherits(tree,"phylo")) 
+		stop("tree must be object of class \"phylo\".")
+	if(inherits(tree,"simmap")) tree<-as.phylo(tree)
 	if(hasArg(plot)) plot<-list(...)$plot
 	else plot<-FALSE
 	obj<-ltt(tree,plot=FALSE)
@@ -239,7 +242,6 @@ gtt<-function(tree,n=100,...){
 	object<-list(t=x,gamma=gamma[1,],p=gamma[2,],tree=tree)
 	class(object)<-"gtt"
 	object
-
 }
 
 ## plot method for "gtt" object class
@@ -256,6 +258,8 @@ plot.gtt<-function(x,...){
 	if(is.null(args$ylab)) args$ylab<-expression(gamma)
 	if(is.null(args$lwd)) args$lwd<-3
 	if(is.null(args$type)) args$type<-"s"
+	if(is.null(args$bty)) args$bty<-"l"
+	if(is.null(args$main)) args$main<-expression(paste(gamma," through time plot"))
 	do.call(plot,args)
 	if(show.tree) plotTree(x$tree,add=TRUE,ftype="off",mar=par()$mar,
 		xlim=args$xlim,color=make.transparent("blue",0.1))

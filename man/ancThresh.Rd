@@ -2,7 +2,7 @@
 \alias{ancThresh}
 \title{Ancestral character estimation under the threshold model using Bayesian MCMC}
 \usage{
-ancThresh(tree, x, ngen=10000, sequence=NULL, method="mcmc", 
+ancThresh(tree, x, ngen=100000, sequence=NULL, method="mcmc", 
    model=c("BM","OU","lambda"), control=list(), ...)
 }
 \arguments{
@@ -33,6 +33,23 @@ ancThresh(tree, x, ngen=10000, sequence=NULL, method="mcmc",
 \seealso{
 	\code{\link{anc.Bayes}}, \code{\link{threshBayes}}
 }
+\examples{
+\dontrun{
+## load data from Revell & Collar (2009)
+data(sunfish.tree)
+data(sunfish.data)
+## extract character of interest
+fmode<-setNames(sunfish.data$feeding.mode,
+    rownames(sunfish.data))
+## run MCMC
+mcmc<-ancThresh(sunfish.tree,fmode,ngen=1000000)
+## plot results
+plot(mcmc,mar=c(0.1,0.1,4.1,0.1))
+title(main="Posterior probabilities for node states",
+    font.main=3)}
+}
+\keyword{ancestral states}
 \keyword{phylogenetics}
 \keyword{comparative method}
 \keyword{bayesian}
+\keyword{discrete character}

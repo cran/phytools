@@ -31,11 +31,19 @@ cophylo(tr1, tr2, assoc=NULL, rotate=TRUE, ...)
 	\code{\link{cophyloplot}}, \code{\link{plotSimmap}}
 }
 \examples{
-tr1<-pbtree(n=26,tip.label=LETTERS)
-tr2<-pbtree(n=26,tip.label=sample(LETTERS))
-obj<-cophylo(tr1,tr2)
-plot(obj)
+## load data from Lopez-Vaamonde et al. (2001)
+data(wasp.trees)
+data(wasp.data)
+## create co-phylogenetic object
+wasp.cophylo<-cophylo(wasp.trees[[1]],wasp.trees[[2]],
+    assoc=wasp.data)
+## plot co-phylogenies
+plot(wasp.cophylo,link.type="curved",link.lwd=4,
+     link.lty="solid",link.col=make.transparent("red",
+     0.25))
+par(mar=c(5.1,4.1,4.1,2.1))
 }
 \keyword{phylogenetics}
 \keyword{plotting}
-
+\keyword{diversification}
+\keyword{co-phylogenetics}

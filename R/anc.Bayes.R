@@ -1,7 +1,7 @@
 ## function does Bayes ancestral character estimation
-## written by Liam J. Revell 2011, 2013, 2015, 2017
+## written by Liam J. Revell 2011, 2013, 2015, 2017, 2020
 
-anc.Bayes<-function(tree,x,ngen=10000,control=list()){
+anc.Bayes<-function(tree,x,ngen=10000,control=list(),...){
 	if(!inherits(tree,"phylo")) stop("tree should be an object of class \"phylo\".")
 	# give the function some defaults (in case none are provided)
 	temp<-phyl.vcv(as.matrix(x),vcv(tree),1)
@@ -119,6 +119,8 @@ print.anc.Bayes<-function(x,digits=6,printlen=NULL,...){
 	invisible(ace)
 }			
 
+summary.anc.Bayes<-function(object,...) print(object,...)
+
 plot.anc.Bayes<-function(x,...){
 	args<-list(...)
 	if(is.null(args$what)) what<-"logLik"
@@ -139,5 +141,30 @@ plot.anc.Bayes<-function(x,...){
 		if(is.null(args$type)) args$type<-"l"
 		if(is.null(args$col)) args$col<-make.transparent("blue",0.5)
 		do.call(plot,args)
-	} 
+	} else {
+		args$x<-x$mcmc$gen
+		args$y<-x$mcmc[,as.character(what)]
+		if(is.null(args$xlab)) args$xlab<-"generation"
+		if(is.null(args$ylab)) args$ylab<-paste("state for node",what)
+		if(is.null(args$type)) args$type<-"l"
+		if(is.null(args$col)) args$col<-make.transparent("blue",0.5)
+		if(is.null(args$ylim)) args$ylim<-range(x$mcmc[,2:(ncol(x$mcmc)-1)])
+		do.call(plot,args)
+	}
+}
+
+density.anc.Bayes<-function(x,...){
+	if(hasArg(what)) what<-list(...)$what
+	else what<-Ntip(x$tree)+1
+	if(hasArg(burnin)) burnin<-list(...)$burnin
+	else burnin<-0.2*max(x$mcmc$gen)
+	ii<-which(abs(x$mcmc$gen-burnin)==min(abs(x$mcmc$gen-burnin)))
+	if(hasArg(bw)) bw<-list(...)$bw
+	else bw<-"nrd0"
+	args<-list(x=x$mcmc[ii:nrow(x$mcmc),as.character(what)],
+		bw=bw)
+	d<-do.call(density,args)
+	d$call<-match.call()
+	d$data.name<-if(what=="logLik") what else paste("node",what)
+	d
 }

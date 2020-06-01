@@ -6,7 +6,7 @@ brownie.lite(tree, x, maxit=2000, test="chisq", nsim=100, se=NULL, ...)
 }
 \arguments{
 	\item{tree}{a phylogenetic tree either as an object of class \code{"phylo"} or \code{"simmap"}. (See \code{\link{read.simmap}}, \code{\link{make.simmap}}, or \code{\link{paintSubTree}} for more details about the latter object class.)}
-	\item{x}{a vector of tip values for species; \code{names(x)} should be the species names.}
+	\item{x}{a vector of tip values for species. \code{names(x)} should be the species names.}
 	\item{maxit}{an optional integer value indicating the maximum number of iterations for optimization - may need to be increased for large trees.}
 	\item{test}{an optional string indicating the method for hypothesis testing - options are \code{"chisq"} or \code{"simulation"}.}
 	\item{nsim}{number of simulations (only used if \code{test="simulation"}).}
@@ -21,12 +21,12 @@ brownie.lite(tree, x, maxit=2000, test="chisq", nsim=100, se=NULL, ...)
 }
 \value{
 	An object of class \code{"brownie.lite"} containing the following components:
-	\item{sig2.single}{is the rate for a single rate model - this is usually the "null" model.}
+	\item{sig2.single}{is the rate, \eqn{\sigma^2}, for a single-rate model. This is usually the "null" model.}
 	\item{a.single}{is the estimated state at the root node for the single rate model.}
 	\item{var.single}{variance on the single rate estimator - obtained from the Hessian.}
 	\item{logL1}{log-likelihood of the single-rate model.}
 	\item{k1}{number of parameters in the single rate model (always 2).}
-	\item{sig2.multiple}{is a length \emph{p} (for \emph{p} rates) vector of BM rates from the multi-rate model.}
+	\item{sig2.multiple}{is a length \emph{p} (for \emph{p} rates) vector of BM rates (\eqn{\sigma_1^2}, \eqn{\sigma_2^2}, and so on) from the multi-rate model.}
 	\item{a.multiple}{is the estimated state at the root node for the multi-rate model.}
 	\item{var.multiple}{\emph{p} x \emph{p} variance-covariance matrix for the \emph{p} rates - the square-roots of the diagonals should give the standard error for each rate.}
 	\item{logL.multiple}{log-likelihood of the multi-rate model.}
@@ -36,7 +36,7 @@ brownie.lite(tree, x, maxit=2000, test="chisq", nsim=100, se=NULL, ...)
 	\item{convergence}{logical value indicating if the likelihood optimization converged.}
 }
 \references{
-	O'Meara, B. C., C. Ane, M. J. Sanderson, and P. C. Wainwright. (2006) Testing for different rates of continuous trait evolution using likelihood. \emph{Evolution}, \bold{60}, 922--933.
+	O'Meara, B. C., C. Ane, M. J. Sanderson, and P. C. Wainwright. (2006) Testing for different rates of continuous trait evolution using likelihood. \emph{Evolution}, \bold{60}, 922-933.
 
 	Revell, L. J. (2012) phytools: An R package for phylogenetic comparative biology (and other things). \emph{Methods Ecol. Evol.}, \bold{3}, 217-223.
 }
@@ -44,6 +44,19 @@ brownie.lite(tree, x, maxit=2000, test="chisq", nsim=100, se=NULL, ...)
 \seealso{
 	\code{\link{brownieREML}}, \code{\link{evol.vcv}}, \code{\link{ratebytree}}
 }
+\examples{
+## load data from Revell & Collar (2009)
+data(sunfish.tree)
+data(sunfish.data)
+## extract character of interest
+buccal.length<-setNames(sunfish.data$buccal.length,
+    rownames(sunfish.data))
+## fit model
+multiBM.fit<-brownie.lite(sunfish.tree,
+    buccal.length)
+print(multiBM.fit)
+}
 \keyword{phylogenetics}
 \keyword{comparative method}
 \keyword{maximum likelihood}
+\keyword{continuous character}

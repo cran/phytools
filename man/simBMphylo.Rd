@@ -9,7 +9,7 @@ simBMphylo(n, t, sig2, plot=TRUE, ...)
 \arguments{
 	\item{n}{number of taxa to simulate in the output tree.}
 	\item{t}{total time for the simulation.}
-	\item{sig2}{the rate of evolution under Brownian motion, or a vector of rates. If the latter the length of the vector must exactly match \code{t}, otherwise the first element of \code{sig2} will just be duplicated \code{t} times.}
+	\item{sig2}{the rate of evolution under Brownian motion, \eqn{\sigma^2}, or a vector of rates. If the latter the length of the vector must exactly match \code{t}, otherwise the first element of \code{sig2} will just be duplicated \code{t} times.}
 	\item{plot}{optional logical value indicating whether or not the simulated object should be plotted.}
 	\item{...}{optional arguments to be passed to the \code{plot} method.}
 	\item{x}{in \code{plot} method, object of class \code{"simBMphylo"}.}
@@ -28,9 +28,13 @@ simBMphylo(n, t, sig2, plot=TRUE, ...)
 	\code{\link{bmPlot}}, \code{\link{fastBM}}, \code{\link{pbtree}}
 }
 \examples{
+set.seed(777)
 simBMphylo(n=6,t=100,sig2=0.01)
+## reset par to defaults
+par(mfrow=c(1,1))
+par(mar=c(5.1,4.1,4.1,2.1))
 }
 \keyword{comparative method}
 \keyword{phylogenetics}
 \keyword{plotting}
-
+\keyword{continuous character}

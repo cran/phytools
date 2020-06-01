@@ -1,5 +1,5 @@
 ## function for conditional likelihoods at nodes
-## written by Liam J. Revell 2015, 2016, 2019
+## written by Liam J. Revell 2015, 2016, 2019, 2020
 ## with input from (& structural similarity to) function ace by E. Paradis et al. 2013
 
 fitMk<-function(tree,x,model="SYM",fixedQ=NULL,...){
@@ -70,11 +70,9 @@ fitMk<-function(tree,x,model="SYM",fixedQ=NULL,...){
 	rate[rate==0]<-k+1
 	liks<-rbind(x,matrix(0,M,m,dimnames=list(1:M+N,states)))
 	pw<-reorder(tree,"pruningwise")
-	lik<-function(pp,output.liks=FALSE,pi){
-		if(any(is.nan(pp))||any(is.infinite(pp))) return(1e50)
+	lik<-function(Q,output.liks=FALSE,pi){
+		if(any(is.nan(Q))||any(is.infinite(Q))) return(1e50)
 		comp<-vector(length=N+M,mode="numeric")
-		Q[]<-c(pp,0)[rate]
-		diag(Q)<--rowSums(Q)
 		parents<-unique(pw$edge[,1])
 		root<-min(parents)
 		for(i in 1:length(parents)){
@@ -83,8 +81,9 @@ fitMk<-function(tree,x,model="SYM",fixedQ=NULL,...){
 			desc<-pw$edge[ii,2]
 			el<-pw$edge.length[ii]
 			v<-vector(length=length(desc),mode="list")
-			for(j in 1:length(v))
+			for(j in 1:length(v)){
 				v[[j]]<-EXPM(Q*el[j])%*%liks[desc[j],]
+			}
 			vv<-if(anc==root) Reduce('*',v)[,1]*pi else Reduce('*',v)[,1]
 			comp[anc]<-sum(vv)
 			liks[anc,]<-vv/comp[anc]
@@ -96,11 +95,14 @@ fitMk<-function(tree,x,model="SYM",fixedQ=NULL,...){
 	if(is.null(fixedQ)){
 		if(length(q.init)!=k) q.init<-rep(q.init[1],k)
 		if(opt.method=="optim")
-			fit<-optim(q.init,function(p) lik(p,pi=pi),method="L-BFGS-B",lower=rep(min.q,k))
+			fit<-optim(q.init,function(p) lik(makeQ(m,p,index.matrix),pi=pi),
+				method="L-BFGS-B",lower=rep(min.q,k))
 		else if(opt.method=="none")
-			fit<-list(objective=lik(q.init,pi=pi),par=q.init)
+			fit<-list(objective=lik(makeQ(m,q.init,index.matrix),pi=pi),
+				par=q.init)
 		else	
-			fit<-nlminb(q.init,function(p) lik(p,pi=pi),lower=rep(0,k),upper=rep(1e50,k))
+			fit<-nlminb(q.init,function(p) lik(makeQ(m,p,index.matrix),pi=pi),
+				lower=rep(0,k),upper=rep(1e50,k))
 		obj<-list(logLik=
 			if(opt.method=="optim") -fit$value else -fit$objective,
 			rates=fit$par,
@@ -108,18 +110,30 @@ fitMk<-function(tree,x,model="SYM",fixedQ=NULL,...){
 			states=states,
 			pi=pi,
 			method=opt.method)
-		if(output.liks) obj$lik.anc<-lik(obj$rates,TRUE,pi=pi)
+		if(output.liks) obj$lik.anc<-lik(makeQ(m,obj$rates,index.matrix),TRUE,
+			pi=pi)
 	} else {
-		fit<-lik(Q[sapply(1:k,function(x,y) which(x==y),index.matrix)],pi=pi)
+		fit<-lik(Q,pi=pi)
 		obj<-list(logLik=-fit,
 			rates=Q[sapply(1:k,function(x,y) which(x==y),index.matrix)],
 			index.matrix=index.matrix,
 			states=states,
 			pi=pi)
-		if(output.liks) obj$lik.anc<-lik(obj$rates,TRUE,pi=pi)
+		if(output.liks) obj$lik.anc<-lik(makeQ(m,obj$rates,index.matrix),TRUE,
+			pi=pi)
 	}
+	lik.f<-function(q) -lik(q,output.liks=FALSE,pi=pi)
+	obj$lik<-lik.f
 	class(obj)<-"fitMk"
 	return(obj)
+}
+
+makeQ<-function(m,q,index.matrix){
+	Q<-matrix(0,m,m)
+	Q[]<-c(0,q)[index.matrix+1]
+	diag(Q)<-0
+	diag(Q)<--rowSums(Q)
+	Q
 }
 
 ## print method for objects of class "fitMk"
@@ -162,14 +176,37 @@ logLik.fitMk<-function(object,...){
 	lik
 }
 
-## AIC method
-AIC.fitMk<-function(object,...,k=2){
-	np<-length(object$rates)
-	-2*logLik(object)+np*k
-}
-	
 ## S3 plot method for objects of class "fitMk"
 plot.fitMk<-function(x,...){
+	Q<-as.Qmatrix(x)
+	plot(Q,...)
+}
+
+## S3 plot method for "gfit" object from geiger::fitDiscrete
+plot.gfit<-function(x,...){
+	if("mkn"%in%class(x$lik)==FALSE){
+		stop("Sorry. No plot method presently available for objects of this type.")
+	} else {
+		chk<-.check.pkg("geiger")
+		if(chk) plot(as.Qmatrix(x),...)
+		else {
+			obj<-list()
+			QQ<-.Qmatrix.from.gfit(x)
+			obj$states<-colnames(QQ)
+			m<-length(obj$states)
+			obj$index.matrix<-matrix(NA,m,m)
+			k<-m*(m-1)
+			obj$index.matrix[col(obj$index.matrix)!=row(obj$index.matrix)]<-1:k
+			obj$rates<-QQ[sapply(1:k,function(x,y) which(x==y),obj$index.matrix)]
+			class(obj)<-"fitMk"
+			plot(obj,...)
+		}
+	}
+}
+	
+## S3 method for "Qmatrix" object class
+plot.Qmatrix<-function(x,...){
+	Q<-unclass(x)
 	if(hasArg(signif)) signif<-list(...)$signif
 	else signif<-3
 	if(hasArg(main)) main<-list(...)$main
@@ -188,16 +225,13 @@ plot.fitMk<-function(x,...){
 	else mar<-c(1.1,1.1,3.1,1.1)
 	if(hasArg(lwd)) lwd<-list(...)$lwd
 	else lwd<-1
-	Q<-matrix(NA,length(x$states),length(x$states))
-    	Q[]<-c(0,x$rates)[x$index.matrix+1]
-	diag(Q)<-0
 	spacer<-0.1
 	plot.new()
 	par(mar=mar)
 	xylim<-c(-1.2,1.2)
 	plot.window(xlim=xylim,ylim=xylim,asp=1)
 	if(!is.null(main)) title(main=main,cex.main=cex.main)
-	nstates<-length(x$states)
+	nstates<-nrow(Q)
 	step<-360/nstates
 	angles<-seq(0,360-step,by=step)/180*pi
 	if(nstates==2) angles<-angles+pi/2
@@ -235,26 +269,8 @@ plot.fitMk<-function(x,...){
 					code=if(isSymmetric(Q)) 3 else 2,lwd=lwd)
 			}
 		}
-	text(v.x,v.y,x$states,cex=cex.traits,
+	text(v.x,v.y,rownames(Q),cex=cex.traits,
 		col=make.transparent("black",0.7))
-}
-
-## S3 plot method for objects resulting from fitDiscrete
-plot.gfit<-function(x,...){
-	if("mkn"%in%class(x$lik)==FALSE){
-		stop("Sorry. No plot method presently available for objects of this type.")
-	} else {
-		obj<-list()
-		QQ<-.Qmatrix.from.gfit(x)
-		obj$states<-colnames(QQ)
-		m<-length(obj$states)
-		obj$index.matrix<-matrix(NA,m,m)
-		k<-m*(m-1)
-		obj$index.matrix[col(obj$index.matrix)!=row(obj$index.matrix)]<-1:k
-		obj$rates<-QQ[sapply(1:k,function(x,y) which(x==y),obj$index.matrix)]
-		class(obj)<-"fitMk"
-		plot(obj,...)
-	}
 }
 
 ## wraps around expm
@@ -327,15 +343,30 @@ sim.Mk<-function(tree,Q,anc=NULL,nsim=1,...){
 	X
 }
 
-## logLik & AIC methods for fitDiscrete & fitContinuous objects
+## as.Qmatrix method
 
-logLik.gfit<-function(object,...){
-	lik<-object$opt$lnL[1]
-	attr(lik,"df")<-object$opt$k[1]
-	lik
+as.Qmatrix<-function(x,...){
+	if(identical(class(x),"Qmatrix")) return(x)
+	UseMethod("as.Qmatrix")
 }
 
-AIC.gfit<-function(object,...,k=2){
-	np<-object$opt$k
-	-2*logLik(object)+np*k
+as.Qmatrix.default<-function(x, ...){
+	warning(paste(
+		"as.Qmatrix does not know how to handle objects of class ",
+		class(x),"."))
+}
+
+as.Qmatrix.fitMk<-function(x,...){
+	Q<-matrix(NA,length(x$states),length(x$states))
+	Q[]<-c(0,x$rates)[x$index.matrix+1]
+	rownames(Q)<-colnames(Q)<-x$states
+	diag(Q)<-0
+	diag(Q)<--rowSums(Q)
+	class(Q)<-"Qmatrix"
+	Q
+}
+
+print.Qmatrix<-function(x,...){
+	cat("Estimated Q matrix:\n")
+	print(unclass(x))
 }

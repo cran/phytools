@@ -34,9 +34,9 @@ phylosig(tree, x, method="K", test=FALSE, nsim=1000, se=NULL, start=NULL,
 	\item{P}{optionally, the P-value from the randomization test.}
 	If \code{(method="lambda")}, it will be a list with up to the following components:
 	\item{lambda}{fitted value of \eqn{\lambda}.}
-	\item{sig2}{rate of evolution, for estimation with sampling error.}
+	\item{sig2}{rate of evolution, \eqn{\sigma^2}, for estimation with sampling error.}
 	\item{logL}{log-likelihood.}
-	\item{logL0}{log-likelihood for \code{lambda=0.0}.}
+	\item{logL0}{log-likelihood for \eqn{\lambda=0}.}
 	\item{P}{P-value of the likelihood ratio test.}
 	\item{convergence}{value for convergence, for estimation with sampling error only. (See \code{\link{optim}}).}
 	\item{message}{message from \code{\link{optim}}, for estimation with sampling error only.}
@@ -52,11 +52,35 @@ phylosig(tree, x, method="K", test=FALSE, nsim=1000, se=NULL, start=NULL,
 }
 \author{Liam Revell \email{liam.revell@umb.edu}}
 \examples{
-tree<-pbtree(n=100)
-x<-fastBM(tree)
-phylosig(tree,x,method="lambda",test=TRUE)
+## load data from Garland et al. (1992)
+data(mammal.tree)
+data(mammal.data)
+## extract characters of interest
+ln.bodyMass<-log(setNames(mammal.data$bodyMass,
+    rownames(mammal.data)))
+ln.homeRange<-log(setNames(mammal.data$homeRange,
+    rownames(mammal.data)))
+## compute phylogenetic signal K
+K.bodyMass<-phylosig(mammal.tree,ln.bodyMass,
+    test=TRUE)
+print(K.bodyMass)
+plot(K.bodyMass)
+K.homeRange<-phylosig(mammal.tree,ln.homeRange,
+    test=TRUE)
+print(K.homeRange)
+plot(K.homeRange)
+## compute phylogenetic signal lambda
+lambda.bodyMass<-phylosig(mammal.tree,ln.bodyMass,
+    method="lambda",test=TRUE)
+print(lambda.bodyMass)
+plot(lambda.bodyMass)
+lambda.homeRange<-phylosig(mammal.tree,ln.homeRange,
+    method="lambda",test=TRUE)
+print(lambda.homeRange)
+plot(lambda.homeRange)
 }
 \keyword{phylogenetics}
 \keyword{comparative method}
 \keyword{maximum likelihood}
 \keyword{simulation}
+\keyword{continuous character}

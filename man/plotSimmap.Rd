@@ -23,7 +23,7 @@ plotSimmap(tree, colors=NULL, fsize=1.0, ftype="reg", lwd=2, pts=FALSE,
 	\item{node.numbers}{a logical value indicating whether or not node numbers should be plotted.}
 	\item{mar}{vector containing the margins for the plot to be passed to \code{\link{par}}. If not specified, the default margins are [0.1,0.1,0.1,0.1].}
 	\item{add}{a logical value indicating whether or not to add the plotted tree to the current plot (\code{TRUE}) or create a new plot (\code{FALSE}, the default).}
-	\item{offset}{offset for the tip labels. For \code{type="phylogram"} this is in the units of the edge lengths of the tree. For \code{type="fan"}, however, \code{offset} is in the unit of character widths.}
+	\item{offset}{offset for the tip labels in character widths.}
 	\item{direction}{plotting direction. Options are \code{"rightwards"} (the default), \code{"leftwards"}, \code{"upwards"} or \code{"downwards"}. For \code{method="fan"} \code{direction} is ignored.}
 	\item{type}{plot type. Can be \code{"phylogram"}, \code{"fan"}, or \code{"cladogram"}. Only a subset of options are presently available for \code{type="fan"}.}
 	\item{setEnv}{logical value indicating whether or not to set the environment \code{.PlotPhyloEnv}. Setting this to \code{TRUE} (the default) will allow compatibility with ape labeling functions such as \code{\link{nodelabels}}.}
@@ -65,14 +65,21 @@ plotSimmap(tree, colors=NULL, fsize=1.0, ftype="reg", lwd=2, pts=FALSE,
 	\code{\link{densityMap}}, \code{\link{make.simmap}}, \code{\link{read.simmap}} 
 }
 \examples{
-# simulate a mapped tree
-Q<-matrix(c(-2,1,1,1,-2,1,1,1,-2),3,3)
-rownames(Q)<-colnames(Q)<-letters[1:3]
-tree<-sim.history(pbtree(n=100,scale=1),Q)
-cols<-setNames(c("blue","red","green"),letters[1:3])
-# plot the mapping
-plot(tree,cols,ftype="i",fsize=0.7)
+data(anoletree)
+cols<-setNames(c("green","#E4D96F","darkgreen",
+    "brown","black","darkgrey"),
+    c("CG","GB","TC","TG","Tr","Tw"))
+plot(anoletree,cols,fsize=0.5,ftype="i",outline=TRUE,
+	lwd=3,ylim=c(0,Ntip(anoletree)),
+    mar=c(0.1,0.1,1.1,0.1))
+add.simmap.legend(colors=cols,prompt=FALSE,x=0,y=-0.5,
+    vertical=FALSE)
+title(main="Caribbean ecomorphs of anoles",font.main=3,
+    line=0)
+par(mar=c(5.1,4.1,4.1,2.1)) ## reset margins to default
 }
+\keyword{ancestral states}
 \keyword{phylogenetics}
 \keyword{plotting}
 \keyword{comparative method}
+\keyword{discrete character}
