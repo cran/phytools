@@ -444,7 +444,7 @@ getnode<-function(...){
 }
 
 ## function mostly to interactively label nodes by clicking
-## written by Liam J. Revell 2017
+## written by Liam J. Revell 2017, 2020
 labelnodes<-function(text,node=NULL,interactive=TRUE,
 	shape=c("circle","ellipse","rect"),...){
 	shape<-shape[1]
@@ -454,6 +454,8 @@ labelnodes<-function(text,node=NULL,interactive=TRUE,
 	else rect.exp<-1.6
 	if(hasArg(cex)) cex<-list(...)$cex
 	else cex<-1
+	if(hasArg(bg)) bg<-list(...)$bg
+	else bg<-"white"
 	obj<-get("last_plot.phylo",envir=.PlotPhyloEnv)
 	h<-cex*strheight("A")
 	w<-cex*strwidth(text)
@@ -474,15 +476,15 @@ labelnodes<-function(text,node=NULL,interactive=TRUE,
 			node[i]<-ii
 		} else ii<-node[i]
 		if(shape=="circle")
-			draw.circle(obj$xx[ii],obj$yy[ii],rad,col="white")
+			draw.circle(obj$xx[ii],obj$yy[ii],rad,col=bg)
 		else if(shape=="ellipse")
 			draw.ellipse(obj$xx[ii],obj$yy[ii],0.8*w[i],h,
-				col="white")
+				col=bg)
 		else if(shape=="rect")
 			rect(xleft=obj$xx[ii]-0.5*rect.exp*w[i],
 				ybottom=obj$yy[ii]-0.5*rect.exp*h,
 				xright=obj$xx[ii]+0.5*rect.exp*w[i],
-				ytop=obj$yy[ii]+0.5*rect.exp*h,col="white",
+				ytop=obj$yy[ii]+0.5*rect.exp*h,col=bg,
 				ljoin=1)
 		text(obj$xx[ii],obj$yy[ii],label=text[i],cex=cex)
 	}
@@ -2128,8 +2130,8 @@ matchType<-function(type,types){
 	return(type)
 }
 	
-# function 'untangles' (or attempts to untangle) a tree with crossing branches
-# written by Liam J. Revell 2013, 2015
+## function 'untangles' (or attempts to untangle) a tree with crossing branches
+## written by Liam J. Revell 2013, 2015, 2020
 untangle<-function(tree,method=c("reorder","read.tree")){
 	if(inherits(tree,"multiPhylo")){
 		tree<-lapply(tree,untangle,method=method)
@@ -2140,8 +2142,11 @@ untangle<-function(tree,method=c("reorder","read.tree")){
 		method<-method[1]
 		if(method=="reorder") tree<-reorder(reorder(tree,"pruningwise"))
 		else if(method=="read.tree"){
+			tip.label<-tree$tip.label
+			tree$tip.label<-1:Ntip(tree)
 			if(inherits(tree,"simmap")) tree<-read.simmap(text=write.simmap(tree))
 			else tree<-if(Ntip(tree)>1) read.tree(text=write.tree(tree)) else read.newick(text=write.tree(tree))
+			tree$tip.label<-tip.label[as.numeric(tree$tip.label)]
 		}
 		ii<-!names(obj)%in%names(attributes(tree))
 		attributes(tree)<-c(attributes(tree),obj[ii])

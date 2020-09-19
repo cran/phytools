@@ -121,25 +121,27 @@ fitPagel<-function(tree,x,y,method="fitMk",model="ARD",dep.var="xy",...){
 ## print method for objects of class "fitPagel"
 ## written by Liam J. Revell 2014, 2016
 print.fitPagel<-function(x,...){
+	if(hasArg(digits)) digits<-list(...)$digits
+	else digits<-6
 	cat("\nPagel's binary character correlation test:\n")
 	cat(paste("\nAssumes \"",x$model,
 		"\" substitution model for both characters\n",sep=""))
 	cat("\nIndependent model rate matrix:\n")
-	print(x$independent.Q)
+	print(round(x$independent.Q,digits))
 	tmp<-if(x$dep.var=="xy") "x & y" 
 		else if(x$dep.var=="x") "x only" 
 		else if(x$dep.var=="y") "y only"
 	cat(paste("\nDependent (",tmp,") model rate matrix:\n",sep=""))
-	print(x$dependent.Q)
+	print(round(x$dependent.Q,digits))
 	cat("\nModel fit:\n")
 	obj<-matrix(c(x$independent.logL,x$dependent.logL,
 		x$independent.AIC,x$dependent.AIC),2,2)
 	rownames(obj)<-c("independent","dependent")
 	colnames(obj)<-c("log-likelihood","AIC")
-	print(obj)
+	print(round(obj,digits))
 	cat("\nHypothesis test result:\n")
-	cat(paste("  likelihood-ratio: ",signif(x$lik.ratio,7),"\n"))
-	cat(paste("  p-value: ",signif(x$P,7),"\n"))
+	cat(paste("  likelihood-ratio: ",signif(x$lik.ratio,digits),"\n"))
+	cat(paste("  p-value: ",signif(x$P,digits),"\n"))
 	cat(paste("\nModel fitting method used was",x$method,"\n\n"))
 }
 
@@ -197,6 +199,8 @@ plot.fitPagel<-function(x,...){
 	else cex.traits<-0.9
 	if(hasArg(cex.rates)) cex.rates<-list(...)$cex.rates
 	else cex.rates<-0.8
+	if(hasArg(lwd)) lwd<-list(...)$lwd
+	else lwd<-2 ## only used if lwd.by.rate=FALSE
 	if(hasArg(lwd.by.rate)) lwd.by.rate<-list(...)$lwd.by.rate
 	else lwd.by.rate<-FALSE
 	if(lwd.by.rate){
@@ -207,7 +211,7 @@ plot.fitPagel<-function(x,...){
 		else max.lwd<-10
 		LWD.ind[LWD.ind>max.lwd]<-max.lwd
 		LWD.dep[LWD.dep>max.lwd]<-max.lwd
-	} else LWD.ind<-LWD.dep<-matrix(2,nrow(x$dependent.Q),
+	} else LWD.ind<-LWD.dep<-matrix(lwd,nrow(x$dependent.Q),
 		ncol(x$dependent.Q))
 	par(mfrow=c(2,1))
 	## INDEPENDENT MODEL

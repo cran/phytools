@@ -100,7 +100,7 @@ make.simmap<-function(tree,x,model="SYM",nsim=1,...){
 # written by Liam J. Revell 2013
 printmessage<-function(Q,pi,method){
 	if(method=="empirical"||method=="fixed")
-		cat("make.simmap is sampling character histories conditioned on the transition matrix\n\nQ =\n")
+		cat("make.simmap is sampling character histories conditioned on\nthe transition matrix\n\nQ =\n")
 	else if(method=="mcmc"){
 		cat("make.simmap is simulating with a sample of Q from\nthe posterior distribution\n")
 		cat("\nMean Q from the posterior is\nQ =\n")
@@ -303,7 +303,7 @@ print.simmap<-function(x,printlen=6,...){
 	if(N>printlen) cat(paste("\t",paste(x$tip.label[1:printlen],collapse=", "),", ...\n",sep=""))
 	else print(x$tip.label)
 	ss<-sort(unique(c(getStates(x,"tips"),getStates(x,"nodes"))))
-	cat(paste("\nThe tree includes a mapped, ",length(ss),"-state discrete character with states:\n",
+	cat(paste("\nThe tree includes a mapped, ",length(ss),"-state discrete character\nwith states:\n",
 		sep=""))
 	if(length(ss)>printlen) cat(paste("\t",paste(ss[1:printlen],collapse=", "),", ...\n",sep=""))
 	else cat(paste("\t",paste(ss,collapse=", "),"\n",sep=""))

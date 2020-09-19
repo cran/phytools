@@ -100,7 +100,8 @@ threshBayes<-function(tree,X,types=NULL,ngen=10000,control=list(),...){
 		cont<-which(types=="cont")
 		for(i in 1:length(disc)) Y[Y[,disc[i]]==0,disc[i]]<--1
 	}
-	Y[,disc]<-Y[,disc]*abs(rnorm(n=length(as.vector(Y[,disc]))))
+	Y[,disc]<-Y[,disc]*abs(rnorm(n=length(as.vector(Y[,disc])),
+		sd=sqrt(max(nodeHeights(tree)))))
 
 	npar<-npar-n*(m-length(disc))-length(disc)
 	if(is.null(colnames(X))) colnames(Y)<-paste("V",1:m,sep="")
@@ -164,7 +165,7 @@ threshBayes<-function(tree,X,types=NULL,ngen=10000,control=list(),...){
 		}
 		d<-i%%npar
 		if(ngen>=con$print.interval) if(i%%con$print.interval==0) if(!con$quiet){ 
-			cat(paste("genearation: ",i,"; mean acceptance rate: ",round(mean(accept.rate),2),"\n",sep=""))
+			cat(paste("generation: ",i,"; mean acceptance rate: ",round(mean(accept.rate),2),"\n",sep=""))
 			flush.console()
 		}
 		Yp[]<-Y
@@ -308,14 +309,20 @@ plot.density.threshBayes<-function(x,...){
 	else xlim<-c(-1,1)
 	if(hasArg(ylim)) ylim<-list(...)$ylim
 	else ylim<-c(0,1.2*max(d$y))
+	if(hasArg(bty)) bty<-list(...)$bty
+	else bty<-"n"
+	if(hasArg(cex.lab)) cex.lab<-list(...)$cex.lab
+	else cex.lab<-1
+	if(hasArg(cex.axis)) cex.axis<-list(...)$cex.axis
+	else cex.axis<-1
 	plot(d,xlim=xlim,ylim=ylim,col="blue",xlab="Posterior sample of r",
-		ylab="Density",main="",bty="l")
+		ylab="Density",main="",bty=bty,cex.lab=cex.lab,cex.axis=cex.axis)
 	polygon(x=c(min(d$x),d$x,max(d$x)),y=c(0,d$y,0),
 		col=make.transparent("blue",0.2))
-	lines(rep(r,2),c(0,par()$usr[4]),col="blue",lty="dashed",
+	lines(rep(r,2),c(0,max(d$y)),col="blue",lty="dashed",
 		lwd=2)
-	text(r,0.95*par()$usr[4],"mean post-burnin\nvalue of r",cex=0.7,
-		pos=if(r>0) 2 else 4)
+	text(r,max(d$y),"mean post-burnin\nvalue of r",cex=0.7,
+		pos=if(r>0) 2 else 4,font=3)
 }
 
 density.threshBayes<-function(x,...){
@@ -343,24 +350,30 @@ print.density.threshBayes<-function(x,...){
 plot.threshBayes<-function(x,...){
 	if(hasArg(bw)) bw<-list(...)$bw
 	else bw<-floor(length(x$par$gen)/100)
+	if(hasArg(bty)) bty<-list(...)$bty
+	else bty<-"n"
+	if(hasArg(las)) las<-list(...)$las
+	else las<-1
+	if(hasArg(cex.main)) cex.main<-list(...)$cex.main
+	else cex.main<-1
 	par(mfrow=c(3,1))
 	par(mar=c(5.1,4.1,2.1,1.1))
-	plot(x$par$gen,x$par$logL,type="l",bty="l",col=make.transparent("grey",0.5),
-		xlab="generation",ylab="log(L)")
-	mtext("a) log-likelihood trace",side=3,line=0,cex=1,at=0,outer=FALSE,
-		adj=0)
+	plot(x$par$gen,x$par$logL,type="l",bty=bty,col=make.transparent("grey",0.5),
+		xlab="generation",ylab="log(L)",las=las)
+	mtext("a) log-likelihood trace",side=3,line=0.5,cex=cex.main,at=0,
+		outer=FALSE,adj=0)
 	par(mar=c(5.1,4.1,2.1,1.1))
 	accept<-vector()
 	for(i in 1:length(x$par$gen))
 		accept[i]<-mean(x$par$accept_rate[max(c(1,i-bw)):i])
-	plot(x$par$gen,accept,type="l",bty="l",col=make.transparent("red",0.5),
-		xlab="generation",ylab="mean acceptance rate")
+	plot(x$par$gen,accept,type="l",bty=bty,col=make.transparent("red",0.5),
+		xlab="generation",ylab="mean acceptance rate",las=las)
 	if(is.numeric(attr(x,"auto.tune"))) lines(c(par()$usr[1],max(x$par$gen)),
 		rep(attr(x,"auto.tune"),2),lty="dotted")
 	mtext(paste("b) mean acceptance rate (sliding window: bw=",bw,")",sep=""),
-		side=3,line=0,cex=1,at=0,outer=FALSE,adj=0)
-	plot(x$par$gen,x$par$r,type="l",bty="l",col=make.transparent("blue",0.5),
-		xlab="generation",ylab="r")
-	mtext("c) trace of the correlation coefficient, r",side=3,line=0,cex=1,at=0,
-		outer=FALSE,adj=0)
+		side=3,line=0.5,cex=cex.main,at=0,outer=FALSE,adj=0)
+	plot(x$par$gen,x$par$r,type="l",bty=bty,col=make.transparent("blue",0.5),
+		xlab="generation",ylab="r",las=las)
+	mtext("c) trace of the correlation coefficient, r",side=3,line=0.5,
+		cex=cex.main,at=0,outer=FALSE,adj=0)
 }
