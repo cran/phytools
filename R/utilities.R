@@ -1,5 +1,5 @@
 ## some utility functions
-## written by Liam J. Revell 2011, 2012, 2013, 2014, 2015, 2016, 2017, 2018, 2019, 2020
+## written by Liam J. Revell 2011, 2012, 2013, 2014, 2015, 2016, 2017, 2018, 2019, 2020, 2021
 
 ## di2multi & multi2di for "contMap" & "densityMap" object classes
 
@@ -1121,12 +1121,12 @@ ladderize.simmap<-function(tree,right=TRUE){
 repPhylo<-function(tree,times) rep(tree,times)
 
 ## S3 method rep for objects of class "phylo" and "multiPhylo"
-## written by Liam J. Revell 2014
+## written by Liam J. Revell 2014, 2021
 
 rep.phylo<-function(x,...){
 	if(hasArg(times)) times<-list(...)$times
 	else times<-(...)[[1]]
-	for(i in 1:times) obj<-if(i==1) x else if(i==2) c(obj,x) else c(obj,list(x))
+	for(i in 1:times) obj<-if(i==1) x else if(i==2) c(obj,x) else c(unclass(obj),list(x))
 	class(obj)<-"multiPhylo"
 	obj
 }
@@ -2131,7 +2131,7 @@ matchType<-function(type,types){
 }
 	
 ## function 'untangles' (or attempts to untangle) a tree with crossing branches
-## written by Liam J. Revell 2013, 2015, 2020
+## written by Liam J. Revell 2013, 2015, 2020, 2021
 untangle<-function(tree,method=c("reorder","read.tree")){
 	if(inherits(tree,"multiPhylo")){
 		tree<-lapply(tree,untangle,method=method)
@@ -2144,7 +2144,8 @@ untangle<-function(tree,method=c("reorder","read.tree")){
 		else if(method=="read.tree"){
 			tip.label<-tree$tip.label
 			tree$tip.label<-1:Ntip(tree)
-			if(inherits(tree,"simmap")) tree<-read.simmap(text=write.simmap(tree))
+			if(inherits(tree,"simmap")) 
+				tree<-read.simmap(text=capture.output(write.simmap(tree,file=stdout())))
 			else tree<-if(Ntip(tree)>1) read.tree(text=write.tree(tree)) else read.newick(text=write.tree(tree))
 			tree$tip.label<-tip.label[as.numeric(tree$tip.label)]
 		}
