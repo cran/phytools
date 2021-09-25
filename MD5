@@ -1,5 +1,5 @@
-78569fa99c91a7fa430fbab4d290bc87 *DESCRIPTION
-1a0f8bc3cef4b358a833c24ab557657c *NAMESPACE
+38204cd1a0e704575ba8d7c972fa8e47 *DESCRIPTION
+88ecddd1e098c781c5990b052d31f976 *NAMESPACE
 ec1dee2fc5dce861a4a896e13a10a9a5 *R/Dtest.R
 ee8f279c7051fd15e5f3b69a78b13d42 *R/add.everywhere.R
 00125e455cd6c2a9a162f414c82b31d3 *R/add.random.R
@@ -22,7 +22,7 @@ be284dbd922c8e640b06f22aeea30eb6 *R/consensus.edges.R
 ca84810482c72fff11b7cc05c1ca994a *R/cophylo.R
 c6caa20ceaa72a8a1dc2e71efa9ea19e *R/cospeciation.R
 f7ffd39dc1f6c31378ee311508708bfb *R/ctt.R
-cec664a83f048072b22c7ce60bcf885b *R/densityMap.R
+77e8e6455154de4d8221514cc5d54cf8 *R/densityMap.R
 a651a11526c62a939580958d664aea3d *R/densityTree.R
 4d0db3cfa22ee367a93e56c4459c0db4 *R/dotTree.R
 446bf517ccb9818edb853c42135476ba *R/drop.tip.simmap.R
@@ -32,13 +32,13 @@ bef780c00ce923e2306295f2dcd7bf8b *R/estDiversity.R
 26357ca8c56e3c1968a9fc85c8b657d6 *R/evolvcv.lite.R
 164c5aba763c4823fae1a2747cbbdde8 *R/exhaustiveMP.R
 0c94431c709b011b1a19a5238b7a3352 *R/export.as.xml.R
-59c8fa4c521018fcc8a9e8bbe8e8e718 *R/fancyTree.R
+fc0a8a0fdd8152f5be6036593472c8e6 *R/fancyTree.R
 10c2c1db23b6325cd65f17e4d3549aba *R/fastAnc.R
 1fb690b492fa00b02e86eaf49b5e48b6 *R/fastBM.R
 fd4043fe4370b493b19344fc752bcdf5 *R/fitBayes.R
 2180796336a37244d12cd384282ae33b *R/fitDiversityModel.R
-c4529c3b9702c79aa051b338023f40ab *R/fitHRM.R
-0e5dd4f025704ecef036080adafb6fb8 *R/fitMk.R
+fcd2a8c6670e1cfce42d4eb502b9fbb3 *R/fitHRM.R
+f4e698534c0371433d652f6fac5d3f31 *R/fitMk.R
 ef4e25e489eae81b918f39d9aeaf74c8 *R/fitPagel.R
 2313c5868bb1a48ceb89a3f12af424b5 *R/fitmultiMk.R
 d56c197dfea3627d8c1f04a660d7d7fb *R/fitpolyMk.R
@@ -77,7 +77,7 @@ e6c26951fcaebf42542b6fbc1affb620 *R/phylo.to.map.R
 ba04cc646aeb4d77be7af8bf3b1f21ac *R/phylomorphospace3d.R
 a321ac68ac46f667e1fdd45cd53c3410 *R/phylosig.R
 3a5045f97da2d4f697eea1e86e46edb7 *R/plotBranchbyTrait.R
-2c9091616c5bc62ccdf02947e62b7c8b *R/plotSimmap.R
+f8f3ef22c21e126947ff17a686eeac4e *R/plotSimmap.R
 d6a34cd3cc500aafcfaab6113e5a29c6 *R/plotTree.datamatrix.R
 a58e6ab65dca2e69dde3266c9d05e51e *R/plotTree.errorbars.R
 9f36a04d3449c0f6a4e59b0154ee802a *R/plotTree.wBars.R
@@ -86,7 +86,8 @@ de8c966ad29e2ef0b7d6838e34bd8f81 *R/ratebystate.R
 c393517b7ce4f9ccd5a44dfa4d541583 *R/ratebytree.R
 47895a08678f00f93229807ffc536c57 *R/rateshift.R
 10aa4276f62187281eaa23d509df6f58 *R/read.newick.R
-613a9311d192d89fefaf7f5c6e039de3 *R/read.simmap.R
+970fb5a7146e3e1626e50fc14ffaef6f *R/read.simmap.R
+4ecad496058c6f0f515d3322084deb6f *R/readNexus.R
 2658841a3af53c82b86513482e4f0bd2 *R/rerootingMethod.R
 ba26eefe861f14105c46ee13652c5b66 *R/resolveNodes.R
 9bb4ea1e15eaeba8b3ea0f4ffc3c9255 *R/roundPhylogram.R
@@ -101,7 +102,7 @@ c8bfa07dd3238d97fcaafe5a369e5e89 *R/starTree.R
 87cc055735bb22fe3784662ef6f24abb *R/threshBayes.R
 5a8a89c2fe9a2e54e4d7ef961e241198 *R/tree.grow.R
 7e547545cd50de19581af1e1c179e967 *R/treeSlice.R
-a47ff4a5903eca139706be895b8419c2 *R/utilities.R
+2f165fdfa3ddbee0944fad4bc44b2bd8 *R/utilities.R
 4c418f19c184c846f28f696969142bd0 *R/write.simmap.R
 67b049f3e083513ff41ab9ca2bd940b5 *R/writeAncestors.R
 65bf87a538f44806311e8914317b242c *R/writeNexus.R
@@ -157,7 +158,7 @@ abeb701a5213e15d9e24816563654492 *man/cladelabels.Rd
 50e4b8683445e313b127005c627b48a8 *man/countSimmap.Rd
 81377c898318ae96904c8533deba604c *man/ctt.Rd
 a89b7d2651d8010515a38328ac9b28ec *man/density.multiSimmap.Rd
-8451a4a8e321d0a2a6b10d8fdc46a924 *man/densityMap.Rd
+dc42deb1613332ddcf96ffa529025a06 *man/densityMap.Rd
 ac498b46bedc5b518ad07b7093e56608 *man/densityTree.Rd
 5e85942250d521117c4a4bfbe0f9dab4 *man/describe.simmap.Rd
 0ea6310926c9aee94ae48d102ddd5c6d *man/di2multi.simmap.Rd
@@ -184,9 +185,9 @@ a39df830514ea734e89fd17d9ab43a4a *man/fastMRCA.Rd
 f403634da6aaa52e261930730fbbc669 *man/fit.bd.Rd
 8c9a8bf66fa03d03fc4d30902bba058e *man/fitBayes.Rd
 50d9e4e565e23081519af79600a7fc0b *man/fitDiversityModel.Rd
-0c90e85c646bf883102711d65dbdfda3 *man/fitMk.Rd
+a67a18f702da423fac28d918b4c0f5d1 *man/fitMk.Rd
 bec587cf8339fb2c411708eb27b2389e *man/fitPagel.Rd
-ba9a3f05a5e21858e0b73853b71893f0 *man/force.ultrametric.Rd
+c8f7cdcf6bd4f7bce00264f357cf48e7 *man/force.ultrametric.Rd
 1b8c690f7a0c981bdeb6023ceea6986d *man/gammatest.Rd
 770b2592b41f11314abbfecfba05a93f *man/genSeq.Rd
 f11ab7e0202bf75021320a02c2b38eee *man/geo.legend.Rd
@@ -207,7 +208,7 @@ d5bb3d63602ebf362a51a8fe59edef42 *man/locate.fossil.Rd
 2b0c832b1f0bb720ad23e6c29c777ec9 *man/ltt.Rd
 9431e93a2583cdb4b8a01d5e6a7dcd50 *man/ltt95.Rd
 e118154dbc13ffdeaf182b9297b8121b *man/make.era.map.Rd
-801eee651844e07034ba5a056ce7dfa4 *man/make.simmap.Rd
+94bc9c79d108d37d2cb6375e8e192bc5 *man/make.simmap.Rd
 8e3dd12746e0ec435c036fa89877921a *man/map.overlap.Rd
 cb88cb82ebff64686d12fa44a638a732 *man/map.to.singleton.Rd
 7bc0bf4a400013d8506a144b98663d09 *man/mapped.states.Rd
@@ -222,7 +223,7 @@ f219aa76dadd3cfb9468bd15b216d079 *man/mrp.supertree.Rd
 21cc9f90c7e6ad96f6d40b8927d43135 *man/multi.mantel.Rd
 cd0d9ef3074a74277c4dd5e0eba2cdda *man/multiC.Rd
 3ec09cb3680a1497d388b91696e11e70 *man/multiRF.Rd
-81f94e2e25583a210fe874c9ebbb78c9 *man/multirateBM.Rd
+f0c6183d68a84e16aed61ce4e30ac72c *man/multirateBM.Rd
 771381f4158bb262fd0a9c7df8c33508 *man/nodeHeights.Rd
 b8061afef967e33d70e5646761eea00e *man/nodelabels.cophylo.Rd
 e65217eade71e3b3b933e1a6834ed972 *man/optim.phylo.ls.Rd
@@ -262,7 +263,7 @@ f77f83cffdb74d5d1d7dc60781beea93 *man/plotTree.wBars.Rd
 de7ad96a9a122d41334bfd6720f09ecc *man/ratebystate.Rd
 dae3bf9cf05d7cb29e9f14c5cfb19897 *man/ratebytree.Rd
 5a0d4ab7ec2ec426fc2fba8aa76bbd61 *man/rateshift.Rd
-83b256d15cc236468fc5a08c4c99e411 *man/read.newick.Rd
+12b316e2f39c582f8aed09ed203606b0 *man/read.newick.Rd
 6baa19a2df1b862a0e401c747ac7cdd5 *man/read.simmap.Rd
 d48ff16c889ec853efdcdfd12744ed62 *man/reorder.backbonePhylo.Rd
 1b9465c231435640da167fc86f10de30 *man/reorderSimmap.Rd
