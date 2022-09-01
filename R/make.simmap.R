@@ -1,5 +1,5 @@
 ## function creates a stochastic character mapped tree as a modified "phylo" object
-## written by Liam Revell 2013, 2014, 2015, 2016, 2017, 2018, 2019, 2020, 2021
+## written by Liam Revell 2013, 2014, 2015, 2016, 2017, 2018, 2019, 2020, 2021, 2022
 
 make.simmap<-function(tree,x,model="SYM",nsim=1,...){
 	if(inherits(tree,"multiPhylo")){
@@ -83,7 +83,8 @@ make.simmap<-function(tree,x,model="SYM",nsim=1,...){
 				list(tree=tree,x=x,N=N,m=m,root=root),SIMPLIFY=FALSE) else
 				list(smap(tree=tree,x=x,N=N,m=m,root=root,L=L[[1]],Q=Q[[1]],pi=pi[[1]],
 				logL=logL[[1]]))
-		} else if(is.matrix(Q)){
+		} else if(is(Q,"Qmatrix")||is.matrix(Q)){
+			if(is(Q,"Qmatrix")) Q<-unclass(Q)
 			XX<-getPars(bt,xx,model,Q=Q,tree,tol,m,pi=pi,args=list(...))
 			L<-XX$L
 			logL<-XX$loglik
@@ -413,10 +414,33 @@ density.multiSimmap<-function(x,...){
 plot.changesMap<-function(x,...){
 	if(hasArg(bty)) bty<-list(...)$bty
 	else bty<-"l"
+	if(hasArg(alpha)) alpha<-list(...)$alpha
+	else alpha<-0.3
+	if(hasArg(colors)){ 
+		colors<-list(...)$colors
+		nn<-names(colors)
+		colors<-setNames(make.transparent(colors,alpha),nn)
+	} else { 
+		colors<-if(length(x$trans)==2) 
+			setNames(make.transparent(c("blue","red"),alpha),x$trans)
+		else
+			setNames(rep(make.transparent("blue",alpha),length(x$trans)),
+				x$trans)
+	}
+	if(length(colors)<length(x$trans))
+		colors<-rep(colors,ceiling(length(x$trans)/length(colors)))[1:length(x$trans)]
+	if(is.null(names(colors))) colors<-setNames(colors,x$trans)
+	if(hasArg(transition)){ 
+		transition<-list(...)$transition
+		if(length(transition)>1){
+			cat("transition should be of length 1; truncating to first element.\n")
+			transition<-transition[1]
+		}
+	} else transition<-NULL
 	p<-x$p
 	hpd<-x$hpd
 	bw<-x$bw
-	if(length(x$trans)==2){
+	if(length(x$trans)==2&&is.null(transition)){
 		plot(p[[1]]$mids,p[[1]]$density,xlim=c(min(x$mins)-1,
 			max(x$maxs)+1),ylim=c(0,1.2*max(c(p[[1]]$density,
 			p[[2]]$density))),
@@ -428,56 +452,66 @@ plot.changesMap<-function(x,...){
 		x2<-rep(p[[1]]$mids-bw/2,each=2)[-1]
 		x3<-c(min(x2),x2,max(x2))
 		y3<-c(0,y2,0)
-		polygon(x3,y3,col=make.transparent("red",0.3),border=FALSE)
+		polygon(x3,y3,col=colors[x$trans[1]],border=FALSE)
 		lines(p[[1]]$mids-bw/2,p[[1]]$density,type="s")
 		y2<-rep(p[[2]]$density,each=2)
 		y2<-y2[-length(y2)]
 		x2<-rep(p[[2]]$mids-bw/2,each=2)[-1]
 		x3<-c(min(x2),x2,max(x2))
 		y3<-c(0,y2,0)
-		polygon(x3,y3,col=make.transparent("blue",0.3),border=FALSE)
+		polygon(x3,y3,col=colors[x$trans[2]],border=FALSE)
 		lines(p[[2]]$mids-bw/2,p[[2]]$density,type="s")
-		add.simmap.legend(colors=setNames(c(make.transparent("red",0.3),
-			make.transparent("blue",0.3)),x$trans[1:2]),
-			prompt=FALSE,x=min(x$mins),y=0.95*par()$usr[4])
 		dd<-0.01*diff(par()$usr[3:4])
 		lines(hpd[[1]],rep(max(p[[1]]$density)+dd,2))
 		lines(rep(hpd[[1]][1],2),c(max(p[[1]]$density)+dd,
 			max(p[[1]]$density)+dd-0.005))
 		lines(rep(hpd[[1]][2],2),c(max(p[[1]]$density)+dd,
 			max(p[[1]]$density)+dd-0.005))
+		CHARS<-strsplit(x$trans[1],"->")[[1]]
+		CHARS[1]<-paste("HPD(",CHARS[1],collapse="")
+		CHARS[2]<-paste(CHARS[2],")",collapse="")
+		T1<-bquote(.(CHARS[1])%->%.(CHARS[2]))
 		text(mean(hpd[[1]]),max(p[[1]]$density)+dd,
-			paste("HPD(",x$trans[1],")",sep=""),
-			pos=3)
+			T1,pos=3)
 		lines(hpd[[2]],rep(max(p[[2]]$density)+dd,2))
 		lines(rep(hpd[[2]][1],2),c(max(p[[2]]$density)+dd,
 			max(p[[2]]$density)+dd-0.005))
 		lines(rep(hpd[[2]][2],2),c(max(p[[2]]$density)+dd,
 			max(p[[2]]$density)+dd-0.005))
+		CHARS<-strsplit(x$trans[2],"->")[[1]]
+		CHARS[1]<-paste("HPD(",CHARS[1],collapse="")
+		CHARS[2]<-paste(CHARS[2],")",collapse="")
+		T2<-bquote(.(CHARS[1])%->%.(CHARS[2]))
 		text(mean(hpd[[2]]),max(p[[2]]$density)+dd,
-			paste("HPD(",x$trans[2],")",sep=""),
-			pos=3)
+			T2,pos=3)
+		CHARS<-strsplit(x$trans[1],"->")[[1]]
+		T1<-bquote(.(CHARS[1])%->%.(CHARS[2]))
+		CHARS<-strsplit(x$trans[2],"->")[[1]]
+		T2<-bquote(.(CHARS[1])%->%.(CHARS[2]))
+		legend("topleft",legend=c(T1,T2),pch=22,pt.cex=2.2,bty="n",
+			pt.bg=colors[x$trans])
 	} else {
-		k<-length(x$states)
-		par(mfrow=c(k,k))
-		ii<-1
+		k<-if(is.null(transition)) length(x$states) else 1
+		if(k>1) par(mfrow=c(k,k))
+		ii<-if(is.null(transition)) 1 else which(x$trans==transition)
 		max.d<-max(unlist(lapply(p,function(x) x$density)))
 		for(i in 1:k){
 			for(j in 1:k){
-				if(i==j) plot.new()
+				if(i==j&&is.null(transition)) plot.new()
 				else {
+					CHARS<-strsplit(x$trans[ii],"->")[[1]]
+					MAIN<-bquote(.(CHARS[1])%->%.(CHARS[2]))
 					plot(p[[ii]]$mids,p[[ii]]$density,xlim=c(min(x$mins)-1,
 						max(x$maxs)+1),ylim=c(0,1.2*max.d),
 						type="n",xlab="number of changes",
-						ylab="relative frequency",main=x$trans[ii],font.main=1,
+						ylab="relative frequency",main=MAIN,font.main=1,
 						bty=bty)
-					##title(main=)
 					y2<-rep(p[[ii]]$density,each=2)
 					y2<-y2[-length(y2)]
 					x2<-rep(p[[ii]]$mids-bw/2,each=2)[-1]
 					x3<-c(min(x2),x2,max(x2))
 					y3<-c(0,y2,0)
-					polygon(x3,y3,col=make.transparent("blue",0.3),border=FALSE)
+					polygon(x3,y3,col=colors[x$trans[ii]],border=FALSE)
 					lines(p[[ii]]$mids-bw/2,p[[ii]]$density,type="s")
 					dd<-0.03*diff(par()$usr[3:4])
 					lines(hpd[[ii]],rep(max(p[[ii]]$density)+dd,2))

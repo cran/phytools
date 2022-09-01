@@ -1,6 +1,11 @@
 ## fitpolyMk 
 ## fits several polymorphic discrete character evolution models
-## written by Liam J. Revell 2019, 2020
+## written by Liam J. Revell 2019, 2020, 2022
+
+as.Qmatrix.fitpolyMk<-function(x,...){
+	class(x)<-"fitMk"
+	as.Qmatrix(x,...)
+}
 
 Combinations<-function(n,r,v=1:n){
 	if(n!=length(v)) stop("n and v should have the same length")
@@ -11,7 +16,8 @@ fitpolyMk<-function(tree,x,model="SYM",ordered=FALSE,...){
 	if(hasArg(quiet)) quiet<-list(...)$quiet
 	else quiet<-FALSE
 	if(is.factor(x)) x<-setNames(as.character(x),names(x))
-	X<-strsplit(x,"+",fixed=TRUE)
+	if(is.matrix(x)) X<-strsplit(colnames(x),"+",fixed=TRUE)
+	else X<-strsplit(x,"+",fixed=TRUE)
 	ns<-sapply(X,length)
 	if(ordered){
 		if(hasArg(max.poly)) max.poly<-list(...)$max.poly
@@ -25,7 +31,10 @@ fitpolyMk<-function(tree,x,model="SYM",ordered=FALSE,...){
 		object<-NULL
 	} else {
 		## fix the order of the input data
-		x<-sapply(X,function(x) paste(sort(x),collapse="+"))
+		if(is.matrix(x)){
+			Levs<-sapply(X,function(x) paste(sort(x),collapse="+"))
+			colnames(x)<-Levs
+		} else x<-sapply(X,function(x) paste(sort(x),collapse="+"))
 		## get the states
 		states<-sort(unique(unlist(X)))
 		if(ordered){
@@ -82,7 +91,10 @@ fitpolyMk<-function(tree,x,model="SYM",ordered=FALSE,...){
 			cat("\n")
 			flush.console()
 		}
-		X<-to.matrix(x,ss)
+		if(is.matrix(x)){
+			X<-matrix(0,nrow(x),length(ss),dimnames=list(rownames(x),ss))
+			X[rownames(x),colnames(x)]<-x
+		} else X<-to.matrix(x,ss)
 		object<-fitMk(tree,X,model=tmodel,...)
 	}
 	object$model<-model

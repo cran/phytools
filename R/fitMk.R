@@ -1,6 +1,25 @@
-## function for conditional likelihoods at nodes
-## written by Liam J. Revell 2015, 2016, 2019, 2020, 2021
+## written by Liam J. Revell 2015, 2016, 2019, 2020, 2021, 2022
 ## with input from (& structural similarity to) function ace by E. Paradis et al. 2013
+
+anova.fitMk<-function(object,...){
+	fits<-list(...)
+	nm<-c(
+		deparse(substitute(object)),
+		if(length(fits)>0) sapply(substitute(list(...))[-1],deparse)
+	)
+	logL<-c(logLik(object),
+		if(length(fits)>0) sapply(fits,logLik))
+	df<-c(attr(logLik(object),"df"),
+		if(length(fits)>0) sapply(fits,function(x) attr(logLik(x),"df")))
+	AICvals<-c(AIC(object),
+		if(length(fits)>0) sapply(fits,AIC))
+	ww<-aic.w(AICvals)
+	result<-data.frame(logL,df,AICvals,unclass(ww))
+	rownames(result)<-nm
+	colnames(result)<-c("log(L)","d.f.","AIC","weight")
+	print(result)
+	invisible(result)
+}
 
 fitMk<-function(tree,x,model="SYM",fixedQ=NULL,...){
 	if(hasArg(output.liks)) output.liks<-list(...)$output.liks
@@ -287,6 +306,12 @@ plot.Qmatrix<-function(x,...){
 	else spacer<-0.1
 	if(hasArg(color)) color<-list(...)$color
 	else color<-FALSE
+	if(hasArg(width)) width<-list(...)$width
+	else width<-FALSE
+	if(hasArg(text)) text<-list(...)$text
+	else text<-TRUE
+	if(hasArg(max.lwd)) max.lwd<-list(...)$max.lwd
+	else max.lwd<-if(text) 5 else 8
 	plot.new()
 	par(mar=mar)
 	xylim<-c(-1.2,1.2)
@@ -296,14 +321,36 @@ plot.Qmatrix<-function(x,...){
 	nstates<-nrow(Q)
 	if(color){
 		col_pal<-function(qq) if(is.na(qq)) NA else 
-			if(is.infinite(qq)) make.transparent("grey",0.4) else
+			if(is.infinite(qq)) make.transparent("grey",0.6) else
 			rgb(colorRamp(c("blue","purple","red"))(qq),maxColorValue=255)
 		qq<-Q
 		diag(qq)<-NA
 		qq<-log(qq)
-		qq<-(qq-MIN(qq,na.rm=TRUE))/diff(RANGE(qq,na.rm=TRUE))
-		cols<-apply(qq,c(1,2),col_pal)
+		dq<-diff(RANGE(qq,na.rm=TRUE))
+		if(dq<tol){
+			cols<-matrix("blue",nstates,nstates)
+			cols[Q<tol]<-make.transparent("grey",0.6)
+		} else {
+			qq<-(qq-MIN(qq,na.rm=TRUE))/dq
+			cols<-apply(qq,c(1,2),col_pal)
+		}
 	} else cols<-matrix(par("fg"),nstates,nstates)
+	if(width){
+		lwd_maker<-function(qq,max.qq) if(is.na(qq)) NA else 
+			if(is.infinite(qq)) 0 else qq*(max.lwd-1)+1
+		qq<-Q
+		diag(qq)<-NA
+		qq<-log(qq)
+		dq<-max(qq[!is.infinite(qq)],na.rm=TRUE)-
+			min(qq[!is.infinite(qq)],na.rm=TRUE)
+		if(dq<tol){
+			lwd<-matrix(lwd,nstates,nstates)
+			lwd[Q<tol]<-0
+		} else {
+			qq<-(qq-(min(qq[!is.infinite(qq)],na.rm=TRUE)))/dq
+			lwd<-apply(qq,c(1,2),lwd_maker,max.qq=max(qq,na.rm=TRUE))
+		}
+	} else lwd<-matrix(lwd,nstates,nstates)
 	if(!umbral||is.null(ncat)){
 		step<-360/nstates
 		angles<-seq(0,360-step,by=step)/180*pi
@@ -336,45 +383,72 @@ plot.Qmatrix<-function(x,...){
 				v.y[j]+spacer*sin(atan(slope))*sign(-dy)+
 				if(isSymmetric(Q)) 0 else shift.y)
 			if(show.zeros||Q[i,j]>tol){
-				if(abs(diff(c(i,j)))==1||abs(diff(c(i,j)))==(nstates-1))
-					text(mean(c(s[1],e[1]))+1.5*shift.x,
-						mean(c(s[2],e[2]))+1.5*shift.y,
-						round(Q[i,j],signif),cex=cex.rates,
-						srt=atan(dy/dx)*180/pi)
-				else
-					text(mean(c(s[1],e[1]))+0.3*diff(c(s[1],e[1]))+
-						1.5*shift.x,
-						mean(c(s[2],e[2]))+0.3*diff(c(s[2],e[2]))+
-						1.5*shift.y,
-						round(Q[i,j],signif),cex=cex.rates,
-						srt=atan(dy/dx)*180/pi)
+				if(text){
+					if(abs(diff(c(i,j)))==1||abs(diff(c(i,j)))==(nstates-1))
+						text(mean(c(s[1],e[1]))+1.5*shift.x,
+							mean(c(s[2],e[2]))+1.5*shift.y,
+							round(Q[i,j],signif),cex=cex.rates,
+							srt=atan(dy/dx)*180/pi)
+					else
+						text(mean(c(s[1],e[1]))+0.3*diff(c(s[1],e[1]))+
+							1.5*shift.x,
+							mean(c(s[2],e[2]))+0.3*diff(c(s[2],e[2]))+
+							1.5*shift.y,
+							round(Q[i,j],signif),cex=cex.rates,
+							srt=atan(dy/dx)*180/pi)
+				}
 				arrows(s[1],s[2],e[1],e[2],length=0.05,
-					code=if(isSymmetric(Q)) 3 else 2,lwd=lwd,
+					code=if(isSymmetric(Q)) 3 else 2,
+					lwd=if(lwd[i,j]==0) 1 else lwd[i,j],
+					lty=if(lwd[i,j]==0) "dotted" else "solid",
 					col=cols[i,j])
 			}
 		}
 	text(v.x,v.y,rownames(Q),cex=cex.traits,
 		col=make.transparent(par("fg"),0.9))
 	if(color){
-		h<-1.5
-		LWD<-diff(par()$usr[1:2])/dev.size("px")[1]
-		lines(x=rep(-1.3+LWD*15/2,2),y=c(-h/2,h/2))
-		nticks<-6
-		Y<-cbind(seq(-h/2,h/2,length.out=nticks),
-			seq(-h/2,h/2,length.out=nticks))
-		X<-cbind(rep(-1.3+LWD*15/2,nticks),
-			rep(-1.3+LWD*15/2+0.02*h,nticks))
-		for(i in 1:nrow(Y)) lines(X[i,],Y[i,])
-		add.color.bar(h,sapply(seq(0,1,length.out=100),col_pal),
-			title="evolutionary rate (q)",
-			lims=NULL,digits=3,
-			direction="upwards",
-			subtitle="",lwd=15,
-			x=-1.3,y=-h/2,prompt=FALSE)
-		QQ<-Q
-		diag(QQ)<-0
-		text(x=X[,2],y=Y[,2],signif(exp(seq(MIN(log(QQ),na.rm=TRUE),
-			MAX(log(QQ),na.rm=TRUE),length.out=6)),signif),pos=4,cex=0.7)
+		if(dq>tol){
+			h<-1.5
+			LWD<-diff(par()$usr[1:2])/dev.size("px")[1]
+			lines(x=rep(-1.3+LWD*15/2,2),y=c(-h/2,h/2))
+			nticks<-6
+			Y<-cbind(seq(-h/2,h/2,length.out=nticks),
+				seq(-h/2,h/2,length.out=nticks))
+			X<-cbind(rep(-1.3+LWD*15/2,nticks),
+				rep(-1.3+LWD*15/2+0.02*h,nticks))
+			for(i in 1:nrow(Y)) lines(X[i,],Y[i,])
+			add.color.bar(h,sapply(seq(0,1,length.out=100),col_pal),
+				title="evolutionary rate (q)",
+				lims=NULL,digits=3,
+				direction="upwards",
+				subtitle="",lwd=15,
+				x=-1.3,y=-h/2,prompt=FALSE)
+			QQ<-Q
+			diag(QQ)<-0
+			text(x=X[,2],y=Y[,2],signif(exp(seq(MIN(log(QQ),na.rm=TRUE),
+				MAX(log(QQ),na.rm=TRUE),length.out=6)),signif),pos=4,cex=0.7)
+		} else {
+			BLUE<-function(...) "blue"
+			h<-1.5
+			LWD<-diff(par()$usr[1:2])/dev.size("px")[1]
+			lines(x=rep(-1.3+LWD*15/2,2),y=c(-h/2,h/2))
+			nticks<-6
+			Y<-cbind(seq(-h/2,h/2,length.out=nticks),
+				seq(-h/2,h/2,length.out=nticks))[nticks,,drop=FALSE]
+			X<-cbind(rep(-1.3+LWD*15/2,nticks),
+				rep(-1.3+LWD*15/2+0.02*h,nticks))[nticks,,drop=FALSE]
+			for(i in 1:nrow(Y)) lines(X[i,],Y[i,])
+			add.color.bar(h,sapply(seq(0,1,length.out=100),BLUE),
+				title="evolutionary rate (q)",
+				lims=NULL,digits=3,
+				direction="upwards",
+				subtitle="",lwd=15,
+				x=-1.3,y=-h/2,prompt=FALSE)
+			QQ<-Q
+			diag(QQ)<-0
+			text(x=X[,2],y=Y[,2],signif(exp(seq(MIN(log(QQ),na.rm=TRUE),
+				MAX(log(QQ),na.rm=TRUE),length.out=1)),signif),pos=4,cex=0.7)
+		}
 	}
 	object<-data.frame(states=rownames(Q),x=v.x,y=v.y)
 	invisible(object)

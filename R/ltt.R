@@ -3,18 +3,250 @@
 ## that is ultrametric.  Optionally, the function can remove extinct
 ## species from the phylogeny. If the input tree is an object of class 
 ## "multiPhylo" then the function will simultaneously plot all ltts.
-## written by Liam J. Revell 2010-2015
+## written by Liam J. Revell 2010-2015, 2022
 
-ltt<-function(tree,plot=TRUE,drop.extinct=FALSE,log.lineages=TRUE,gamma=TRUE,...){
+## ltt method (added 2022)
+
+ltt<-function(tree,...) UseMethod("ltt")
+
+ltt.default<-function(tree,...){
+	warning(paste(
+		"ltt does not know how to handle objects of class ",
+		class(tree),"."))
+}
+
+print.ltt.multiSimmap<-function(x,...){
+	cat(paste(length(x),"objects of class \"ltt.simmap\" in a list\n"))
+}
+
+ltt.multiSimmap<-function(tree,gamma=TRUE,...){
+	if(!inherits(tree,"multiSimmap")){
+		stop("tree must be object of class \"multiSimmap\".")
+	} else {
+		obj<-lapply(tree,ltt,plot=FALSE,log.lineages=FALSE,gamma=gamma)
+		class(obj)<-"ltt.multiSimmap"
+		return(obj)
+	}
+}
+
+ltt.simmap<-function(tree,plot=TRUE,log.lineages=FALSE,gamma=TRUE,...){
+	if(!inherits(tree,"simmap")){
+		stop("tree must be an object of class \"simmap\".")
+	} else {
+		levs<-sort(unique(c(getStates(tree,"tips"),
+			getStates(tree,"nodes"))))
+		tt<-map.to.singleton(tree)
+		H<-nodeHeights(tt)
+		h<-c(0,max(H)-branching.times(tt),min(sapply(1:Ntip(tt),
+			nodeheight,tree=tt)))
+		ss<-setNames(as.factor(names(tt$edge.length)),
+			tt$edge[,2])
+		lineages<-matrix(0,length(h),length(levs),
+			dimnames=list(names(h),levs))
+		lineages[1,getStates(tree,"nodes")[1]]<-1
+		for(i in 2:length(h)){
+			ii<-intersect(which(h[i]>H[,1]),which(h[i]<=H[,2]))
+			lineages[i,]<-summary(ss[ii])
+		}
+		ii<-order(h)
+		times<-h[ii]
+		lineages<-lineages[ii,]
+		lineages<-cbind(lineages,total=rowSums(lineages))
+		obj<-list(times=times,ltt=lineages)	
+		if(gamma==FALSE){
+			obj<-list(ltt=lineages,times=times,tree=tree)
+			class(obj)<-"ltt.simmap"
+		} else {
+			gam<-gammatest(ltt(as.phylo(tree),plot=FALSE))
+			obj<-list(ltt=lineages,times=times,gamma=gam$gamma,
+				p=gam$p,tree=tree)
+			class(obj)<-"ltt.simmap"
+		}
+	}
+	if(plot) plot(obj,log.lineages=log.lineages,...)
+	obj
+}
+
+plot.ltt.multiSimmap<-function(x,...){
+	if(hasArg(add)) add<-list(...)$add
+	else add<-FALSE
+	hh<-max(sapply(x,function(x) max(nodeHeights(x$tree))))
+	if(hasArg(alpha)) alpha<-list(...)$alpha else alpha<-0.05
+	if(hasArg(res)) res<-list(...)$res else res<-1000
+	if(hasArg(log.lineages)) log.lineages<-list(...)$log.lineages
+	else log.lineages<-FALSE
+	levs<-sort(unique(unlist(lapply(x,function(x) 
+		c(getStates(x$tree,"tips"),getStates(x$tree,"nodes"))))))
+	if(hasArg(colors)) colors<-list(...)$colors	
+	else colors<-setNames(c(palette()[1:length(levs)+1],par()$fg),
+		c(levs,"total"))
+	if(hasArg(legend)) legend<-list(...)$legend else 
+		legend<-"topleft"
+	plot.leg<-TRUE
+	if(is.logical(legend)) if(legend) plot.leg<-TRUE else 
+		plot.leg<-FALSE
+	if(hasArg(lwd)) lwd<-list(...)$lwd else lwd<-5
+	if(hasArg(show.total)) show.total<-list(...)$show.total else
+		show.total<-TRUE
+	nn<-max(sapply(x,function(x,tot) if(!tot) 
+		max(x$ltt[,-which(colnames(x$ltt)=="total")]) else
+		Ntip(x$tree),tot=show.total))
+	xlim<-if(hasArg(xlim)) list(...)$xlim else c(0,hh)
+	ylim<-if(hasArg(ylim)) list(...)$ylim else 
+		if(log.lineages) log(c(1,1.05*nn)) else 
+		c(0,1.05*nn)
+	xlab<-if(hasArg(xlab)) list(...)$xlab else "time"
+	ylab<-if(hasArg(ylab)) list(...)$ylab else if(log.lineages) 
+		"log(lineages)" else "lineages"
+	TIMES<-seq(0,hh,length.out=res)
+	LINEAGES<-matrix(0,length(TIMES),length(levs)+1)
+	colnames(LINEAGES)<-c(levs,"total")
+	for(i in 1:length(TIMES)){
+		for(j in 1:length(x)){
+			ii<-which(x[[j]]$times<=TIMES[i])
+			ADD<-if(length(ii)==0) rep(0,length(levs)) else 
+				x[[j]]$ltt[max(ii),]/length(x)
+			LINEAGES[i,]<-LINEAGES[i,]+ADD
+		}
+	}
+	args<-list(...)
+	args$res<-NULL
+	args$alpha<-NULL
+	args$log.lineages<-NULL
+	args$colors<-NULL
+	args$legend<-NULL
+	args$show.total<-NULL
+	args$add<-NULL
+	args$xlim<-xlim
+	args$ylim<-ylim
+	args$xlab<-xlab
+	args$ylab<-ylab
+	args$x<-NA
+	if(!add) do.call(plot,args)
+	if(!show.total) dd<-1 else dd<-0
+	for(i in 1:length(x)){
+		for(j in 1:(ncol(LINEAGES)-dd)){
+			nm<-colnames(x[[i]]$ltt)[j]
+			ltt<-if(log.lineages) log(x[[i]]$ltt[,j]) else x[[i]]$ltt[,j]
+			lines(x[[i]]$times,ltt,type="s",lwd=1,
+				col=make.transparent(colors[nm],
+				alpha))
+		}
+	}
+	for(i in 1:(ncol(LINEAGES)-dd)){
+		nm<-colnames(LINEAGES)[i]
+		ltt<-if(log.lineages) log(LINEAGES[,i]) else LINEAGES[,i]
+		lines(TIMES,ltt,lwd=lwd,col=colors[nm])
+	}
+	if(plot.leg){
+		nm<-c(levs,"total")
+		if(!show.total) nm<-setdiff(nm,"total")
+		legend(legend,legend=nm,pch=22,pt.bg=colors[nm],pt.cex=1.2,
+			cex=0.8,bty="n")
+	}
+	invisible(list(times=TIMES,ltt=LINEAGES))
+}
+
+plot.ltt.simmap<-function(x,...){
+	if(hasArg(add)) add<-list(...)$add else add<-FALSE
+	if(hasArg(log.lineages)) log.lineages<-list(...)$log.lineages
+	else log.lineages<-FALSE
+	if(hasArg(colors)) colors<-list(...)$colors	
+	else colors<-setNames(c(palette()[2:ncol(x$ltt)],par()$fg),
+		colnames(x$ltt))
+	if(hasArg(legend)) legend<-list(...)$legend else 
+		legend<-"topleft"
+	plot.leg<-TRUE
+	if(is.logical(legend)) if(legend) plot.leg<-TRUE else 
+		plot.leg<-FALSE
+	if(hasArg(show.tree)) show.tree<-list(...)$show.tree else
+		show.tree<-FALSE
+	if(hasArg(lwd)) lwd<-list(...)$lwd else lwd<-3
+	if(hasArg(outline)) outline<-list(...)$outline else 
+		outline<-show.tree
+	if(hasArg(show.total)) show.total<-list(...)$show.total else
+		show.total<-TRUE
+	xlim<-if(hasArg(xlim)) list(...)$xlim else range(x$times)
+	ylim<-if(hasArg(ylim)) list(...)$ylim else 
+		if(log.lineages) log(c(1,1.05*max(x$ltt))) else 
+		c(0,1.1*max(x$ltt))
+	xlab<-if(hasArg(xlab)) list(...)$xlab else "time"
+	ylab<-if(hasArg(ylab)) list(...)$ylab else if(log.lineages) 
+		"log(lineages)" else "lineages"
+	args<-list(...)
+	args$log.lineages<-NULL
+	args$colors<-NULL
+	args$legend<-NULL
+	args$show.tree<-NULL
+	args$show.total<-NULL
+	args$add<-NULL
+	args$xlim<-xlim
+	args$ylim<-ylim
+	args$xlab<-xlab
+	args$ylab<-ylab
+	args$x<-NA
+	if(!add) do.call(plot,args)
+	tips<-if(log.lineages) seq(0,log(Ntip(x$tree)),
+		length.out=Ntip(x$tree)) else 1:Ntip(x$tree)
+	if(show.tree){
+		mar<-par()$mar
+		plot(x$tree,
+			make.transparent(colors[1:(ncol(x$ltt)-1)],0.5),
+			tips=tips,xlim=xlim,ylim=ylim,
+			ftype="off",add=TRUE,lwd=1,mar=mar)
+		plot.window(xlim=xlim,ylim=ylim)
+	}
+	if(!show.total) dd<-1 else dd<-0
+	for(i in 1:(ncol(x$ltt)-dd)){
+		LTT<-if(log.lineages) log(x$ltt) else x$ltt
+		if(outline) lines(x$times,LTT[,i],type="s",lwd=lwd+2,
+				col=if(par()$bg=="transparent") "white" else 
+				par()$bg)
+		lines(x$times,LTT[,i],type="s",lwd=lwd,col=colors[i])
+	}
+	if(plot.leg){
+		nn<-colnames(x$ltt)
+		if(!show.total) nn<-setdiff(nn,"total")
+		legend(legend,nn,pch=22,pt.bg=colors[nn],pt.cex=1.2,
+		cex=0.8,bty="n")
+	}
+}
+
+print.ltt.simmap<-function(x,digits=4,...){
+	ss<-sort(unique(c(getStates(x$tree,"tips"),
+		getStates(x$tree,"nodes"))))
+	cat("Object of class \"ltt.simmap\" containing:\n\n")
+	cat(paste("(1) A phylogenetic tree with ",Ntip(x$tree), 
+		" tips, ",x$tree$Nnode," internal\n",sep= ""))
+	cat(paste("    nodes, and a mapped state with ",length(ss),
+		" states.\n\n",sep=""))
+	cat(paste("(2) A matrix containing the number of lineages in each\n",
+		"    state (ltt) and event timings (times) on the tree.\n\n",sep=""))
+	if(!is.null(x$gamma))
+		cat(paste("(3) A value for Pybus & Harvey's \"gamma\"",
+			" statistic of\n    gamma = ",round(x$gamma,digits),
+			", p-value = ",
+			round(x$p,digits),".\n\n",sep=""))
+}
+
+ltt.multiPhylo<-function(tree,drop.extinct=FALSE,gamma=TRUE,...){
+	if(!inherits(tree,"multiPhylo")){
+		stop("tree must be object of class \"multiPhylo\".")
+	} else {
+		obj<-lapply(tree,ltt,plot=FALSE,drop.extinct=drop.extinct,
+			log.lineages=FALSE,gamma=gamma)
+		class(obj)<-"multiLtt"
+		return(obj)
+	}
+}
+
+ltt.phylo<-function(tree,plot=TRUE,drop.extinct=FALSE,log.lineages=TRUE,
+	gamma=TRUE,...){
 	# set tolerance
 	tol<-1e-6
 	# check "phylo" object
-	if(!inherits(tree,"phylo")&&!inherits(tree,"multiPhylo"))
-		stop("tree must be object of class \"phylo\" or \"multiPhylo\".")
-	if(inherits(tree,"multiPhylo")){
-		obj<-lapply(tree,ltt,plot=FALSE,drop.extinct=drop.extinct,
-			log.lineages=log.lineages,gamma=gamma)
-		class(obj)<-"multiLtt"
+	if(!inherits(tree,"phylo")){
+		stop("tree must be object of class \"phylo\".")
 	} else {
 		# reorder the tree
 		tree<-reorder.phylo(tree,order="cladewise")

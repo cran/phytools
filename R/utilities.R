@@ -1,5 +1,5 @@
 ## some utility functions
-## written by Liam J. Revell 2011, 2012, 2013, 2014, 2015, 2016, 2017, 2018, 2019, 2020, 2021
+## written by Liam J. Revell 2011, 2012, 2013, 2014, 2015, 2016, 2017, 2018, 2019, 2020, 2021, 2022
 
 ## function to get states at internal nodes from simmap style trees
 ## written by Liam J. Revell 2013, 2014, 2015, 2021
@@ -407,10 +407,10 @@ force.ultrametric<-function(tree,method=c("nnls","extend"),...){
 }
 
 ## function to create curved clade labels for a fan tree
-## written by Liam J. Revell 2017
+## written by Liam J. Revell 2017, 2022
 
 arc.cladelabels<-function(tree=NULL,text,node=NULL,ln.offset=1.02,
-	lab.offset=1.06,cex=1,orientation="curved",...){
+	lab.offset=1.06,cex=1,orientation="curved",stretch=1,...){
 	obj<-get("last_plot.phylo",envir=.PlotPhyloEnv)
 	if(obj$type!="fan") stop("method works only for type=\"fan\"")
 	h<-max(sqrt(obj$xx^2+obj$yy^2))
@@ -453,7 +453,7 @@ arc.cladelabels<-function(tree=NULL,text,node=NULL,ln.offset=1.02,
 	if(orientation=="curved")
 		arctext(text,radius=lab.offset*h,
 			middle=mean(range(deg*pi/180)),cex=cex,
-			clockwise=clockwise)
+			clockwise=clockwise,stretch=stretch)
 	else if(orientation=="horizontal"){
 		x0<-lab.offset*cos(median(deg)*pi/180)*h
 		y0<-lab.offset*sin(median(deg)*pi/180)*h
@@ -527,7 +527,7 @@ labelnodes<-function(text,node=NULL,interactive=TRUE,
 
 ## convert object of class "birthdeath" into birth & death rates
 bd<-function(x){
-	if(class(x)!="birthdeath") stop("x should be an object of class 'birthdeath'")
+	if(!inherits(x,"birthdeath")) stop("x should be an object of class 'birthdeath'")
 	b<-x$para[2]/(1-x$para[1])
 	d<-b-x$para[2]
 	setNames(c(b,d),c("b","d"))

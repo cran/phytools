@@ -1,3 +1,122 @@
+## function plots a sigmoid phylogram or cladogram
+## written by Liam J. Revell 2022
+
+compute.brlen.simmap<-function(phy,method="Grafen",power=1,...){
+	if(inherits(phy,"simmap")){
+		tt<-as.phylo(phy)
+		tt<-compute.brlen(tt,method=method,power=power,...)
+		ss<-tt$edge.length/phy$edge.length
+		phy$maps<-mapply("*",ss,phy$maps,SIMPLIFY=FALSE)
+		phy$mapped.edge<-phy$mapped.edge*
+			matrix(rep(ss,ncol(phy$mapped.edge)),
+			nrow(phy$mapped.edge),ncol(phy$mapped.edge))
+		phy$edge.length<-tt$edge.length
+	} else if(inherits(phy,"phylo")) 
+		phy<-compute.brlen(phy,method=method,power=power,...)
+	phy
+}		
+
+sigmoidPhylogram<-function(tree,...){
+	## b=5,m1=0.01,m2=0.5,v=1
+	b<-if(hasArg(b)) list(...)$b else 5
+	m1<-if(hasArg(m1)) list(...)$m1 else 0.01
+	m2<-if(hasArg(m2)) list(...)$m2 else 0.5
+	v<-if(hasArg(v)) list(...)$v else 1
+	direction<-if(hasArg(direction)) list(...)$direction else "rightwards"
+	show.hidden<-if(hasArg(show.hidden)) list(...)$show.hidden else FALSE
+	if(inherits(tree,"simmap")){
+		if(hasArg(colors)) colors<-list(...)$colors
+		else {
+			ss<-sort(unique(c(getStates(tree,"nodes"),
+				getStates(tree,"tips"))))
+			mm<-length(ss)
+			colors<-setNames(
+				colorRampPalette(palette()[1:min(8,mm)])(mm),
+				ss)
+		}
+	} else if(inherits(tree,"phylo")) {
+		if(hasArg(color)){ 
+			color<-setNames(list(...)$color,"1")
+			colors<-color
+		} else colors<-setNames(par()$fg,"1")
+		tree<-paintSubTree(tree,Ntip(tree)+1,"1")
+	}
+	if(hasArg(res)) res<-list(...)$res
+	else res<-199
+	if(hasArg(use.edge.length)) 
+		use.edge.length<-list(...)$use.edge.length
+	else use.edge.length<-TRUE
+	if(!use.edge.length){
+		if(hasArg(power)) power<-list(...)$power
+		else power<-1
+		tree<-compute.brlen.simmap(tree,power=power)
+	}
+	if(hasArg(lwd)) lwd<-list(...)$lwd
+	else lwd<-2
+	h<-max(nodeHeights(tree))
+	args<-list(...)
+	args$power<-NULL
+	args$res<-NULL
+	args$colors<-NULL
+	args$b<-NULL
+	args$m1<-NULL
+	args$m2<-NULL
+	args$v<-NULL
+	args$tree<-tree
+	args$color<-if(show.hidden) make.transparent("red",0.25) else
+		"transparent"
+	dev.hold()
+	par_fg<-par()$fg
+	par(fg="transparent")
+	do.call(plotTree,args)
+	par(fg=par_fg)
+	pp<-get("last_plot.phylo",envir=.PlotPhyloEnv)
+	par_usr<-par()$usr
+	args$add<-TRUE
+	if(direction=="downwards"){
+		args$xlim<-pp$x.lim
+		args$ylim<-pp$y.lim[2:1]-pp$y.lim[1]
+		args$direction<-"upwards"
+	} else if(direction=="leftwards"){
+		args$xlim<-pp$x.lim[2:1]-pp$x.lim[1]
+		args$ylim<-pp$y.lim
+		args$direction<-"rightwards"
+	}
+	do.call(plotTree,args)
+	pp<-get("last_plot.phylo",envir=.PlotPhyloEnv)
+	xx<-if(direction%in%c("rightwards","leftwards")) pp$xx else pp$yy
+	yy<-if(direction%in%c("rightwards","leftwards")) pp$yy else pp$xx
+	## Yt<-A+(K-A)/((C+exp(-B*(t-M)))^(1/v))
+	sigmoid<-function(x,.A=A,.K=K,.C=C,.B=B,.M=M,.v=v)
+		return(.A+(.K-.A)/((.C+exp(-.B*(x-.M)))^(1/.v)))
+	for(i in 1:nrow(tree$edge)){
+		A<-yy[tree$edge[i,1]]
+		K<-yy[tree$edge[i,2]]
+		if(i==1) dy<-abs(A-K)
+		B<-b*Ntip(tree)/h
+		t<-seq(xx[tree$edge[i,1]],xx[tree$edge[i,2]],
+			length.out=res)
+		t<-sort(c(t,t[1]+cumsum(tree$maps[[i]])))
+		dd<-diff(range(t))
+		M<-t[1] + if(m1*h>(m2*dd)) m2*dd else m1*h
+		C<-1
+		Yt<-c(A,sigmoid(t),K)
+		t<-c(t[1],t,t[length(t)])
+		COLS<-vector()
+		bb<-setNames(t[1]+cumsum(tree$maps[[i]]),names(tree$maps[[i]]))
+		for(j in 1:length(t)) 
+			COLS[j]<-colors[names(bb[which(t[j]<=bb)])[1]]
+		nn<-length(t)
+		if(direction%in%c("rightwards","leftwards"))
+			segments(t[1:(nn-1)],Yt[1:(nn-1)],x1=t[2:nn],y1=Yt[2:nn],
+				col=COLS,lwd=lwd)
+		else if(direction%in%c("upwards","downwards"))
+			segments(Yt[1:(nn-1)],t[1:(nn-1)],x1=Yt[2:nn],y1=t[2:nn],
+				col=COLS,lwd=lwd)
+	}
+	nulo<-dev.flush()
+}
+
 ## function plots a round phylogram
 ## written by Liam J. Revell 2014, 2015, 2016
 
