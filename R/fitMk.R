@@ -1,5 +1,7 @@
-## written by Liam J. Revell 2015, 2016, 2019, 2020, 2021, 2022
-## with input from (& structural similarity to) function ace by E. Paradis et al. 2013
+## optimizing, graphing, and analyzing extended Mk model for discrete
+## character evolution
+## written by Liam J. Revell (updates in 2015, 2016, 2019, 2020, 2021, 2022)
+## likelihood function (with pruning) adapted from ape::ace (Paradis et al. 2013)
 
 anova.fitMk<-function(object,...){
 	fits<-list(...)
@@ -22,173 +24,185 @@ anova.fitMk<-function(object,...){
 }
 
 fitMk<-function(tree,x,model="SYM",fixedQ=NULL,...){
-	if(hasArg(output.liks)) output.liks<-list(...)$output.liks
-	else output.liks<-FALSE
-	if(hasArg(q.init)) q.init<-list(...)$q.init
-	else q.init<-length(unique(x))/sum(tree$edge.length)
 	if(hasArg(opt.method)) opt.method<-list(...)$opt.method
 	else opt.method<-"nlminb"
-	if(hasArg(min.q)) min.q<-list(...)$min.q
-	else min.q<-1e-12
-	if(hasArg(max.q)) max.q<-list(...)$max.q
-	else max.q<-max(nodeHeights(tree))*100
-	if(hasArg(logscale)) logscale<-list(...)$logscale
-	else logscale<-FALSE
-	N<-Ntip(tree)
-	M<-tree$Nnode
-	if(is.matrix(x)){
-		x<-x[tree$tip.label,]
-		m<-ncol(x)
-		states<-colnames(x)
+	if(opt.method=="optimParallel"){ 
+		if(hasArg(ncores)) ncores<-list(...)$ncores
+		else ncores<-detectCores()
+		if(is.na(ncores)) ncores<-1 
+		args<-list(...)
+		args$tree<-tree
+		args$x<-x
+		args$model<-model
+		args$ncores<-ncores
+		obj<-do.call(fitMk.parallel,args)
 	} else {
-		x<-to.matrix(x,sort(unique(x)))
-		x<-x[tree$tip.label,]
-		m<-ncol(x)
-		states<-colnames(x)
-	}
-	if(hasArg(pi)) pi<-list(...)$pi
-	else pi<-"equal"
-	if(is.numeric(pi)) root.prior<-"given"
-	if(pi[1]=="equal"){ 
-		pi<-setNames(rep(1/m,m),states)
-		root.prior<-"flat"
-	} else if(pi[1]=="estimated"){ 
-		pi<-if(!is.null(fixedQ)) statdist(fixedQ) else 
-			statdist(summary(fitMk(tree,x,model),quiet=TRUE)$Q)
-		cat(paste("Using pi estimated from the stationary",
-			"distribution of Q assuming a flat prior.\npi =\n"))
-		print(round(pi,6))
-		cat("\n")
-		root.prior<-"stationary"
-	} else if(pi[1]=="fitzjohn") root.prior<-"nuisance"
-	if(is.numeric(pi)){ 
-		pi<-pi/sum(pi)
-		if(is.null(names(pi))) pi<-setNames(pi,states)
-		pi<-pi[states]
-	} 
-	if(is.null(fixedQ)){
-		if(is.character(model)){
-			rate<-matrix(NA,m,m)
-			if(model=="ER"){ 
-				k<-rate[]<-1
-				diag(rate)<-NA
-			} else if(model=="ARD"){
-				k<-m*(m-1)
-				rate[col(rate)!=row(rate)]<-1:k
-			} else if(model=="SYM"){
-				k<-m*(m-1)/2
-				ii<-col(rate)<row(rate)
-				rate[ii]<-1:k
-				rate<-t(rate)
-				rate[ii]<-1:k
-			}
+		if(hasArg(output.liks)) output.liks<-list(...)$output.liks
+		else output.liks<-FALSE
+		if(hasArg(q.init)) q.init<-list(...)$q.init
+		else q.init<-length(unique(x))/sum(tree$edge.length)
+		if(hasArg(min.q)) min.q<-list(...)$min.q
+		else min.q<-1e-12
+		if(hasArg(max.q)) max.q<-list(...)$max.q
+		else max.q<-max(nodeHeights(tree))*100
+		if(hasArg(logscale)) logscale<-list(...)$logscale
+		else logscale<-FALSE
+		N<-Ntip(tree)
+		M<-tree$Nnode
+		if(is.matrix(x)){
+			x<-x[tree$tip.label,]
+			m<-ncol(x)
+			states<-colnames(x)
 		} else {
-			if(ncol(model)!=nrow(model)) 
-				stop("model is not a square matrix")
-			if(ncol(model)!=ncol(x)) 
-				stop("model does not have the right number of columns")
-			rate<-model
-			k<-max(rate)
+			x<-to.matrix(x,sort(unique(x)))
+			x<-x[tree$tip.label,]
+			m<-ncol(x)
+			states<-colnames(x)
 		}
-		Q<-matrix(0,m,m)
-	} else {
-		rate<-matrix(NA,m,m)
-		k<-m*(m-1)
-		rate[col(rate)!=row(rate)]<-1:k
-		Q<-fixedQ
-	}
-	index.matrix<-rate
-	tmp<-cbind(1:m,1:m)
-	rate[tmp]<-0
-	rate[rate==0]<-k+1
-	liks<-rbind(x,matrix(0,M,m,dimnames=list(1:M+N,states)))
-	pw<-reorder(tree,"pruningwise")
-	lik<-function(Q,output.liks=FALSE,pi,...){
-		if(hasArg(output.pi)) output.pi<-list(...)$output.pi
-		else output.pi<-FALSE
-		if(is.Qmatrix(Q)) Q<-unclass(Q)
-		if(any(is.nan(Q))||any(is.infinite(Q))) return(1e50)
-		comp<-vector(length=N+M,mode="numeric")
-		parents<-unique(pw$edge[,1])
-		root<-min(parents)
-		for(i in 1:length(parents)){
-			anc<-parents[i]
-			ii<-which(pw$edge[,1]==parents[i])
-			desc<-pw$edge[ii,2]
-			el<-pw$edge.length[ii]
-			v<-vector(length=length(desc),mode="list")
-			for(j in 1:length(v)){
-				v[[j]]<-EXPM(Q*el[j])%*%liks[desc[j],]
-			}
-			if(anc==root){
-				if(is.numeric(pi)) vv<-Reduce('*',v)[,1]*pi
-				else if(pi[1]=="fitzjohn"){
-					D<-Reduce('*',v)[,1]
-					pi<-D/sum(D)
-					vv<-D*D/sum(D)
+		if(hasArg(pi)) pi<-list(...)$pi
+		else pi<-"equal"
+		if(is.numeric(pi)) root.prior<-"given"
+		if(pi[1]=="equal"){ 
+			pi<-setNames(rep(1/m,m),states)
+			root.prior<-"flat"
+		} else if(pi[1]=="estimated"){ 
+			pi<-if(!is.null(fixedQ)) statdist(fixedQ) else 
+				statdist(summary(fitMk(tree,x,model),quiet=TRUE)$Q)
+			cat(paste("Using pi estimated from the stationary",
+				"distribution of Q assuming a flat prior.\npi =\n"))
+			print(round(pi,6))
+			cat("\n")
+			root.prior<-"stationary"
+		} else if(pi[1]=="fitzjohn") root.prior<-"nuisance"
+		if(is.numeric(pi)){ 
+			pi<-pi/sum(pi)
+			if(is.null(names(pi))) pi<-setNames(pi,states)
+			pi<-pi[states]
+		} 
+		if(is.null(fixedQ)){
+			if(is.character(model)){
+				rate<-matrix(NA,m,m)
+				if(model=="ER"){ 
+					k<-rate[]<-1
+					diag(rate)<-NA
+				} else if(model=="ARD"){
+					k<-m*(m-1)
+					rate[col(rate)!=row(rate)]<-1:k
+				} else if(model=="SYM"){
+					k<-m*(m-1)/2
+					ii<-col(rate)<row(rate)
+					rate[ii]<-1:k
+					rate<-t(rate)
+					rate[ii]<-1:k
 				}
-			} else vv<-Reduce('*',v)[,1]
-			## vv<-if(anc==root) Reduce('*',v)[,1]*pi else Reduce('*',v)[,1]
-			comp[anc]<-sum(vv)
-			liks[anc,]<-vv/comp[anc]
-		}
-		if(output.liks) return(liks[1:M+N,,drop=FALSE])
-		else if(output.pi) return(pi)
-		else {
-			logL<--sum(log(comp[1:M+N]))
-			if(is.na(logL)) logL<-Inf
-			return(logL)
-		}
-	}
-	if(is.null(fixedQ)){
-		if(length(q.init)!=k) q.init<-rep(q.init[1],k)
-		q.init<-if(logscale) log(q.init) else q.init
-		if(opt.method=="optim"){
-			fit<-if(logscale) 
-				optim(q.init,function(p) lik(makeQ(m,exp(p),index.matrix),pi=pi),
-					method="L-BFGS-B",lower=rep(log(min.q),k),upper=rep(log(max.q),k)) else
-				optim(q.init,function(p) lik(makeQ(m,p,index.matrix),pi=pi),
-					method="L-BFGS-B",lower=rep(min.q,k),upper=rep(max.q,k))
-		} else if(opt.method=="none"){
-			fit<-list(objective=lik(makeQ(m,q.init,index.matrix),pi=pi),
-				par=q.init)
+			} else {
+				if(ncol(model)!=nrow(model)) 
+					stop("model is not a square matrix")
+				if(ncol(model)!=ncol(x)) 
+					stop("model does not have the right number of columns")
+				rate<-model
+				k<-max(rate)
+			}
+			Q<-matrix(0,m,m)
 		} else {
-			fit<-if(logscale)
-				nlminb(q.init,function(p) lik(makeQ(m,exp(p),index.matrix),pi=pi),
-					lower=rep(log(min.q),k),upper=rep(log(max.q),k))
-				else nlminb(q.init,function(p) lik(makeQ(m,p,index.matrix),
-					pi=pi),lower=rep(0,k),upper=rep(max.q,k))
+			rate<-matrix(NA,m,m)
+			k<-m*(m-1)
+			rate[col(rate)!=row(rate)]<-1:k
+			Q<-fixedQ
 		}
-		if(logscale) fit$par<-exp(fit$par)
-		if(pi[1]=="fitzjohn") pi<-setNames(
-			lik(makeQ(m,fit$par,index.matrix),FALSE,pi=pi,output.pi=TRUE),
-			states)
-		obj<-list(logLik=
-			if(opt.method=="optim") -fit$value else -fit$objective,
-			rates=fit$par,
-			index.matrix=index.matrix,
-			states=states,
-			pi=pi,
-			method=opt.method,
-			root.prior=root.prior)
-		if(output.liks) obj$lik.anc<-lik(makeQ(m,obj$rates,index.matrix),TRUE,
-			pi=pi)
-	} else {
-		fit<-lik(Q,pi=pi)
-		if(pi[1]=="fitzjohn") pi<-setNames(lik(Q,FALSE,pi=pi,output.pi=TRUE),states)
-		obj<-list(logLik=-fit,
-			rates=Q[sapply(1:k,function(x,y) which(x==y),index.matrix)],
-			index.matrix=index.matrix,
-			states=states,
-			pi=pi,
-			root.prior=root.prior)
-		if(output.liks) obj$lik.anc<-lik(makeQ(m,obj$rates,index.matrix),TRUE,
-			pi=pi)
+		index.matrix<-rate
+		tmp<-cbind(1:m,1:m)
+		rate[tmp]<-0
+		rate[rate==0]<-k+1
+		liks<-rbind(x,matrix(0,M,m,dimnames=list(1:M+N,states)))
+		pw<-reorder(tree,"pruningwise")
+		lik<-function(Q,output.liks=FALSE,pi,...){
+			if(hasArg(output.pi)) output.pi<-list(...)$output.pi
+			else output.pi<-FALSE
+			if(is.Qmatrix(Q)) Q<-unclass(Q)
+			if(any(is.nan(Q))||any(is.infinite(Q))) return(1e50)
+			comp<-vector(length=N+M,mode="numeric")
+			parents<-unique(pw$edge[,1])
+			root<-min(parents)
+			for(i in 1:length(parents)){
+				anc<-parents[i]
+				ii<-which(pw$edge[,1]==parents[i])
+				desc<-pw$edge[ii,2]
+				el<-pw$edge.length[ii]
+				v<-vector(length=length(desc),mode="list")
+				for(j in 1:length(v)){
+					v[[j]]<-EXPM(Q*el[j])%*%liks[desc[j],]
+				}
+				if(anc==root){
+					if(is.numeric(pi)) vv<-Reduce('*',v)[,1]*pi
+					else if(pi[1]=="fitzjohn"){
+						D<-Reduce('*',v)[,1]
+						pi<-D/sum(D)
+						vv<-D*D/sum(D)
+					}
+				} else vv<-Reduce('*',v)[,1]
+				## vv<-if(anc==root) Reduce('*',v)[,1]*pi else Reduce('*',v)[,1]
+				comp[anc]<-sum(vv)
+				liks[anc,]<-vv/comp[anc]
+			}
+			if(output.liks) return(liks[1:M+N,,drop=FALSE])
+			else if(output.pi) return(pi)
+			else {
+				logL<--sum(log(comp[1:M+N]))
+				if(is.na(logL)) logL<-Inf
+				return(logL)
+			}
+		}
+		if(is.null(fixedQ)){
+			if(length(q.init)!=k) q.init<-rep(q.init[1],k)
+			q.init<-if(logscale) log(q.init) else q.init
+			if(opt.method=="optim"){
+				fit<-if(logscale) 
+					optim(q.init,function(p) lik(makeQ(m,exp(p),index.matrix),pi=pi),
+						method="L-BFGS-B",lower=rep(log(min.q),k),upper=rep(log(max.q),k)) else
+					optim(q.init,function(p) lik(makeQ(m,p,index.matrix),pi=pi),
+						method="L-BFGS-B",lower=rep(min.q,k),upper=rep(max.q,k))
+			} else if(opt.method=="none"){
+				fit<-list(objective=lik(makeQ(m,q.init,index.matrix),pi=pi),
+					par=q.init)
+			} else {
+				fit<-if(logscale)
+					nlminb(q.init,function(p) lik(makeQ(m,exp(p),index.matrix),pi=pi),
+						lower=rep(log(min.q),k),upper=rep(log(max.q),k))
+					else nlminb(q.init,function(p) lik(makeQ(m,p,index.matrix),
+						pi=pi),lower=rep(0,k),upper=rep(max.q,k))
+			}
+			if(logscale) fit$par<-exp(fit$par)
+			if(pi[1]=="fitzjohn") pi<-setNames(
+				lik(makeQ(m,fit$par,index.matrix),FALSE,pi=pi,output.pi=TRUE),
+				states)
+			obj<-list(logLik=
+				if(opt.method=="optim") -fit$value else -fit$objective,
+				rates=fit$par,
+				index.matrix=index.matrix,
+				states=states,
+				pi=pi,
+				method=opt.method,
+				root.prior=root.prior)
+			if(output.liks) obj$lik.anc<-lik(makeQ(m,obj$rates,index.matrix),TRUE,
+				pi=pi)
+		} else {
+			fit<-lik(Q,pi=pi)
+			if(pi[1]=="fitzjohn") pi<-setNames(lik(Q,FALSE,pi=pi,output.pi=TRUE),states)
+			obj<-list(logLik=-fit,
+				rates=Q[sapply(1:k,function(x,y) which(x==y),index.matrix)],
+				index.matrix=index.matrix,
+				states=states,
+				pi=pi,
+				root.prior=root.prior)
+			if(output.liks) obj$lik.anc<-lik(makeQ(m,obj$rates,index.matrix),TRUE,
+				pi=pi)
+		}
+		lik.f<-function(q) -lik(q,output.liks=FALSE,
+			pi=if(root.prior=="nuisance") "fitzjohn" else pi)
+		obj$lik<-lik.f
+		class(obj)<-"fitMk"
 	}
-	lik.f<-function(q) -lik(q,output.liks=FALSE,
-		pi=if(root.prior=="nuisance") "fitzjohn" else pi)
-	obj$lik<-lik.f
-	class(obj)<-"fitMk"
 	return(obj)
 }
 
@@ -239,7 +253,10 @@ summary.fitMk<-function(object,...){
 ## logLik method for objects of class "fitMk"
 logLik.fitMk<-function(object,...){ 
 	lik<-object$logLik
-	attr(lik,"df")<-length(object$rates)
+	if(!is.null(object$index.matrix)) 
+		attr(lik,"df")<-max(object$index.matrix,na.rm=TRUE)
+	else
+		attr(lik,"df")<-length(object$rates)
 	lik
 }
 
@@ -312,23 +329,49 @@ plot.Qmatrix<-function(x,...){
 	else text<-TRUE
 	if(hasArg(max.lwd)) max.lwd<-list(...)$max.lwd
 	else max.lwd<-if(text) 5 else 8
-	plot.new()
+	if(hasArg(rotate)) rotate<-list(...)$rotate
+	else rotate<-NULL
+	if(hasArg(add)) add<-list(...)$add
+	else add<-FALSE
+	if(hasArg(xlim)) xlim<-list(...)$xlim
+	else xlim<-NULL
+	if(hasArg(ylim)) ylim<-list(...)$ylim
+	else ylim<-NULL
+	if(hasArg(offset)) offset<-list(...)$offset
+	else offset<-0.02
+	if(hasArg(palette)) palette<-list(...)$palette
+	else palette<-c("blue","purple","red")
+	## set all Q<tol to zero (may remove later)
+	Q[Q<tol]<-0
+	## end may remove later
+	if(!add) plot.new()
 	par(mar=mar)
-	xylim<-c(-1.2,1.2)
-	if(!color) plot.window(xlim=xylim,ylim=xylim,asp=1) else 
-		plot.window(xlim=c(-1.4,xylim[2]-0.2),ylim=xylim,asp=1)
+	if(is.null(xlim)) xlim<-ylim
+	if(is.null(ylim)) ylim<-xlim
+	if(is.null(xlim)&&is.null(ylim)){
+		if(!color) xlim<-ylim<-c(-1.2,1.2)
+		else { 
+			xlim<-c(-1.4,1)
+			ylim<-c(-1.2,1.2)
+		}
+	}
+	plot.window(xlim=xlim,ylim=ylim,asp=1)
 	if(!is.null(main)) title(main=main,cex.main=cex.main)
 	nstates<-nrow(Q)
+	if(is.null(rotate)){
+		if(nstates==2) rotate<--90
+		else rotate<--90*(nstates-2)/(nstates)
+	}
 	if(color){
 		col_pal<-function(qq) if(is.na(qq)) NA else 
 			if(is.infinite(qq)) make.transparent("grey",0.6) else
-			rgb(colorRamp(c("blue","purple","red"))(qq),maxColorValue=255)
+			rgb(colorRamp(palette)(qq),maxColorValue=255)
 		qq<-Q
 		diag(qq)<-NA
 		qq<-log(qq)
 		dq<-diff(RANGE(qq,na.rm=TRUE))
 		if(dq<tol){
-			cols<-matrix("blue",nstates,nstates)
+			cols<-matrix(palette[1],nstates,nstates)
 			cols[Q<tol]<-make.transparent("grey",0.6)
 		} else {
 			qq<-(qq-MIN(qq,na.rm=TRUE))/dq
@@ -353,7 +396,7 @@ plot.Qmatrix<-function(x,...){
 	} else lwd<-matrix(lwd,nstates,nstates)
 	if(!umbral||is.null(ncat)){
 		step<-360/nstates
-		angles<-seq(0,360-step,by=step)/180*pi
+		angles<-seq(rotate,360-step+rotate,by=step)/180*pi
 		if(nstates==2) angles<-angles+pi/2
 		v.x<-cos(angles)
 		v.y<-sin(angles)
@@ -372,8 +415,8 @@ plot.Qmatrix<-function(x,...){
 			dx<-v.x[j]-v.x[i]
 			dy<-v.y[j]-v.y[i]
 			slope<-abs(dy/dx)
-			shift.x<-0.02*sin(atan(dy/dx))*sign(j-i)*if(dy/dx>0) 1 else -1
-			shift.y<-0.02*cos(atan(dy/dx))*sign(j-i)*if(dy/dx>0) -1 else 1
+			shift.x<-offset*sin(atan(dy/dx))*sign(j-i)*if(dy/dx>0) 1 else -1
+			shift.y<-offset*cos(atan(dy/dx))*sign(j-i)*if(dy/dx>0) -1 else 1
 			s<-c(v.x[i]+spacer*cos(atan(slope))*sign(dx)+
 				if(isSymmetric(Q)) 0 else shift.x,
 				v.y[i]+spacer*sin(atan(slope))*sign(dy)+
@@ -428,7 +471,7 @@ plot.Qmatrix<-function(x,...){
 			text(x=X[,2],y=Y[,2],signif(exp(seq(MIN(log(QQ),na.rm=TRUE),
 				MAX(log(QQ),na.rm=TRUE),length.out=6)),signif),pos=4,cex=0.7)
 		} else {
-			BLUE<-function(...) "blue"
+			BLUE<-function(...) palette[1]
 			h<-1.5
 			LWD<-diff(par()$usr[1:2])/dev.size("px")[1]
 			lines(x=rep(-1.3+LWD*15/2,2),y=c(-h/2,h/2))
@@ -535,6 +578,16 @@ as.Qmatrix.default<-function(x, ...){
 	warning(paste(
 		"as.Qmatrix does not know how to handle objects of class ",
 		class(x),"."))
+}
+
+as.Qmatrix.matrix<-function(x, ...){
+	if(ncol(x)!=nrow(x)){
+		warning("\"matrix\" object does not appear to contain a valid Q matrix.\n")
+	} else {
+		diag(x)<--rowSums(x)
+		class(x)<-"Qmatrix"
+		return(x)
+	}
 }
 
 as.Qmatrix.fitMk<-function(x,...){

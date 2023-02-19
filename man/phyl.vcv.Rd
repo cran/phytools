@@ -10,9 +10,12 @@ phyl.vcv(X, C, lambda)
 	\item{C}{matrix containing the height above the root of each pair of species in the tree. Typically this will have been produced by calling \code{\link{vcv.phylo}}.}
 }
 \description{
-	Primarily an internal function for \code{\link{phyl.pca}}; this can be used to compute the phylogenetic trait variance-covariance matrix given a phylogenetic VCV, \eqn{\lambda}, and a data matrix. 
+	Internal function for \code{\link{phyl.pca}}.
+}
+\details{
+	Primarily designed as an internal function for \code{\link{phyl.pca}}; \code{phyl.vcv} can be used to compute the phylogenetic trait variance-covariance matrix given a phylogenetic VCV, \eqn{\lambda}, and a data matrix. 
 	
-	This function should not be confused with \code{\link{vcv.phylo}} in the \emph{ape} package (although one of the objects returned is the output of \code{vcv.phylo}).
+	This function should not be confused with \code{\link{vcv.phylo}} in the \pkg{ape} package (although one of the objects returned is the output of \code{vcv.phylo}).
 }
 \value{
 	A list containing three elements, as follows: \code{C}, the matrix \code{vcv.phylo} transformed by \code{lambda}; \code{R}, the among trait variance-covariance matrix for the data in \code{X}; and \code{alpha}, a vector of ancestral states at the root node of the tree.

@@ -10,7 +10,11 @@ brownieREML(tree, x, maxit=2000, ...)
 	\item{maxit}{an optional integer value indicating the maximum number of iterations for optimization - may need to be increased for large trees.}
 	\item{...}{optional arguments.}
 }
+
 \description{
+	Fits a multi-rate Brownian motion evolution model using REML. (See \code{\link{brownie.lite}} for more details.)
+}
+\details{
 	This function takes an object of class \code{"phylo"} or an object of class \code{"simmap"} with a mapped binary or multistate trait (see \code{\link{read.simmap}}) and data for a single continuously valued character.  It then uses restricted maximum likelihood (REML) to fit the Brownian rate variation ("noncensored") model of O'Meara et al. (2006; \emph{Evolution}).  This function is similar to \code{\link{brownie.lite}} but uses REML (which is faster and unbiased) instead of ML.  REML optimization takes advantage of Felsenstein's (1985) contrasts algorithm.
 }
 \value{
@@ -31,6 +35,18 @@ brownieREML(tree, x, maxit=2000, ...)
 \author{Liam Revell \email{liam.revell@umb.edu}}
 \seealso{
 	\code{\link{brownie.lite}}, \code{\link{evol.vcv}}, \code{\link{evol.rate.mcmc}}, \code{\link{ratebytree}}
+}
+\examples{
+## load data from Revell & Collar (2009)
+data(sunfish.tree)
+data(sunfish.data)
+## extract character of interest
+gape.width<-setNames(sunfish.data$gape.width,
+    rownames(sunfish.data))
+## fit model
+multiBM.reml<-brownieREML(sunfish.tree,
+	gape.width)
+print(multiBM.reml)
 }
 \keyword{phylogenetics}
 \keyword{comparative method}

@@ -1,5 +1,5 @@
 ## function plots reconstructed values for ancestral characters along the edges of the tree
-## written by Liam J. Revell 2012-2017
+## written by Liam J. Revell 2012-2023
 contMap<-function(tree,x,res=100,fsize=NULL,ftype=NULL,lwd=4,legend=NULL,
 	lims=NULL,outline=TRUE,sig=3,type="phylogram",direction="rightwards",
 	plot=TRUE,...){
@@ -95,7 +95,7 @@ getState<-function(x,trans){
 
 ## S3 print method for objects of class "contMap"
 ## uses print.densityMap internally
-## written by Liam J. Revell 2012, 2013, 2014, 2015, 2016
+## written by Liam J. Revell 2012, 2013, 2014, 2015, 2016, 2023
 
 plot.contMap<-function(x,...){
 	if(inherits(x,"contMap")){
@@ -138,10 +138,13 @@ plot.contMap<-function(x,...){
 	if(length(ftype)==1) ftype<-c(ftype,"reg")
 	if(hasArg(leg.txt)) leg.txt<-list(...)$leg.txt
 	else leg.txt<-"trait value"
+	if(hasArg(underscore)) underscore<-list(...)$underscore
+	else underscore<-FALSE
 	# done optional arguments
 	leg.txt<-c(round(lims[1],sig),leg.txt,round(lims[2],sig))
 	plot(x,fsize=fsize,ftype=ftype,lwd=lwd,legend=legend,outline=outline,leg.txt=leg.txt,
-		type=type,mar=mar,direction=direction,offset=offset,xlim=xlim,ylim=ylim,hold=hold)
+		type=type,mar=mar,direction=direction,offset=offset,xlim=xlim,ylim=ylim,hold=hold,
+		underscore=underscore)
 }
 
 ## S3 print method for object of class 'contMap'
@@ -153,12 +156,12 @@ print.contMap<-function(x,digits=6,...){
 }
 
 ## drop tips from an object of class 'contMap'
-## written by Liam J. Revell 2014
-drop.tip.contMap<-function(x,tip,...){
-	if(!inherits(x,"contMap")) cat("x should be an object of class \"contMap\"\n")
+## written by Liam J. Revell 2014, 2023
+drop.tip.contMap<-function(phy,tip,...){
+	if(!inherits(phy,"contMap")) cat("phy should be an object of class \"contMap\"\n")
 	else {
-		x$tree<-drop.tip.simmap(x$tree,tip,...)
-		return(x)
+		phy$tree<-drop.tip.simmap(phy$tree,tip,...)
+		return(phy)
 	}
 }
 
@@ -206,7 +209,7 @@ errorbar.contMap<-function(obj,...){
 	}
 }
 
-keep.tip.contMap<-function(x,tip,...){
-	tips<-setdiff(x$tree$tip.label,tip)
-	drop.tip.contMap(x,tips,...)
+keep.tip.contMap<-function(phy,tip,...){
+	tips<-setdiff(phy$tree$tip.label,tip)
+	drop.tip.contMap(phy,tip=tips,...)
 }

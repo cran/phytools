@@ -7,15 +7,20 @@
 \usage{
 map.to.singleton(tree)
 plotTree.singletons(tree)
-drop.tip.singleton(tree, tip)
+\method{drop.tip}{singleton}(phy, tip, ...)
 rootedge.to.singleton(tree)
 }
 \arguments{
 	\item{tree}{an object of class \code{"simmap"} (for \code{map.to.singleton},  or a tree with one or more singleton nodes (for \code{plotTree.singletons}, \code{drop.tip.singleton}, and \code{rootedge.to.singleton}).}
+	\item{phy}{for \code{drop.tip.singleton}, an object of class \code{"singleton"} or \code{"phylo"}.}
 	\item{tip}{for \code{drop.tip.singleton}, a tip label or vector of tip labels.}
+	\item{...}{optional arguments for \code{drop.tip.singleton}.}
 }
 \description{
-	The function \code{map.to.singleton} takes an object of class \code{"simmap"} with a mapped discrete character and converts it to a tree with singleton nodes, in which edge has only one state. The states for each edge are stored in \code{names(tree$edge.length)}. In a sense this is just an alternative way to use the general structure of the \code{"phylo"} object to encode a tree with a mapped character.	
+	\code{map.to.singleton} takes an object of class \code{"simmap"} with a mapped discrete character and converts it to a tree with singleton nodes, in which edge has only one state.
+}	
+\details{	
+	The states for each edge are stored in \code{names(tree$edge.length)}. In a sense this is just an alternative way to use the general structure of the \code{"phylo"} object to encode a tree with a mapped character.	
 	
 	\code{plotTree.singletons} plots a tree with singleton nodes. Note that \code{\link{plotTree}} and \code{\link{plot.phylo}} now have no trouble graphing trees with singleton nodes - but they do this by just ignoring the singletons. \code{plotTree.singletons} marks the singletons as nodes on the plotted phylogeny.
 	

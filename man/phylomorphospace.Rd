@@ -4,9 +4,9 @@
 \title{Creates phylomorphospace plot}
 \usage{
 phylomorphospace(tree, X, A=NULL, label=c("radial","horizontal","off"),
-   control=list(), ...)
+    control=list(), ...)
 project.phylomorphospace(tree, X, nsteps=200, sleep=0,
-	direction=c("to","from","both"), ...)
+    direction=c("to","from","both"), ...)
 }
 \arguments{
 	\item{tree}{a phylogenetic tree in \code{"phylo"} format, or a modified \code{"phylo"} object with a mapped discrete character.}
@@ -20,6 +20,9 @@ project.phylomorphospace(tree, X, nsteps=200, sleep=0,
 	\item{...}{optional arguments for plotting, including \code{xlim}, \code{ylim}, \code{xlab}, \code{ylab}, \code{lwd}, \code{colors}, \code{fsize}, and \code{node.by.map}. \code{colors} is only used when there is a mapped discrete character on the tree, in which case \code{control$col.edge} is ignored. \code{fsize} is relative to the default, which is \code{textxy(...,cx=0.75)}. \code{node.by.map} is a logical value (defaults to \code{FALSE} which tells the function whether or not to plot the node colors using the colors of the mapped discrete character. Setting this option to \code{TRUE} will cause \code{control$col.node} to be ignored. \code{node.size} is a vector containing the point size relative to the default (see \code{\link{par}} for plotted internal nodes and tips, respectively. Defaults to \code{node.size=c(1,1.3)}. If only one number is provided it will be recycled. \code{axes} is a logical value indicating whether or not axes should be plotted (see \code{\link{plot.default}}. Finally, \code{add} indicates whether to add the phylmorphospace to the current plot.}
 }
 \description{
+	Project a phylogeny into morphospace.
+}
+\details{
 	This function creates a phylomorphospace plot (a projection of the tree into morphospace) for two characters following Sidlauskas (2008; \emph{Evolution}). It will also plot a discrete character mapped on tree.
 	
 	\code{project.phylomorphospace} animates the phylomorphospace projection.

@@ -12,20 +12,20 @@ make.simmap(tree, x, model="SYM", nsim=1, ...)
 	\item{...}{optional arguments. So far, \code{pi} gives the prior distribution on the root node of the tree. Acceptable values for \code{pi} are \code{"equal"}, \code{"estimated"}, or a vector with the frequencies. If \code{pi="estimated"} then the stationary distribution is estimated by numerically solving \code{pi*Q=0} for \code{pi}, and this is used as a prior on the root. If \code{pi="fitzjohn"}, then the Fitzjohn et al. (2009) root prior is used. Finally, if \code{pi} is a numeric vector then the root state will be sampled from this vector. The function defaults to \code{pi="equal"} which results in the root node being sampled from the conditional scaled likelihood distribution at the root. \code{message} tells whether or not to print a message containing the rate matrix, \emph{Q} and state frequencies. \code{message} defaults to \code{TRUE}. For optional argument \code{Q="mcmc"} (see below) the mean value of \code{Q} from the posterior sample is printed. \code{tol} gives the tolerance for zero elements in \code{Q}. (Elements less then \code{tol} will be reset to \code{tol}). Optional argument \code{Q} can be a string (\code{"empirical"} or \code{"mcmc"}), or a fixed value of the transition matrix, \emph{Q}. If \code{"empirical"} than a single value of \emph{Q}, the most likely value, is used for all simulations. If \code{"mcmc"}, then \code{nsim} values of \emph{Q} are first obtained from the posterior distribution for \emph{Q} using Bayesian MCMC, then a simulated stochastic character map is generated for each sampled value of \emph{Q}. Optional argument \code{vQ} can consist of a single numeric value or a vector containing the variances of the (normal) proposal distributions for the MCMC. The order of \code{vQ} is assumed to be in the order of the \code{index.matrix} in \code{\link{ace}} for the chosen model. \code{prior} is a list containing \code{alpha} and \code{beta} parameters for the \eqn{\Gamma} prior distribution on the transition rates in \emph{Q}. Note that \code{alpha} and \code{beta} can be single values or vectors, if different priors are desired for each value in the transition matrix \emph{Q}. As for \code{vQ}, the order of \code{prior} is assumed to correspond with the order of \code{index.matrix} as in \code{\link{ace}}. \code{prior} can also be given the optional logical value \code{use.empirical} which tells the function whether or not to give the prior distribution the empirical mean for \emph{Q}. If \code{TRUE} then only \code{prior$beta} is used and \code{prior$alpha} is set equal to \code{prior$beta} times the empirical mean of \emph{Q}. \code{burnin} and \code{samplefreq} are burn-in and sample frequency for the MCMC, respectively.}
 }
 \description{
-	This function performs stochastic mapping using several different alternative methods.
-
+	Performs stochastic character mapping (Huelsenbeck et al., 2003) using several different alternative methods.
+}
+\details{
 	For \code{Q="empirical"}, \code{make.simmap} first fits a continuous-time reversible Markov model for the evolution of \code{x} and then simulates stochastic character histories using that model and the tip states on the tree. This is the same procedure that is described in Bollback (2006), except that simulation is performed using a fixed value of the transition matrix, \emph{Q}, instead of by sampling \emph{Q} from its posterior distribution.
 
 	For \code{Q="mcmc"}, \code{make.simmap} first samples \emph{Q} \code{nsim} times from the posterior probability distribution of \emph{Q} using MCMC, then it simulates \code{nsim} stochastic maps conditioned on each sampled value of \emph{Q}.
 
 	For \code{Q} set to a matrix, \code{make.simmap} samples stochastic mappings conditioned on the fixed input matrix.
-}
-\details{
-	\code{make.simmap} uses code that has been adapted from \emph{ape}'s function \code{\link{ace}} (by Paradis et al.) to perform Felsenstein's pruning algorithm to compute the likelihood.
 
-	As of \emph{phytools} >= 0.2-33 \code{x} can be a vector of states or a matrix containing the prior probabilities of tip states in rows. In this case the column names of \code{x} should contain the states, and the row names should contain the tip names.
+	\code{make.simmap} uses code that has been adapted from \pkg{ape}'s function \code{\link{ace}} (by Paradis et al.) to perform Felsenstein's pruning algorithm to compute the likelihood.
 
-	Note that there was a small (but potentially significant) bug in how node states were simulated by \code{make.simmap} in versions of \emph{phytools} <= 0.2-26. Between \emph{phytools} 0.2-26 and 0.2-36 there was also a bug for asymmetric models of character change (e.g., \code{model="ARD"}). Finally, between \emph{phytools} 0.2-33 and \emph{phytools} 0.2-47 there was an error in use of the conditional likelihoods for the root node, which caused the root node of the tree to be sampled incorrectly. Giorgio Bianchini pointed out that in \emph{phytools} 1.0-1 (and probably prior recent versions) there was an error sampling the state at the root node of the tree based on the input prior (\code{pi}) supplied by a user -- except for \code{pi="equal"} (a flat prior, the default) or for a prior distribution in which one or another state was known to be the global root state (e.g., \code{pi=c(1,0)}, \code{pi=c(0,1)}, etc.). All of these issues should be fixed in the current and all later versions.
+	As of \pkg{phytools} >= 0.2-33 \code{x} can be a vector of states or a matrix containing the prior probabilities of tip states in rows. In this case the column names of \code{x} should contain the states, and the row names should contain the tip names.
+
+	Note that there was a small (but potentially significant) bug in how node states were simulated by \code{make.simmap} in versions of \pkg{phytools} <= 0.2-26. Between \pkg{phytools} 0.2-26 and 0.2-36 there was also a bug for asymmetric models of character change (e.g., \code{model="ARD"}). Finally, between \pkg{phytools} 0.2-33 and \pkg{phytools} 0.2-47 there was an error in use of the conditional likelihoods for the root node, which caused the root node of the tree to be sampled incorrectly. Giorgio Bianchini pointed out that in \pkg{phytools} 1.0-1 (and probably prior recent versions) there was an error sampling the state at the root node of the tree based on the input prior (\code{pi}) supplied by a user -- except for \code{pi="equal"} (a flat prior, the default) or for a prior distribution in which one or another state was known to be the global root state (e.g., \code{pi=c(1,0)}, \code{pi=c(0,1)}, etc.). All of these issues should be fixed in the current and all later versions.
 
 	If \code{tree} is an object of class \code{"multiPhylo"} then \code{nsim} stochastic maps are generated for each input tree.
 }
@@ -73,8 +73,7 @@ par(mar=c(5.1,4.1,4.1,2.1))
 ## plot posterior density on the number of changes
 plot(density(smap.trees),bty="l")
 title(main="Posterior distribution of changes of each type",
-    font.main=3)
-}
+    font.main=3)}
 }
 \keyword{ancestral states}
 \keyword{phylogenetics}

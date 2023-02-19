@@ -18,7 +18,10 @@ phenogram95(tree, x=NULL, ...)
 	\item{x}{in \code{phenogram95}, a named vector with values for a continuously distributed trait.}
 }
 \description{
-	This function plots different types of phylogenetic trees.
+	Plots phylogenies (or phylogenetic trees and comparative data) in a variety of different styles.
+}
+\details{
+	This function plots a phylogeny or phylogenetic tree and comparative data in a variety of different styles, depending on the value of \code{type}. In some instances, \code{fancyTree} is now just a wrappe for other \pkg{phytools} functions, such as \code{\link{contMap}} and \code{\link{densityMap}}.
 	
 	If \code{type="extinction"} (or any unambiguous abbreviation) the function will plot a tree in which branches preceding the MRCA of all extant taxa and branches leading only to extnct lineages are plotted with dashed red lines. 
 	
@@ -26,11 +29,11 @@ phenogram95(tree, x=NULL, ...)
 	
 	If \code{type="droptip"} the function will create a two panel figure in which the first panel is the tree with lineages to be pruned highlighted; and the second panel is the pruned tree. In this case, the additional argument \code{tip}, the tip name or vector of tip names to be dropped, must be supplied. 
 	
-	If \code{type="densitymap"}, a posterior probability density "heat-map" is created based on a set of trees in a \code{"multiPhylo"} object containing a binary [0,1] mapped character. (See \code{\link{densityMap}} for additional optional arguments if \code{type="densitymap"}.) This option just calls the function \code{\link{densityMap}} internally.
+	If \code{type="densitymap"}, a posterior probability density "heat-map" is created based on a set of trees in a \code{"multiSimmap"} object containing a binary [0,1] mapped character. (See \code{\link{densityMap}} for additional optional arguments if \code{type="densitymap"}.)
 	
-	If \code{type="contmap"}, reconstructed continuous trait evolution is mapped on the tree. Again, see \code{\link{contMap}} for additional arguments if \code{type="contmap"}. Much like \code{type="densitymap"}, this option just calls the function \code{\link{contMap}} internally.
+	If \code{type="contmap"}, reconstructed continuous trait evolution is mapped on the tree. Again, see \code{\link{contMap}} for additional arguments if \code{type="contmap"}.
 
-	If \code{type="phenogram95"} a 95-percent phenogram is plotted using transparency to visualize uncertainty at ancestral nodes and along branches. Most of the options of \code{\link{phenogram}} are available. 
+	If \code{type="phenogram95"} a 95\% phenogram is plotted using transparency to visualize uncertainty at ancestral nodes and along branches. Most of the options of \code{\link{phenogram}} are available. 
 	
 	Finally, if \code{type="scattergram"} a phylogenetic scatter plot matrix containing \code{\link{contMap}} style trees on the diagonal and \code{\link{phylomorphospace}} plots in non-diagonal panels is produced. For this type a trait matrix \code{X} must also be supplied. The only additional arguments available for this type are \code{ftype}, \code{fsize}, \code{colors}, and \code{label}. (See \code{\link{phylomorphospace}} for details on how these arguments should be used.) This function calls \code{\link{phyloScattergram}} (which is also now exported to the name space) internally. In addition to creating a plot, \code{phyloScattergram} also returns an object of class \code{"phyloScattergram"} which can be replotted using different options if desired.
 
@@ -49,19 +52,19 @@ phenogram95(tree, x=NULL, ...)
 	\code{\link{contMap}}, \code{\link{densityMap}}, \code{\link{drop.tip}}, \code{\link{phenogram}}, \code{\link{phylomorphospace3d}}, \code{\link{plot.phylo}}, \code{\link{plotSimmap}}
 }
 \examples{
-# plot tree with extinction
+## plot tree with extinction
 set.seed(10)
 tree<-pbtree(b=1,d=0.4,t=4)
 fancyTree(tree,type="extinction")
 
 \dontrun{
-# plot 3D traitgram
+## plot 3D traitgram
 tree<-pbtree(n=50,scale=10)
 Y<-sim.corrs(tree,vcv=matrix(c(1,0.75,0.75,1),2,2))
 fancyTree(tree,type="traitgram3d",X=Y,
     control=list(spin=FALSE))
 	
-# plot with internal nodes from simulation
+## plot with internal nodes from simulation
 Y<-sim.corrs(tree,vcv=matrix(c(1,0.75,0.75,1),
     2,2),internal=TRUE)
 B<-Y[length(tree$tip)+1:tree$Nnode,]
@@ -69,20 +72,19 @@ Y<-Y[1:length(tree$tip),]
 fancyTree(tree,type="traitgram3d",X=Y,A=B,
     control=list(simple.axes=TRUE,spin=FALSE))}
 	
-# plot with dropped tips
+## plot with dropped tips
 tree<-pbtree(n=30)
 tips<-sample(tree$tip.label)[1:10]
 pruned<-fancyTree(tree,type="droptip",tip=tips)
+par(mfrow=c(1,1)) ## reset mfrow to default
 
 \dontrun{
-# plot 95-percent CI phenogram
+## plot 95-percent CI phenogram
 tree<-pbtree(n=30)
 x<-fastBM(tree)
 fancyTree(tree,type="phenogram95",x=x)}
 
-## reset par to defaults
-par(mar=c(5.1,4.1,4.1,2.1))
-par(mfrow=c(1,1))
+par(mar=c(5.1,4.1,4.1,2.1)) ## reset mar to defaults
 }
 \keyword{phylogenetics}
 \keyword{plotting}
