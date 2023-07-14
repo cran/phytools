@@ -2,6 +2,12 @@
 ## written by Liam J. Revell 2022, 2023
 
 splinePhylogram<-function(tree,...){
+	args<-list(...)
+	args$tree<-tree
+	args$plot<-FALSE
+	args$direction<-"rightwards"
+	do.call(plotTree,args)
+	pp<-get("last_plot.phylo",envir=.PlotPhyloEnv)
 	if(hasArg(df)) df<-list(...)$df
 	else df<-50
 	if(hasArg(res)) res<-list(...)$res
@@ -17,6 +23,8 @@ splinePhylogram<-function(tree,...){
 	args<-list(...)
 	args$tree<-tree
 	args$color<-"transparent"
+	args$direction<-"rightwards"
+	args$add<-TRUE
 	dev.hold()
 	do.call(plotTree,args)
 	obj<-get("last_plot.phylo",envir=.PlotPhyloEnv)
@@ -40,6 +48,7 @@ splinePhylogram<-function(tree,...){
 	par(fg="transparent")
 	do.call(plotTree,args)
 	par(fg=ffg)
+	assign("last_plot.phylo",pp,envir=.PlotPhyloEnv)
 }
 
 compute.brlen.simmap<-function(phy,method="Grafen",power=1,...){
@@ -58,6 +67,18 @@ compute.brlen.simmap<-function(phy,method="Grafen",power=1,...){
 }		
 
 sigmoidPhylogram<-function(tree,...){
+	if(hasArg(outline)) outline<-list(...)$outline
+	else outline<-FALSE
+	if(hasArg(lwd)) lwd<-list(...)$lwd
+	else lwd<-2
+	if(outline){
+		args<-list(...)
+		args$tree<-as.phylo(tree)
+		args$lwd<-lwd+2
+		args$colors<-par()$fg
+		args$outline<-FALSE
+		do.call(sigmoidPhylogram,args)
+	}
 	## b=5,m1=0.01,m2=0.5,v=1
 	b<-if(hasArg(b)) list(...)$b else 5
 	m1<-if(hasArg(m1)) list(...)$m1 else 0.01
@@ -92,8 +113,6 @@ sigmoidPhylogram<-function(tree,...){
 		else power<-1
 		tree<-compute.brlen.simmap(tree,power=power)
 	}
-	if(hasArg(lwd)) lwd<-list(...)$lwd
-	else lwd<-2
 	h<-max(nodeHeights(tree))
 	args<-list(...)
 	args$power<-NULL
@@ -106,6 +125,8 @@ sigmoidPhylogram<-function(tree,...){
 	args$tree<-tree
 	args$color<-if(show.hidden) make.transparent("red",0.25) else
 		"transparent"
+	if(outline) args$add<-TRUE
+	args$outline<-FALSE
 	dev.hold()
 	par_fg<-par()$fg
 	par(fg="transparent")
@@ -123,7 +144,12 @@ sigmoidPhylogram<-function(tree,...){
 		args$ylim<-pp$y.lim
 		args$direction<-"rightwards"
 	}
+	if(outline){
+		par_fg<-par()$fg
+		par(fg="transparent")
+	}
 	do.call(plotTree,args)
+	if(outline) par(fg=par_fg)
 	pp<-get("last_plot.phylo",envir=.PlotPhyloEnv)
 	xx<-if(direction%in%c("rightwards","leftwards")) pp$xx else pp$yy
 	yy<-if(direction%in%c("rightwards","leftwards")) pp$yy else pp$xx
@@ -156,10 +182,12 @@ sigmoidPhylogram<-function(tree,...){
 				col=COLS,lwd=lwd)
 	}
 	nulo<-dev.flush()
+	pp$edge<-tree$edge
+	assign("last_plot.phylo",pp,envir=.PlotPhyloEnv)
 }
 
 ## function plots a round phylogram
-## written by Liam J. Revell 2014, 2015, 2016
+## written by Liam J. Revell 2014, 2015, 2016, 2023
 
 roundPhylogram<-function(tree,fsize=1.0,ftype="reg",lwd=2,mar=NULL,offset=NULL,
 	direction="rightwards",type="phylogram",xlim=NULL,ylim=NULL,...){
@@ -228,7 +256,7 @@ roundPhylogram<-function(tree,fsize=1.0,ftype="reg",lwd=2,mar=NULL,offset=NULL,
 		PP<-list(type=type,use.edge.length=if(type=="phylogram") TRUE else FALSE,node.pos=1,
 			show.tip.label=if(ftype) TRUE else FALSE,show.node.label=FALSE,font=ftype,cex=fsize,
 			adj=0,srt=0,no.margin=FALSE,label.offset=offset,x.lim=par()$usr[1:2],y.lim=par()$usr[3:4],
-			direction=direction,tip.color="black",Ntip=length(cw$tip.label),Nnode=cw$Nnode,edge=cw$edge,
+			direction=direction,tip.color="black",Ntip=length(cw$tip.label),Nnode=cw$Nnode,edge=tree$edge,
 			xx=sapply(1:(length(cw$tip.label)+cw$Nnode),function(x,y,z) y[match(x,z)],y=X,z=cw$edge),
 			yy=y)
 		assign("last_plot.phylo",PP,envir=.PlotPhyloEnv)

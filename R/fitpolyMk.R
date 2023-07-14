@@ -2,7 +2,7 @@
 ## fits several polymorphic discrete character evolution models
 ## written by Liam J. Revell 2019, 2020, 2022, 2023
 
-anova.fitpolyMk<-anova.fitMk
+anova.fitpolyMk<-function(object,...) anova.fitMk(object,...)
 
 as.Qmatrix.fitpolyMk<-function(x,...){
 	class(x)<-"fitMk"
@@ -96,7 +96,7 @@ fitpolyMk<-function(tree,x,model="SYM",ordered=FALSE,...){
 			}
 		}
 		if(!quiet){
-			cat("\nThis is the design matrix of the fitted model. Does it make sense?\n\n")
+			cat("\nThis is the design matrix of the fitted model.\nDoes it make sense?\n\n")
 			print(tmodel)
 			cat("\n")
 			flush.console()
@@ -110,7 +110,6 @@ fitpolyMk<-function(tree,x,model="SYM",ordered=FALSE,...){
 	object$model<-model
 	object$ordered<-ordered
 	if(ordered) attr(object$ordered,"max.poly")<-max.poly
-	object$data<-X
 	class(object)<-"fitpolyMk"
 	object
 }
@@ -138,6 +137,9 @@ print.fitpolyMk<-function(x,digits=6,...){
 	print(round(x$pi,digits))
 	cat(paste("\nLog-likelihood:",round(x$logLik,digits),"\n"))
 	cat(paste("\nOptimization method used was \"",x$method,"\"\n\n",sep=""))
+	if(x$opt_results$convergence==0) 
+		cat("R thinks it has found the ML solution.\n\n")
+	else cat("R thinks optimization may not have converged.\n\n")
 }
 
 ## logLik method for objects of class "fitpolyMk"
@@ -202,14 +204,14 @@ plot.fitpolyMk<-function(x,...){
 							text(mean(c(s[1],e[1]))+1.5*shift.x,
 								mean(c(s[2],e[2]))+1.5*shift.y,
 								round(Q[i,j],signif),cex=cex.rates,
-								srt=atan(dy/dx)*180/pi)
+								srt=atan(asp*dy/dx)*180/pi)
 						else
 							text(mean(c(s[1],e[1]))+0.3*diff(c(s[1],e[1]))+
 								1.5*shift.x,
 								mean(c(s[2],e[2]))+0.3*diff(c(s[2],e[2]))+
 								1.5*shift.y,
 								round(Q[i,j],signif),cex=cex.rates,
-								srt=atan(dy/dx)*180/pi)
+								srt=atan(asp*dy/dx)*180/pi)
 						arrows(s[1],s[2],e[1],e[2],length=0.05,
 							code=if(isSymmetric(Q)) 3 else 2,lwd=lwd)
 					}
@@ -247,7 +249,7 @@ plot.fitpolyMk<-function(x,...){
 						text(mean(c(s[1],e[1]))+1.5*shift.x,
 							mean(c(s[2],e[2]))+1.5*shift.y,
 							round(Q[i,j],signif),cex=cex.rates,
-							srt=atan(dy/dx)*180/pi)
+							srt=atan(asp*dy/dx)*180/pi)
 						arrows(s[1],s[2],e[1],e[2],length=0.05,
 							code=if(isSymmetric(Q)) 3 else 2,lwd=lwd)
 					}
@@ -285,14 +287,14 @@ plot.fitpolyMk<-function(x,...){
 						text(mean(c(s[1],e[1]))+1.5*shift.x,
 						mean(c(s[2],e[2]))+1.5*shift.y,
 						round(Q[i,j],signif),cex=cex.rates,
-						srt=atan(dy/dx)*180/pi)
+						srt=atan(asp*dy/dx)*180/pi)
 				else
 					text(mean(c(s[1],e[1]))+0.3*diff(c(s[1],e[1]))+
 						1.5*shift.x,
 						mean(c(s[2],e[2]))+0.3*diff(c(s[2],e[2]))+
 						1.5*shift.y,
 						round(Q[i,j],signif),cex=cex.rates,
-						srt=atan(dy/dx)*180/pi)
+						srt=atan(asp*dy/dx)*180/pi)
 				arrows(s[1],s[2],e[1],e[2],length=0.05,
 					code=if(isSymmetric(Q)) 3 else 2,lwd=lwd)
 			}
@@ -404,7 +406,7 @@ graph.polyMk<-function(k=2,model="SYM",ordered=FALSE,...){
 		}
 	}
 	if(plot){
-		spacer<-0.1
+		spacer<-if(hasArg(spacer)) list(...)$spacer else 0.1
 		plot.new()
 		par(mar=mar)
 		plot.window(xlim=xlim,ylim=ylim,asp=asp)

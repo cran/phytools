@@ -1,5 +1,76 @@
 ## function creates a stochastic character mapped tree as a modified "phylo" object
-## written by Liam Revell 2013, 2014, 2015, 2016, 2017, 2018, 2019, 2020, 2021, 2022
+## written by Liam Revell 2013, 2014, 2015, 2016, 2017, 2018, 2019, 2020, 2021, 2022, 2023
+
+## S3 method for Mk models & objects of various classes
+
+simmap<-function(object,...) UseMethod("simmap")
+
+simmap.default<-function(object,...){
+	warning(paste(
+		"simmap does not know how to handle objects of class ",
+		class(object),".\n"))
+}
+
+simmap.simmap<-function(object,...){
+	args<-list(...)
+	args$tree<-as.phylo(object)
+	args$x<-getStates(object,"tips")
+	if(hasArg(Q)) Q<-list(...)$Q
+	else {
+		args$Q<-if(!is.null(object$Q)) object$Q
+	}
+	args$pi<-if(hasArg(pi)) list(...)$pi else "fitzjohn"
+	if(hasArg(nsim)){
+		nsim<-list(...)$nsim
+		args$nsim<-nsim
+	} else args$nsim<-100
+	if(hasArg(trace)) trace<-list(...)$trace
+	else trace<-0
+	if(trace>0) args$message<-TRUE
+	else args$message<-FALSE
+	do.call(make.simmap,args)
+}
+
+simmap.fitpolyMk<-function(object,...) simmap.fitMk(object,...)
+
+simmap.fitMk<-function(object,...){
+	args<-list(...)
+	args$tree<-object$tree
+	args$x<-object$data
+	args$Q<-as.Qmatrix(object)
+	args$pi<-if(object$root.prior=="fitzjohn") 
+		"fitzjohn" else object$pi
+	if(is.null(args$nsim)) args$nsim<-100
+	if(hasArg(trace)) trace<-list(...)$trace
+	else trace<-0
+	if(trace>0) args$message<-TRUE
+	else args$message<-FALSE
+	do.call(make.simmap,args)
+}
+
+simmap.anova.fitMk<-function(object,...){
+	if(hasArg(weighted)) weighted<-list(...)$weighted
+	else weighted<-TRUE
+	if(hasArg(nsim)) nsim<-list(...)$nsim
+	else nsim<-100
+	if(weighted){
+		w<-object$weight
+		mods<-sample(1:length(w),size=nsim,replace=TRUE,prob=w)
+	} else {
+		best<-which(object$AIC==min(object$AIC))
+		mods<-sample(best,size=nsim,replace=TRUE)
+	}
+	fits<-attr(object,"models")[mods]
+	foo<-function(obj,args){
+		args$object<-obj
+		do.call(simmap,args)
+	}
+	args<-list(...)
+	args$nsim<-1
+	tt<-lapply(fits,foo,args=args)
+	class(tt)<-c("multiSimmap","multiPhylo")
+	return(tt)
+}
 
 make.simmap<-function(tree,x,model="SYM",nsim=1,...){
 	if(inherits(tree,"multiPhylo")){
@@ -8,8 +79,10 @@ make.simmap<-function(tree,x,model="SYM",nsim=1,...){
 			if(nsim>1) class(zz)<-NULL
 			return(zz)
 		}	
-		if(nsim>1) mtrees<-unlist(sapply(tree,ff,x,model,nsim,...,simplify=FALSE),recursive=FALSE)
-		else mtrees<-sapply(tree,ff,x,model,nsim,...,simplify=FALSE)
+		if(nsim>1){
+			mtrees<-unlist(sapply(tree,ff,x,model,nsim,...,simplify=FALSE),
+				recursive=FALSE)
+		} else mtrees<-sapply(tree,ff,x,model,nsim,...,simplify=FALSE)
 		class(mtrees)<-c("multiSimmap","multiPhylo")
 	} else {
 		## get optional arguments
@@ -373,20 +446,21 @@ density.multiSimmap<-function(x,...){
 		ab<-lapply(ab,function(x){
 			class(x)<-"mcmc"
 			x })
-		if(.check.pkg("coda")){
-			hpd.ab<-lapply(ab,HPDinterval)
-		} else {
-			cat("  HPDinterval requires package coda.\n")
-			cat("  Computing 95% interval from samples only.\n\n")
-			hpd95<-function(x){
-				obj<-setNames(c(sort(x)[round(0.025*length(x))],
-					sort(x)[round(0.975*length(x))]),
-					c("lower","upper"))
-				attr(obj,"Probability")<-0.95
-				obj
-			}
-			hpd.ab<-lapply(ab,hpd95)
-		}
+		## if(.check.pkg("coda")){
+			## hpd.ab<-lapply(ab,HPDinterval)
+		## } else {
+			## cat("  HPDinterval requires package coda.\n")
+			## cat("  Computing 95% interval from samples only.\n\n")
+			## hpd95<-function(x){
+				## obj<-setNames(c(sort(x)[round(0.025*length(x))],
+					## sort(x)[round(0.975*length(x))]),
+					## c("lower","upper"))
+				## attr(obj,"Probability")<-0.95
+				## obj
+			## }
+			## hpd.ab<-lapply(ab,hpd95)
+		## }
+		hpd.ab<-lapply(ab,HPDinterval)
 		minmax<-range(unlist(ab))
 		pcalc<-function(x,mm)
 			hist(x,breaks=seq(mm[1]-1.5,mm[2]+1.5,bw),plot=FALSE)
@@ -416,6 +490,12 @@ plot.changesMap<-function(x,...){
 	else bty<-"l"
 	if(hasArg(alpha)) alpha<-list(...)$alpha
 	else alpha<-0.3
+	if(hasArg(xlim)) xlim<-list(...)$xlim
+	else xlim<-NULL
+	if(hasArg(ylim)) ylim<-list(...)$ylim
+	else ylim<-NULL
+	if(hasArg(main)) main<-list(...)$main
+	else main<-NULL
 	if(hasArg(colors)){ 
 		colors<-list(...)$colors
 		nn<-names(colors)
@@ -441,9 +521,10 @@ plot.changesMap<-function(x,...){
 	hpd<-x$hpd
 	bw<-x$bw
 	if(length(x$trans)==2&&is.null(transition)){
-		plot(p[[1]]$mids,p[[1]]$density,xlim=c(min(x$mins)-1,
-			max(x$maxs)+1),ylim=c(0,1.2*max(c(p[[1]]$density,
-			p[[2]]$density))),
+		plot(p[[1]]$mids,p[[1]]$density,xlim=if(is.null(xlim)) 
+			c(min(x$mins)-1,max(x$maxs)+1) else xlim,
+			ylim=if(is.null(ylim)) c(0,1.2*max(c(p[[1]]$density,
+			p[[2]]$density))) else ylim,
 			type="n",xlab="number of changes",
 			ylab="relative frequency across stochastic maps",
 			bty=bty)
@@ -500,9 +581,11 @@ plot.changesMap<-function(x,...){
 				if(i==j&&is.null(transition)) plot.new()
 				else {
 					CHARS<-strsplit(x$trans[ii],"->")[[1]]
-					MAIN<-bquote(.(CHARS[1])%->%.(CHARS[2]))
-					plot(p[[ii]]$mids,p[[ii]]$density,xlim=c(min(x$mins)-1,
-						max(x$maxs)+1),ylim=c(0,1.2*max.d),
+					MAIN<-if(is.null(main)) bquote(.(CHARS[1])%->%.(CHARS[2])) else
+						main
+					plot(p[[ii]]$mids,p[[ii]]$density,xlim=if(is.null(xlim)) 
+						c(min(x$mins)-1,max(x$maxs)+1) else xlim,
+						ylim=if(is.null(ylim)) c(0,1.2*max.d) else ylim,
 						type="n",xlab="number of changes",
 						ylab="relative frequency",main=MAIN,font.main=1,
 						bty=bty)
