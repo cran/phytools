@@ -13,7 +13,7 @@ force.ultrametric<-function(tree,method=c("nnls","extend"),...){
 		cat("*                          Note:                              *\n")
 		cat("*    force.ultrametric does not include a formal method to    *\n")
 		cat("*    ultrametricize a tree & should only be used to coerce    *\n")
-		cat("*   a phylogeny that fails is.ultramtric due to rounding --   *\n")
+		cat("*   a phylogeny that fails is.ultrametric due to rounding --  *\n")
 		cat("*    not as a substitute for formal rate-smoothing methods.   *\n")
 		cat("***************************************************************\n")
 	}
@@ -109,6 +109,8 @@ describe.simmap<-function(tree,...){
 	else message<-FALSE
 	if(hasArg(ref.tree)) ref.tree<-list(...)$ref.tree
 	else ref.tree<-NULL
+	if(hasArg(states)) states<-list(...)$states
+	else states<-NULL
 	if(inherits(tree,"multiPhylo")){
 		if(check.equal){
 			TT<-sapply(tree,function(x,y) sapply(y,all.equal.phylo,x),y=tree)
@@ -117,12 +119,12 @@ describe.simmap<-function(tree,...){
 		} else check<-TRUE
 		if(is.null(ref.tree)&&check){ 
 			YY<-getStates(tree,"both")
-			states<-sort(unique(as.vector(YY)))
+			if(is.null(states)) states<-sort(unique(as.vector(YY)))
 			ZZ<-t(apply(YY,1,function(x,levels,Nsim) summary(factor(x,levels))/Nsim,
 				levels=states,Nsim=length(tree)))
 		} else {
 			YY<-getStates(tree)
-			states<-sort(unique(as.vector(YY)))
+			if(is.null(states)) states<-sort(unique(as.vector(YY)))
 			if(is.null(ref.tree)){
 				cat("No reference tree provided & some trees are unequal.\nComputing majority-rule consensus tree.\n")
 				ref.tree<-consensus(tree,p=0.5)
@@ -158,7 +160,7 @@ describe.simmap<-function(tree,...){
 	} else if(inherits(tree,"phylo")){
 		XX<-countSimmap(tree,message=FALSE)
 		YY<-getStates(tree)
-		states<-sort(unique(YY))
+		if(is.null(states)) states<-sort(unique(YY))
 		AA<-setNames(c(colSums(tree$mapped.edge),sum(tree$edge.length)),
 			c(colnames(tree$mapped.edge),"total"))
 		AA<-rbind(AA,AA/AA[length(AA)]); rownames(AA)<-c("raw","prop")
@@ -1325,7 +1327,7 @@ reroot<-function(tree,node.number,position=NULL,interactive=FALSE,...){
 }
 
 ## function to ladderize phylogeny with mapped discrete character
-## written by Liam J. Revell 2014, 2015, 2019
+## written by Liam J. Revell 2014, 2015, 2019, 2023
 
 ladderize.simmap<-function(tree,right=TRUE){
 	if(!inherits(tree,"simmap")){
@@ -1340,7 +1342,7 @@ ladderize.simmap<-function(tree,right=TRUE){
 		rN<-Ntip(obj)+1
 		T<-cbind(1:Ntip(obj),sapply(obj$tip.label,
 			function(x,y) which(y==x),y=tree$tip.label))
-		N<-matchNodes(obj,tree)
+		N<-matchNodes(obj,as.phylo(tree))
 		M<-rbind(T,N[N[,1]!=rN,])
 		ii<-sapply(M[,1],function(x,y) which(y==x),y=obj$edge[,2])
 		jj<-sapply(M[,2],function(x,y) which(y==x),y=tree$edge[,2])
