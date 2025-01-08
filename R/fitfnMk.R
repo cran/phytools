@@ -100,7 +100,9 @@ fitfnMk<-function(tree,x,model="polynomial",degree=2,...){
 			for(i in 0:degree[2]) q2<-q2+par[degree[1]+i+2]*m^(degree[2]-i)
 			q1[q1<0]<-0
 			q2[q2<0]<-0
-			if(all(q1<0)||all(q2<0)){ 
+			if(any(is.nan(c(q1,q2)))){
+				return(Inf)
+			} else if(all(q1<0)||all(q2<0)){ 
 				return(Inf)
 			} else {
 				MODEL<-matrix(0,k,k,dimnames=list(colnames(Y),colnames(Y)))
@@ -113,8 +115,8 @@ fitfnMk<-function(tree,x,model="polynomial",degree=2,...){
 		xx<-0:(k-2)+0.5
 		if(is.null(start)) q1_start<-q2_start<--1
 		else if(start[1]=="smart"){
-			cat("Numerically optimizing simple equal-rates ordered model\n")
-			cat("  to get better random starting values....\n\n")
+			cat("\nNumerically optimizing simple equal-rates ordered model\n")
+			cat("  to get better random starting values....\n")
 			MODEL<-matrix(0,k,k,dimnames=list(colnames(x),colnames(x)))
 			MODEL[cbind(1:(k-1),2:k)]<-1
 			MODEL[cbind(2:k,1:(k-1))]<-2
@@ -129,7 +131,24 @@ fitfnMk<-function(tree,x,model="polynomial",degree=2,...){
 			q1_start[q1_start<0]<-0
 			q2_start[q2_start<0]<-0
 			if(all(q1_start==0)&&all(q2_start==0)) q1_start<-q2_start<--1	
-		} else if(is.numeric(start)) {
+		} else if(start[1]=="really smart"){
+			cat("\nNumerically optimizing ordered all-rates-different model\n")
+			cat("  to get better random starting values....\n")
+			MODEL<-matrix(0,k,k,dimnames=list(colnames(x),colnames(x)))
+			MODEL[cbind(1:(k-1),2:k)]<-1:(k-1)
+			MODEL[cbind(2:k,1:(k-1))]<-1:(k-1)+(k-1)
+			RATES<-fitMk(pw,x,model=MODEL,pi=pi,lik.func="pruning",rand_start=TRUE)$rates
+			lm1<-lm(RATES[1:(k-1)]~poly(xx,degree=degree[1],raw=TRUE))
+			lm2<-lm(RATES[1:(k-1)+(k-1)]~poly(xx,degree=degree[2],raw=TRUE))
+			start<-c(unclass(coef(lm1))[(degree[1]+1):1],
+				unclass(coef(lm2))[(degree[2]+1):1])
+			names(start)<-NULL
+			q1_start<-q2_start<-rep(0,length(xx))
+			for(i in 0:degree[1]) q1_start<-q1_start+start[i+1]*xx^(degree[1]-i)
+			for(i in 0:degree[2]) q2_start<-q2_start+start[degree[1]+i+2]*xx^(degree[2]-i)
+			q1_start[q1_start<0]<-0
+			q2_start[q2_start<0]<-0
+		} else if(is.numeric(start)){
 			q1_start<-q2_start<-rep(0,length(xx))
 			for(i in 0:degree[1]) q1_start<-q1_start+start[i+1]*xx^(degree[1]-i)
 			for(i in 0:degree[2]) q2_start<-q2_start+start[degree[1]+i+2]*xx^(degree[2]-i)
@@ -213,12 +232,15 @@ fitfnMk<-function(tree,x,model="polynomial",degree=2,...){
 		index.matrix[cbind(1:(k-1),2:k)]<-1:(k-1)
 		index.matrix[cbind(2:k,1:(k-1))]<-k:(2*k-2)
 		lik.f<-function(par) -lik(par,pw=pw,Y=x,pi=pi,degree=degree)
+		if(is.numeric(pi)[1]) PI<-pi else {
+			PI<-pruning(c(q1_est,q2_est),pw,x,model=index.matrix,pi=pi,return="pi")
+		}
 		object<-list(
 			logLik=-fit$objective,
 			rates=c(q1_est,q2_est),
 			index.matrix=index.matrix,
 			states=levs,
-			pi=pi,
+			pi=PI,
 			method=opt.method,
 			root.prior=root.prior,
 			opt_results=fit[c("convergence","iterations","evaluations","message")],
@@ -233,24 +255,84 @@ fitfnMk<-function(tree,x,model="polynomial",degree=2,...){
 }
 
 plot.fitfnMk<-function(x,...){
+	if(hasArg(mar)) mar<-list(...)$mar
+	else mar<-c(5.1,4.1,4.1,4.1)
+	if(hasArg(log)) log<-list(...)$log
+	else log=""
+	if(hasArg(args.legend)) args.legend<-list(...)$args.legend
+	else args.legend<-list()
+	if(hasArg(col)) col<-list(...)$col
+	else col<-c("blue","red")
 	k<-length(x$states)
 	q1<-x$rates[1:(k-1)]
 	q2<-x$rates[k:(2*k-2)]
-	xx<-0:(k-2)+0.5
-	plot(xx,q1,type="b",col="blue",bty="n",las=1,
-		axes=FALSE,xlab="",ylab="transition rate (q)",
-		ylim=c(0,max(c(q1,q2))))
-	lines(xx,q2,type="b",col="red")
-	labs<-mapply(function(x,y) bquote(.(x) %<->% .(y)),
+	xx<-seq(0.5,(k-2)+0.5,length.out=100)
+	## compute actual polynomial function
+	X<-seq(0.5,(k-0.5),length.out=100)
+	qq1<-rep(0,100)
+	for(i in 0:x$degree[1]) qq1<-qq1+x$par[i+1]*xx^(x$degree[1]-i)
+	qq1[qq1<0]<-0
+	qq2<-rep(0,100)
+	for(i in 0:x$degree[2]) qq2<-qq2+x$par[x$degree[1]+i+2]*xx^(x$degree[2]-i)
+	qq2[qq2<0]<-0
+	if(hasArg(xlim)) xlim<-list(...)$xlim
+	else xlim<-range(pretty(c(0,max(x$rates))))
+	par(mar=mar)
+	plot(qq1,xx-0.1,type="l",col=col[1],bty="n",las=1,
+		axes=FALSE,xlab="transition rate (q)",ylab="",
+		xlim=xlim,ylim=c(min(xx)-0.1,max(xx)+0.1),log=log)
+	labs<-mapply(function(x,y) bquote(.(x) %->% .(y)),
 		x=x$states[1:(k-1)],y=x$states[2:k])
-	axis(1,at=seq(0.5,k-1.5,by=1),labels=rep("",k-1))
-	nulo<-mapply(mtext,text=labs,at=seq(0.5,k-1.5,by=1),
-		MoreArgs=list(side=1,line=1,las=3,cex=0.7))
-	axis(2,las=1,cex.axis=0.8)
-	grid()
-	legend("bottomleft",c("forward","backward"),
-		col=c("blue","red"),
-		lty="solid",pch=1,cex=0.8)
+	axis(2,at=c(par()$usr[3],seq(0.4,k-1.6,by=1)),
+		tick=TRUE,labels=FALSE,col.ticks="transparent")
+	axis(2,at=seq(0.4,k-1.6,by=1),labels=rep("",k-1))
+	nulo<-mapply(mtext,text=labs,at=seq(0.4,k-1.6,by=1),
+		MoreArgs=list(side=2,line=1,las=3,cex=0.7))
+	axis(4,at=c(seq(0.6,k-1.4,by=1),par()$usr[4]),
+		tick=TRUE,labels=FALSE,col.ticks="transparent")
+	axis(4,at=seq(0.6,k-1.4,by=1),labels=rep("",k-1))
+	labs<-mapply(function(x,y) bquote(.(x) %<-% .(y)),
+		x=x$states[1:(k-1)],y=x$states[2:k])
+	nulo<-mapply(mtext,text=labs,at=seq(0.6,k-1.4,by=1),
+		MoreArgs=list(side=4,line=1,las=3,cex=0.7))
+	points(q1,0:(k-2)+0.4,pch=16,
+		col=if(par()$bg=="transparent") "white" else par()$bg,cex=2)
+	points(q1,0:(k-2)+0.4,pch=16,col=col[1],cex=1)
+	ss<-0:(k-2)+0.4
+	for(i in 1:length(q1)) 
+		arrows(par()$usr[1],ss[i],q1[i]-0.015*diff(par()$usr[1:2]),ss[i],
+			col=make.transparent(col[1],0.25),
+			length=0.1)
+	axis(1,at=c(par()$usr[1],pretty(c(0,max(x$rates)))),
+		tick=TRUE,labels=FALSE,col.ticks="transparent")
+	axis(1,las=1,cex.axis=0.8,
+		at=pretty(c(0,max(x$rates))))
+	usr<-par()$usr
+	par(usr=par()$usr[c(2,1,3,4)])
+	lines(qq2,xx+0.1,type="l",col=col[2])
+	points(q2,0:(k-2)+0.6,pch=16,
+		col=if(par()$bg=="transparent") "white" else par()$bg,cex=2)
+	points(q2,0:(k-2)+0.6,pch=16,col=col[2],cex=1)	
+	ss<-0:(k-2)+0.6
+	for(i in 1:length(q1)) 
+		arrows(par()$usr[2],ss[i],q2[i]+0.015*diff(par()$usr[1:2]),ss[i],
+			col=make.transparent(col[2],0.25),
+			length=0.1)
+	axis(3,at=c(par()$usr[2],pretty(c(0,max(x$rates)))),
+		tick=TRUE,labels=FALSE,col.ticks="transparent")
+	axis(3,las=1,cex.axis=0.8,
+		at=pretty(c(0,max(x$rates))))
+	par(usr=usr)
+	if(is.null(args.legend$x)) args.legend$x<-"bottomleft"
+	if(is.null(args.legend$args.legend)) args.legend$legend<-c("forward","backward")
+	if(is.null(args.legend$cex)) args.legend$cex<-0.8
+	if(is.null(args.legend$pt.cex)) args.legend$pt.cex<-1
+	if(is.null(args.legend$bg)) args.legend$bg<-make.transparent("white",0.75)
+	args.legend$col<-col
+	args.legend$lty<-"solid"
+	args.legend$pch<-16
+	args.legend$cex<-0.8
+	do.call(legend,args.legend)
 }
 
 logLik.fitfnMk<-function(object,...){

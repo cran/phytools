@@ -28,11 +28,14 @@ repPhylo(tree, times)
 }
 \author{Liam Revell \email{liam.revell@umb.edu}}
 \examples{
+## create a random tree
 tree<-pbtree(n=100)
+
+## create a "multiPhylo" object with 100 copies
 trees<-rep(tree,100)
 }
 \seealso{
-	\code{\link{c.phylo}}, \code{\link{rep}}
+	\code{\link[ape]{c.phylo}}, \code{\link{rep}}
 }
 \keyword{phylogenetics}
 \keyword{utilities}

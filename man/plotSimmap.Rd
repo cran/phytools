@@ -27,7 +27,7 @@ plotSimmap(tree, colors=NULL, fsize=1.0, ftype="reg", lwd=2, pts=FALSE,
 	\item{offset}{offset for the tip labels in character widths.}
 	\item{direction}{plotting direction. Options are \code{"rightwards"} (the default), \code{"leftwards"}, \code{"upwards"} or \code{"downwards"}. For \code{method="fan"} \code{direction} is ignored.}
 	\item{type}{plot type. Can be \code{"phylogram"}, \code{"fan"}, or \code{"cladogram"}. Only a subset of options are presently available for \code{type="fan"}.}
-	\item{setEnv}{logical value indicating whether or not to set the environment \code{.PlotPhyloEnv}. Setting this to \code{TRUE} (the default) will allow compatibility with \pkg{ape} labeling functions such as \code{\link{nodelabels}}.}
+	\item{setEnv}{logical value indicating whether or not to set the environment \code{.PlotPhyloEnv}. Setting this to \code{TRUE} (the default) will allow compatibility with \pkg{ape} labeling functions such as \code{\link[ape]{nodelabels}}.}
 	\item{part}{value between 0 and 1 for \code{type="fan"} indicating what fraction of the full circular tree to use as plotting area. For instance, \code{part=0.5} will plot a half fan phylogeny. It also affects the axis scaling used.}
 	\item{xlim}{x-limits for the plot.}
 	\item{ylim}{y-limits for the plot.}
@@ -39,7 +39,7 @@ plotSimmap(tree, colors=NULL, fsize=1.0, ftype="reg", lwd=2, pts=FALSE,
 	\item{lend}{line end style. See \code{\link{par}}.}
 	\item{asp}{aspect ratio. See \code{\link{plot.window}}.}
 	\item{outline}{logical value indicating whether or not to draw a black outline around the plotted edges of the tree.}
-	\item{plot}{logical value indicating whether or not to actually plot the tree. (See equivalent argument in \code{\link{plot.phylo}}.)}
+	\item{plot}{logical value indicating whether or not to actually plot the tree. (See equivalent argument in \code{\link[ape]{plot.phylo}}.)}
 	\item{underscore}{logical value indicating whether to plot the underscore character, \code{"_"} (if \code{underscore=TRUE}) or substitute for a space. Defaults to \code{underscore=FALSE}.}
 	\item{arc_height}{for \code{type="arc"} trees, the height of the arc in units of total tree depth.}
 	\item{x}{for S3 plotting method, object of class \code{"simmap"} or \code{"multiSimmap"}.}
@@ -67,10 +67,15 @@ plotSimmap(tree, colors=NULL, fsize=1.0, ftype="reg", lwd=2, pts=FALSE,
 	\code{\link{densityMap}}, \code{\link{make.simmap}}, \code{\link{read.simmap}} 
 }
 \examples{
+## load tree with mapped character
 data(anoletree)
+
+## set colors for regims
 cols<-setNames(c("green","#E4D96F","darkgreen",
     "brown","black","darkgrey"),
     c("CG","GB","TC","TG","Tr","Tw"))
+
+## create plot
 plot(anoletree,cols,fsize=0.5,ftype="i",outline=TRUE,
     lwd=3,ylim=c(0,Ntip(anoletree)),
     mar=c(0.1,0.1,1.1,0.1))
@@ -78,7 +83,9 @@ add.simmap.legend(colors=cols,prompt=FALSE,x=0,y=-0.5,
     vertical=FALSE)
 title(main="Caribbean ecomorphs of anoles",font.main=3,
     line=0)
-par(mar=c(5.1,4.1,4.1,2.1)) ## reset margins to default
+	
+## reset margins to default
+par(mar=c(5.1,4.1,4.1,2.1))
 }
 \keyword{ancestral states}
 \keyword{phylogenetics}

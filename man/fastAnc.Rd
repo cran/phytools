@@ -27,15 +27,17 @@ fastAnc(tree, x, vars=FALSE, CI=FALSE, ...)
 }
 \author{Liam Revell \email{liam.revell@umb.edu}}
 \seealso{
-	\code{\link{ace}}, \code{\link{anc.Bayes}}, \code{\link{anc.ML}}, \code{\link{pic}}
+	\code{\link[ape]{ace}}, \code{\link{anc.Bayes}}, \code{\link{anc.ML}}, \code{\link{ancr}} \code{\link[ape]{pic}}
 }
 \examples{
 ## load data from Garland et al. (1992)
 data(mammal.tree)
 data(mammal.data)
+
 ## extract character of interest
 ln.bodyMass<-log(setNames(mammal.data$bodyMass,
     rownames(mammal.data)))
+
 ## estimate ancestral body sizes
 fit.BM<-fastAnc(mammal.tree,ln.bodyMass,CI=TRUE)
 print(fit.BM,printlen=10)

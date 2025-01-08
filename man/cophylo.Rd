@@ -38,19 +38,23 @@ cotangleplot(tr1, tr2, type=c("cladogram","phylogram"),
 }
 \author{Liam Revell \email{liam.revell@umb.edu}}
 \seealso{
-	\code{\link{cophyloplot}}, \code{\link{plotSimmap}}
+	\code{\link[ape]{cophyloplot}}, \code{\link{plotSimmap}}
 }
 \examples{
 ## load data from Lopez-Vaamonde et al. (2001)
 data(wasp.trees)
 data(wasp.data)
+
 ## create co-phylogenetic object
 wasp.cophylo<-cophylo(wasp.trees[[1]],wasp.trees[[2]],
     assoc=wasp.data)
+
 ## plot co-phylogenies
 plot(wasp.cophylo,link.type="curved",link.lwd=4,
-     link.lty="solid",link.col=make.transparent("red",
-     0.25))
+    link.lty="solid",link.col=make.transparent("red",
+        0.25))
+
+## reset par to default
 par(mar=c(5.1,4.1,4.1,2.1))
 }
 \keyword{phylogenetics}

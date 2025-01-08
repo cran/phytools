@@ -24,12 +24,17 @@ plotTree(tree, ...)
 }
 \author{Liam Revell \email{liam.revell@umb.edu}}
 \seealso{
-	\code{\link{plot.phylo}}, \code{\link{plotSimmap}}
+	\code{\link[ape]{plot.phylo}}, \code{\link{plotSimmap}}
 }
 \examples{
+## load tree
 data(vertebrate.tree)
+
+## create plot
 plotTree(vertebrate.tree,fsize=1.2,ftype="i")
-par(mar=c(5.1,4.1,4.1,2.1)) ## reset margins to default
+
+## reset margins to default
+par(mar=c(5.1,4.1,4.1,2.1))
 }
 \keyword{phylogenetics}
 \keyword{plotting}

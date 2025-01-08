@@ -14,7 +14,7 @@ ladderize.simmap(tree, right=TRUE)
 \details{
 	This function 'ladderizes' an object of class \code{"simmap"} with a mapped discrete character.
 	
-	For more information see \code{\link{ladderize}}.
+	For more information see \code{\link[ape]{ladderize}}.
 }
 \value{
 	A ladderized object of class \code{"simmap"}.
@@ -24,7 +24,26 @@ ladderize.simmap(tree, right=TRUE)
 }
 \author{Liam Revell \email{liam.revell@umb.edu}}
 \seealso{
-	\code{\link{make.simmap}}, \code{\link{ladderize}}
+	\code{\link{make.simmap}}, \code{\link[ape]{ladderize}}
+}
+\examples{
+## load "simmap" object
+data(anoletree)
+
+## ladderize object
+anoletree_ladderized<-ladderize.simmap(anoletree)
+
+## plot unladderized & ladderized
+par(mfrow=c(2,1))
+plot(anoletree,ftype="off",direction="upwards",
+    mar=c(1.1,2.1,2.1,1.1))
+mtext("a) unladderized tree",adj=0)
+plot(anoletree_ladderized,ftype="off",
+    direction="upwards",mar=c(1.1,2.1,2.1,1.1))
+mtext("b) ladderized tree",adj=0)
+
+## reset par to default
+par(mfrow=c(1,1),mar=c(5.1,4.1,4.1,2.1))
 }
 \keyword{phylogenetics}
 \keyword{utilities}

@@ -21,7 +21,7 @@ phylomorphospace3d(tree, X, A=NULL, label=TRUE, control=list(),
 	This function creates a phylomorphospace plot for three characters using the 3D visualization package, \pkg{rgl} (if available) or statically, by simulating 3D on a flat graphical device.
 }
 \value{
-	This function creates a three dimensional phylomorphospace plot. The function returns a function from \code{spin3d} (for \code{method="dynamic"}); or a series of functions from \code{\link{scatterplot3d}} (for \code{method="static"}).
+	This function creates a three dimensional phylomorphospace plot. The function returns a function from \code{spin3d} (for \code{method="dynamic"}); or a series of functions from \code{\link[scatterplot3d]{scatterplot3d}} (for \code{method="static"}).
 }
 \references{
 	Revell, L. J. (2014) Graphical methods for visualizing comparative data on phylogenies. Chapter 4 in \emph{Modern phylogenetic comparative methods and their application in evolutionary biology: Concepts and practice} (L. Z. Garamszegi ed.), pp. 77-103.
@@ -32,16 +32,23 @@ phylomorphospace3d(tree, X, A=NULL, label=TRUE, control=list(),
 }
 \author{Liam Revell \email{liam.revell@umb.edu}}
 \examples{
+## load data
 data(anoletree)
 data(anole.data)
+
+## run phylogenetic PCA
 anole.pca<-phyl.pca(anoletree,anole.data)
+
 \dontrun{
+## create dynamic plot using rgl
 phylomorphospace3d(anoletree,scores(anole.pca)[,1:3],
     control=list(spin=FALSE))}
-par(cex=0.5)
+
+## create static plot
+par(cex=0.5) ## adjust font size
 phylomorphospace3d(anoletree,scores(anole.pca)[,1:3],
     method="static",angle=-30)
-par(cex=1)
+par(cex=1) ## reset to default
 }
 \seealso{
 	\code{\link{fancyTree}}, \code{\link{phenogram}}, \code{\link{phylomorphospace}}

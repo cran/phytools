@@ -36,7 +36,7 @@ fitfnMk(tree, x, model="polynomial", degree=2, ...)
 }
 \arguments{
 	\item{tree}{an object of class \code{"phylo"}. In the case of \code{fitmultiMk} an object of class \code{"simmap"} with a mapped discrete character.}
-	\item{x}{a vector (or numeric matrix) of tip values for species; \code{names(x)} should be the species names. In the case of \code{plot} and \code{density} methods, an object of the appropriate class.}
+	\item{x}{a vector (or numeric matrix) of tip values for species; \code{names(x)} (or \code{rownames(x)}) should be the species names. In the case of \code{plot} and \code{density} methods, an object of the appropriate class.}
 	\item{model}{model. See \code{make.simmap} or \code{ace} for details. For \code{fitfnMk} the only option is presently \code{model="polynomial"}.}
 	\item{fixedQ}{fixed value of transition matrix \code{Q}, if one is desired.}
 	\item{ordered}{for \code{fitpolyMk}, a logical value indicating whether or not the character should be treated as ordered. For now the function assumes alphanumerical order (i.e., numbers sorted by their initial and then successive digits followed by characters or character strings in alphabetical order).}
@@ -46,7 +46,7 @@ fitfnMk(tree, x, model="polynomial", degree=2, ...)
 	\item{ncores}{number of cores for \code{fitMk.parallel}.}
 	\item{nrates}{number of rate categories for discretized \eqn{\Gamma} distribution.}
 	\item{degree}{the degree of the polynomial for \code{fitfnMk}. (Defaults to \code{degree=2}.)}
-	\item{...}{optional arguments, including \code{pi}, the prior distribution at the root node (defaults to \code{pi="equal"}). Other options for \code{pi} include \code{pi="fitzjohn"} (which implements the prior distribution of FitzJohn et al. 2009), \code{pi="estimated"} (which finds the stationary distribution of state frequencies and sets that as the prior), or an arbitrary prior distribution specified by the user. For \code{plot} method optional arguments include (but may not be limited to): \code{signif}, the number of digits for the rates to be plotted; \code{main}, a character vector of length two with the headings for each subplot; \code{cex.main}, \code{cex.traits}, and \code{cex.rates}, font sizes for the various text elements of the plot; and \code{show.zeros}, a logical argument specifying whether or not to plot arrows with the ML estimated transition rate is not different from zero (with tolerance specified by the optional argument \code{tol}). Finally, for \code{fitpolyMk}, both \code{order} (an evolutionary sequence for the monomorphic condition) and \code{max.poly} can be set for the \code{ordered=TRUE} model. If not set, \code{order} defaults to alphanumeric order, and \code{max.poly} defaults to the highest level of polymorphism observed in the data.}
+	\item{...}{optional arguments, including \code{pi}, the prior distribution at the root node (defaults to \code{pi="equal"}). Other options for \code{pi} include \code{pi="fitzjohn"} (which implements the prior distribution of FitzJohn et al. 2009), \code{pi="estimated"} (which finds the stationary distribution of state frequencies and sets that as the prior), or an arbitrary prior distribution specified by the user. For \code{plot} method optional arguments include (but may not be limited to): \code{signif}, the number of digits for the rates to be plotted; \code{main}, a character vector of length two with the headings for each subplot; \code{cex.main}, \code{cex.traits}, and \code{cex.rates}, font sizes for the various text elements of the plot; and \code{show.zeros}, a logical argument specifying whether or not to plot arrows with the ML estimated transition rate is not different from zero (with tolerance specified by the optional argument \code{tol}). Finally, for \code{fitpolyMk}, both \code{order} (an evolutionary sequence for the monomorphic condition) and \code{max.poly} can be set for the \code{ordered=TRUE} model. If not set, \code{order} defaults to alphanumeric order, and \code{max.poly} defaults to the highest level of polymorphism observed in the data. (\code{max.poly} can also be specified for an unordered polymorphic trait model, and if not specified, defaults to the number of distinct monomorphic states of the data.)}
 }
 \description{
 	The functions \code{fitMk}, \code{fitmultiMk}, \code{fitpolyMk}, \code{fitHRM}, \code{fitMk.parallel}, \code{fitgammaMk}, \code{fitfnMk}, and \code{mcmcMk} fit various flavors of the extended M\emph{k} model (Lewis, 2001) for discrete character evolution on a reconstructed phylogeny.
@@ -56,9 +56,9 @@ fitfnMk(tree, x, model="polynomial", degree=2, ...)
 	
 	\code{plot.fitMk} plots an object of class \code{"fitMk"} returned by \code{fitMk}. \code{plot.gfit} plots an object of class \code{"gfit"} from \pkg{geiger}'s \code{fitDiscrete} function. Both plots portray the fitted model using a graph of arrows connecting states.
 	
-	The function \code{fitmultiMk} fits an M\emph{k} model in which the transition rates between character states are allowed to vary depending on the mapped state of a discrete character on the tree. It can be combined with, for example, \code{\link{paintSubTree}} to test hypotheses about how the process of discrete character evolution for \code{x} varies between different parts of the tree.
+	The function \code{fitmultiMk} fits an M\emph{k} model in which the transition rates between character states are allowed to vary depending on the mapped state of a discrete character on the tree following Revell et al. (2024). It can be combined with, for example, \code{\link{paintSubTree}} to test hypotheses about how the process of discrete character evolution for \code{x} varies between different parts of the tree.
 	
-	The function \code{fitgammaMk} fits an M\emph{k} model in which the edge rates are assumed to have been sampled randomly from a \eqn{\Gamma} distribution with mean of 1.0 and shape parameter \eqn{\alpha}.
+	The function \code{fitgammaMk} fits an M\emph{k} model in which the edge rates are assumed to have been sampled randomly from a \eqn{\Gamma} distribution with mean of 1.0 and shape parameter \eqn{\alpha} (Revell and Harmon, In review).
 	
 	The function \code{fitfnMk} fit an ordered M\emph{k} model in which the backward and forward transition rates between adjacent levels of the trait vary according to a functional form. Presently that function form is an \emph{n}th degree polynomial, in which \code{degree} is set by the user (but defaults to \code{degree = 2}).
 	
@@ -70,7 +70,7 @@ fitfnMk(tree, x, model="polynomial", degree=2, ...)
 	
 	Finally, the function \code{fitHRM} fits a hidden-rate M\emph{k} model following Beaulieu et al. (2013). For the hidden-rate model we need to specify a number of rate categories for each level of the trait - and this can be a vector of different values for each trait. We can also choose a model (\code{"ER"}, \code{"SYM"}, or \code{"ARD"}), as well as whether or not to treat the character as a 'threshold' trait (\code{umbral=TRUE}, defaults to \code{FALSE}). This latter model is basically one that allows absorbing conditions for some hidden states. Since this can be a difficult optimization problem, the optional argument \code{niter} sets the number of optimization iterations to be run. \code{niter} defaults to \code{niter=10}. To fit the same default hidden-rates model as is implemented in \pkg{corHMM}, one should set \code{corHMM_model=TRUE} and \code{ordered_hrm=FALSE}.
 
-	Note that (by default) both \code{fitMk} and \code{fitmultiMk} recycle code from \code{\link{ace}} in the \pkg{ape} package for computing the likelihood. (If the optional argument \code{pruning=TRUE} then alternative, slightly faster, \pkg{phytools} code for the pruning algorithm is used.) \code{fitpolyMk}, \code{mcmcMk}, and \code{fitHRM} use \code{fitMk} internally to compute the likelihood.
+	Note that (by default) both \code{fitMk} and \code{fitmultiMk} recycle code from \code{\link[ape]{ace}} in the \pkg{ape} package for computing the likelihood. (If the optional argument \code{lik.func="pruning"} then alternative, slightly faster, \pkg{phytools} code for the pruning algorithm is used.) \code{fitpolyMk}, \code{mcmcMk}, and \code{fitHRM} use \code{fitMk} internally to compute the likelihood.
 }
 \value{
 	An object of class \code{"fitMk"}, \code{"fitmultiMk"}, \code{"fitpolyMk"}, \code{"mcmcMk"}, \code{"fitHRM"}, \code{"fitgammaMk"}, or \code{"fitfnMk"}. In the case of \code{density.mcmcMk} an object of class \code{"density.mcmcMk"}.
@@ -87,43 +87,57 @@ fitfnMk(tree, x, model="polynomial", degree=2, ...)
 	Revell, L. J. (2024) phytools 2.0: an updated R ecosystem for phylogenetic comparative methods (and other things). \emph{PeerJ}, \bold{12}, e16505.
 	
 	Revell, L. J. and L. J. Harmon (2022) \emph{Phylogenetic Comparative Methods in R}. Princeton University Press.
+	
+	Revell, L. J. and L. J. Harmon. In review. A discrete character evolution model for phylogenetic comparative biology with \eqn{\Gamma}-distributed rate heterogeneity among branches of the tree.
+	
+	Revell, L. J., K. P. Schliep, D. L. Mahler, and T. Ingram (2024) Testing for heterogeneous rates of discrete character evolution on phylogenies. \emph{Journal of Evolutionary Biology}, \bold{37}, 1591-1602.
+	
 }
 \author{Liam Revell \email{liam.revell@umb.edu}}
 \seealso{
-	\code{\link{ace}}, \code{\link{make.simmap}}
+	\code{\link[ape]{ace}}, \code{\link{make.simmap}}, \code{\link{simmap}}
 }
 \examples{
 ## load tree and data from Revell & Collar (2009)
 data(sunfish.tree)
 data(sunfish.data)
+
 ## extract discrete character (feeding mode)
 fmode<-setNames(sunfish.data$feeding.mode,
     rownames(sunfish.data))
+
 ## fit "ER" model
 fit.ER<-fitMk(sunfish.tree,fmode,model="ER")
 print(fit.ER)
+
 ## fit "ARD" model
 fit.ARD<-fitMk(sunfish.tree,fmode,model="ARD")
 print(fit.ARD)
+
 ## compare the models
 AIC(fit.ER,fit.ARD)
 
 ## load tree and data from Benitez-Alvarez et al. (2000)
 data(flatworm.data)
 data(flatworm.tree)
+
 ## extract discrete character (habitat)
 habitat<-setNames(flatworm.data$Habitat,
     rownames(flatworm.data))
+
 ## fit polymorphic models "ER" and "transient"
 fitpoly.ER<-fitpolyMk(flatworm.tree,habitat,
     model="ER")
 fitpoly.transient<-fitpolyMk(flatworm.tree,habitat,
     model="transient")
+
 ## print fitted models
 print(fitpoly.ER)
 print(fitpoly.transient)
+
 ## compare model
 AIC(fitpoly.ER,fitpoly.transient)
+
 ## plot models
 par(mfrow=c(2,1))
 plot(fitpoly.ER)
@@ -131,6 +145,8 @@ mtext("a) ER polymorphic model",adj=0,line=1)
 plot(fitpoly.transient)
 mtext("b) Transient polymorphic model",adj=0,
      line=1)
+
+## reset par to default
 par(mfrow=c(1,1))
 }
 \keyword{phylogenetics}
