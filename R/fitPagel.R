@@ -1,6 +1,6 @@
 ## function fits Pagel '94 model of correlated evolution of two binary characters
 ## uses fitMk, ape::ace, or geiger::fitDiscrete internally
-## written by Liam J. Revell 2014, 2015, 2016, 2020, 2022, 2023
+## written by Liam J. Revell 2014, 2015, 2016, 2020, 2022, 2023, 2025
 
 anova.fitPagel<-function(object,...){
 	fits<-list(...)
@@ -143,13 +143,16 @@ fitPagel<-function(tree,x,y,method="fitMk",model="ARD",dep.var="xy",...){
 		data=xy,
 		method=method,
 		dep.var=dep.var,
-		model=model)
+		model=model,
+		mk_fits=list(
+			independent=fit.iQ,
+			dependent=fit.dQ))
 	class(obj)<-"fitPagel"
 	obj
 }
 
 ## print method for objects of class "fitPagel"
-## written by Liam J. Revell 2014, 2016
+## written by Liam J. Revell 2014, 2016, 2025
 print.fitPagel<-function(x,...){
 	if(hasArg(digits)) digits<-list(...)$digits
 	else digits<-6
@@ -172,7 +175,13 @@ print.fitPagel<-function(x,...){
 	cat("\nHypothesis test result:\n")
 	cat(paste("  likelihood-ratio: ",signif(x$lik.ratio,digits),"\n"))
 	cat(paste("  p-value: ",signif(x$P,digits),"\n"))
-	cat(paste("\nModel fitting method used was",x$method,"\n\n"))
+	cat(paste("\nModel fitting method used was",x$method,"\n"))
+	if(x$method=="fitMk") {
+		convergence<-sapply(x$mk_fits,function(x) x$opt_results$convergence)
+		if(all(convergence==0)){
+			cat("\nR thinks both model optimizations converged.\n\n")
+		} else cat("\nR thinks one or both likelihood optimizations did not converge.\n\n")
+	} else cat("\n")
 }
 
 ## function borrowed from geiger to pull the Q-matrix from a fit returned by 

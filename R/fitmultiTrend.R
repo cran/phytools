@@ -1,14 +1,7 @@
-## function to fit a discrete-state-dependent multi-rate Brownian
+## function to fit a discrete-state-dependent multi-rate, multi-trend Brownian
 ## model using the discrete approximation of Boucher & Demery (2016)
 
-x_by_y<-function(x,y){
-	nn<-vector()
-	for(i in 1:length(x)) for(j in 1:length(y))
-		nn<-c(nn,paste(x[i],y[j],sep=","))
-	nn
-}
-
-fitmultiBM<-function(tree,x,y=NULL,model="ER",ncat=1,...){
+fitmultiTrend<-function(tree,x,y=NULL,model="ER",ncat=1,...){
 	if(hasArg(logscale)) logscale<-list(...)$logscale
 	else logscale<-TRUE
 	if(hasArg(rand_start)) rand_start<-list(...)$rand_start
@@ -17,7 +10,6 @@ fitmultiBM<-function(tree,x,y=NULL,model="ER",ncat=1,...){
 	parallel<-if(hasArg(parallel)) list(...)$parallel else 
 		FALSE
 	lik.func<-if(parallel) "parallel" else "pruning"
-	if(is.null(y)&&ncat==1) lik.func<-"eigen"
 	if(hasArg(opt.method)) opt.method<-list(...)$opt.method
 	else opt.method<-"nlminb"
 	null_model<-if(hasArg(null_model)) list(...)$null_model else
@@ -29,7 +21,8 @@ fitmultiBM<-function(tree,x,y=NULL,model="ER",ncat=1,...){
 	if(hasArg(lims)) lims<-list(...)$lims
 	else lims<-expand.range(x)
 	dd<-diff(lims)
-	tol<-1e-8*dd/levs
+	delta<-dd/levs
+	tol<-1e-8*delta
 	bins<-cbind(seq(from=lims[1]-tol,by=(dd+2*tol)/levs,
 		length.out=levs),seq(to=lims[2]+tol,by=(dd+2*tol)/levs,
 			length.out=levs))
@@ -79,23 +72,25 @@ fitmultiBM<-function(tree,x,y=NULL,model="ER",ncat=1,...){
 		dimnames=list(nn,nn))
 	for(i in 1:(levs-1)){
 		for(j in 0:(ncol(y)-1)){
-			cmodel[i+j*levs,i+1+j*levs]<-
-				cmodel[i+1+j*levs,i+j*levs]<-(j+1)				
+			cmodel[i+j*levs,i+1+j*levs]<-(j+1)
+			cmodel[i+1+j*levs,i+j*levs]<-(j+1)+ncol(y)				
 		}
 	}
 	if(wrapped){
 		for(i in 0:(ncol(y)-1)){
-			cmodel[1+i*levs,(i+1)*levs]<-
-				cmodel[(i+1)*levs,1+i*levs]<-(i+1)
+			cmodel[1+i*levs,(i+1)*levs]<-(i+1)+ncol(y)
+			cmodel[(i+1)*levs,1+i*levs]<-(i+1)
 		}
 	}
 	state_ind<-setNames(1:ncol(y),colnames(y))
 	if(null_model){ 
 		if(ncat==1){ 
-			cmodel[cmodel>0]<-1
+			for(i in 2:ncol(cmodel)){
+				if(cmodel[i-1,i]>0) cmodel[i-1,i]<-1
+				if(cmodel[i,i-1]>0) cmodel[i,i-1]<-2
+			}
 			state_ind[]<-1
-		}
-		else {
+		} else {
 			## allow hidden character to have different rates
 			hs<-strsplit(nn,"")
 			foo<-function(x){
@@ -111,8 +106,8 @@ fitmultiBM<-function(tree,x,y=NULL,model="ER",ncat=1,...){
 				ii<-which(hs==un.hs[i])
 				ii<-ii[!((ii%%levs)==0)]
 				state_ind[unique(cmodel[cbind(ii+1,ii)])]<-k
-				cmodel[cbind(ii+1,ii)]<-
-					cmodel[cbind(ii,ii+1)]<-k
+				cmodel[cbind(ii+1,ii)]<-k
+				cmodel[cbind(ii,ii+1)]<-k+ncat
 				k<-k+1
 			}
 		}
@@ -267,14 +262,18 @@ fitmultiBM<-function(tree,x,y=NULL,model="ER",ncat=1,...){
 			legend=names(cols),pch=15,col=cols,bty="n",xpd=TRUE,
 			horiz=TRUE,plot=FALSE,cex=0.8)
 		for(i in 1:ncol(qmodel)){
-			tmp<-paste("[",colnames(qmodel)[i],"]",sep="")
-			if(i==1) nm<-bquote(sigma^2~.(tmp))
-			else nm<-c(nm,bquote(sigma^2~.(tmp)))
+			tmp<-paste("[",colnames(qmodel)[i],"] ",sep="")
+			if(i==1) nm<-bquote(sigma^2~.(tmp)~-mu~.(tmp))
+			else nm<-c(nm,bquote(sigma^2~.(tmp)~-mu~.(tmp)))
+		}
+		for(i in 1:nrow(qmodel)){
+			tmp<-paste("[",colnames(qmodel)[i],"] ",sep="")
+			nm<-c(nm,bquote(sigma^2~.(tmp)~+mu~.(tmp)))
 		}
 		if(max(qmodel)>=1) nm<-c(nm,paste("q[",1:max(qmodel),"]",sep=""))
 		legend(x=ncol(model),y=0,
 			legend=nm,pch=15,
-			col=cols[c(state_ind+1,1:max(qmodel)+max(cmodel)+1)],
+			col=cols[2:length(cols)],
 			bty="n",xpd=TRUE,horiz=FALSE,cex=0.8)
 		dev.flush()
 	}
@@ -286,55 +285,33 @@ fitmultiBM<-function(tree,x,y=NULL,model="ER",ncat=1,...){
 	if(rand_start) q.init<-q.init*runif(n=length(q.init),0,2)
 	max.q<-max(q.init)*1000
 	## optimize model
-	if(lik.func%in%c("pruning","parallel")){
-		fit<-fitMk(tree,XX,model=model,
-			lik.func=if(parallel) "parallel" else "pruning",
-			expm.method=if(isSymmetric(model)) "R_Eigen" else 
-				"Higham08.b",
-			pi=pi,logscale=logscale,q.init=q.init,
-			opt.method=opt.method,max.q=max.q,
-			ncores=ncores)
-	} else {
-		QQ<-model
-		diag(QQ)<--rowSums(QQ)
-		eQQ<-eigen(QQ)
-		pw<-reorder(tree,"postorder")
-		if(parallel){
-			if(hasArg(ncores)) ncores<-list(...)$ncores
-			else ncores<-min(nrow(tree$edge),detectCores()-1)
-			mc<-makeCluster(ncores,type="PSOCK")
-			registerDoParallel(cl=mc)
-		}
-		fit<-optimize(eigen_pruning,c(tol,10*q.init[1]),tree=pw,
-			x=X,eigenQ=eQQ,parallel=parallel,pi=pi,
-			maximum=TRUE)
-		fit<-list(
-			logLik=fit$objective,
-			rates=fit$maximum,
-			index.matrix=model,
-			states=colnames(XX),
-			pi=eigen_pruning(fit$maximum,pw,X,eQQ,pi=pi,
-				return="pi",parallel=parallel),
-			method="optimize",
-			root.prior=if(pi[1]=="fitzjohn") "nuisance" else pi,
-			opt_results=list(convergence=0),
-			data=XX,
-			tree=pw)
-		class(fit)<-"fitMk"
-		if(parallel) stopCluster(cl=mc)
-	}	
-	sig2<-2*fit$rates[1:max(cmodel)]*(dd/levs)^2
+	fit<-fitMk(tree,XX,model=model,
+		lik.func=if(parallel) "parallel" else "pruning",
+		expm.method=if(isSymmetric(model)) "R_Eigen" else 
+			"Higham08.b",
+		pi=pi,logscale=logscale,q.init=q.init,
+		opt.method=opt.method,max.q=max.q,
+		ncores=ncores)
+	sig2<-(fit$rates[1:(max(cmodel)/2)]+
+		fit$rates[1:(max(cmodel)/2)+max(cmodel)/2])*delta^2
+	mu<-(fit$rates[1:(max(cmodel)/2)]-
+		fit$rates[1:(max(cmodel)/2)+max(cmodel)/2])*delta
 	q<-fit$rates[1:max(qmodel)+max(cmodel)]
 	index.matrix<-qmodel
-	lnL<-logLik(fit)-Ntip(tree)*log(dd/levs)
+	lnL<-logLik(fit)-Ntip(tree)*log(delta)
 	attr(lnL,"df")<-max(model)+1
 	## likelihood function (to export)
-	lfunc<-function(sig2,q,x0="mle",...){
+	lfunc<-function(sig2,mu,q,x0="mle",...){
 		if(hasArg(lik.func)) lik.func<-list(...)$lik.func
 		else lik.func<-"pruning"
 		if(hasArg(parallel)) parallel<-list(...)$parallel
 		else parallel<-FALSE
-		q<-c((sig2/2)*(levs/dd)^2,q)
+		delta<-dd/levs
+		jj<-1:(length(sig2)/2)
+		kk<-1:(length(sig2)/2)+length(sig2)/2
+		q<-c(sig2[jj]/(2*delta^2)+mu[jj]/(2*delta),
+			sig2[kk]/(2*delta^2)-mu[kk]/(2*delta),
+			q)
 		if(x0=="mle") pi<-"mle"
 		else if(x0=="nuisance") pi<-"fitzjohn"
 		else if(is.numeric(x0)) pi<-to_binned(x0,bins)[1,]
@@ -342,7 +319,7 @@ fitmultiBM<-function(tree,x,y=NULL,model="ER",ncat=1,...){
 			lnL<-pruning(q,tree,XX,model,pi=pi,
 				expm.method=if(isSymmetric(model)) "R_Eigen" else 
 					"Higham08.b")-
-				Ntip(tree)*log(dd/levs)
+				Ntip(tree)*log(delta)
 		} else if(lik.func=="parallel"){
 			if(!exists("ncores")) ncores<-min(nrow(tree$edge),
 				detectCores()-1)
@@ -350,13 +327,14 @@ fitmultiBM<-function(tree,x,y=NULL,model="ER",ncat=1,...){
 			registerDoParallel(cl=mc)
 			lnL<-parallel_pruning(q,tree,XX,model,pi=pi,
 				expm.method=if(isSymmetric(model)) "R_Eigen" else 
-					"Higham08.b")-Ntip(tree)*log(dd/levs)
+					"Higham08.b")-Ntip(tree)*log(delta)
 			stopCluster(cl=mc)
 		}
 		lnL
 	}
 	object<-list(
 		sigsq=sig2,
+		mu=mu,
 		state_ind=state_ind,
 		x0=sum(fit$pi*rowMeans(bins)),
 		bounds=lims,
@@ -368,20 +346,23 @@ fitmultiBM<-function(tree,x,y=NULL,model="ER",ncat=1,...){
 		opt_results=fit$opt_results,
 		mk_fit=fit,
 		lik=lfunc)
-	class(object)<-c("fitmultiBM","fitMk")
+	class(object)<-c("fitmultiTrend","fitmultiBM","fitMk")
 	object
 }
 
-print.fitmultiBM<-function(x,digits=4,...){
-	cat(paste("Object of class \"fitmultiBM\" based on\n",
+print.fitmultiTrend<-function(x,digits=4,...){
+	cat(paste("Object of class \"fitmultiTrend\" based on\n",
 		"   a discretization with k =",
 		x$ncat,"levels.\n\n"))
-	cat("Fitted multi-rate BM model parameters:\n")
+	cat("Fitted multi-rate trend model parameters:\n")
 	cat(paste(" levels: [",
 		paste(names(x$state_ind),collapse=", "),
 		"]\n"))
 	cat(paste("  sigsq: [",
 		paste(round(x$sigsq[x$state_ind],digits),collapse=", "),
+		"]\n"))
+	cat(paste("  mu: [",
+		paste(round(x$mu[x$state_ind],digits),collapse=", "),
 		"]\n"))
 	cat(paste("     x0:",round(x$x0,digits),"\n\n"))
 	print(as.Qmatrix(x))
@@ -393,73 +374,55 @@ print.fitmultiBM<-function(x,digits=4,...){
 		"R thinks optimization may not have converged.\n\n")
 }
 
-logLik.fitmultiBM<-function(object,...) object$logLik
-
-ancr.fitmultiBM<-function(object,...){
-  if(hasArg(lik.func)) lik.func<-list(...)$lik.func
-  else lik.func<-"pruning"
-  if(hasArg(expm.method)) expm.method<-list(...)$expm.method
-  else expm.method<-if(isSymmetric(object$mk_fit$index.matrix)) "R_Eigen" else 
-    "Higham08.b"
-  if(hasArg(parallel)) parallel<-list(...)$parallel
-  else parallel<-FALSE
-  if(hasArg(tips)) tips<-list(...)$tips
-  else tips<-FALSE
-  dd<-diff(object$bounds)
-  tol<-1e-8*dd/object$ncat
-  bins<-cbind(seq(from=object$bounds[1]-tol,
-    by=(dd+2*tol)/object$ncat,length.out=object$ncat),
-    seq(to=object$bounds[2]+tol,by=(dd+2*tol)/object$ncat,
-      length.out=object$ncat))
-  mids<-rowMeans(bins)
-  Anc<-ancr(object$mk_fit,lik.func=lik.func,parallel=parallel,
-    expm.method=expm.method,tips=tips)
-  mAce_cont<-matrix(0,nrow(Anc$ace),object$ncat,
-    dimnames=list(rownames(Anc$ace),1:object$ncat))
-  nn<-sapply(strsplit(colnames(Anc$ace),","),function(x) x[2])
-  for(i in 1:object$ncat){
-    mAce_cont[,i]<-rowSums(Anc$ace[,which(nn==as.character(i)),drop=FALSE])
-  }
-  ace_cont<-colSums(apply(mAce_cont,1,function(x,y) x*y,
-    y=mids))
-  ci_cont<-matrix(NA,length(ace_cont),2,dimnames=list(names(ace_cont),
-    c("lower","upper")))
-  for(i in 1:nrow(mAce_cont)){
-    cumprob<-cumsum(mAce_cont[i,])
-    ci_cont[i,1]<-mids[which(cumprob>0.025)][1]
-    ci_cont[i,2]<-mids[which(cumprob>0.975)][1]
-  }
-  ace_disc<-matrix(0,nrow(Anc$ace),length(object$states),
-    dimnames=list(rownames(Anc$ace),object$states))
-  nn<-sapply(strsplit(colnames(Anc$ace),","),function(x) x[1])
-  for(i in 1:length(object$states)){
-    ace_disc[,i]<-rowSums(Anc$ace[,which(nn==as.character(object$states[i])),
-      drop=FALSE])
-  }
-  result<-list(
-    ace=list(
-      continuous=ace_cont,
-      discrete=ace_disc),
-    CI95=list(
-      continuous=ci_cont))
-  class(result)<-"ancr.fitmultiBM"
-  result
-}
-
-print.ancr.fitmultiBM<-function(x,digits=6,printlen=6,...){
-  cat("Continuous character node estimates from \"fitmultiBM\" object:\n")
-  Nnode<-length(x$ace$continuous)
-  if(is.null(printlen)||printlen>=Nnode) print(round(x$ace$continuous,digits))
-  else printDotDot(x$ace$continuous,digits,printlen)
-  cat("\nLower & upper 95% CIs:\n")
-  if(is.null(printlen)||printlen>=Nnode) print(round(x$CI95$continuous,digits))
-  else printDotDot(x$CI95$continuous,digits,printlen)
-  cat("\n")
-  cat("Discrete character node estimates from \"fitmultiBM\" object:\n")
-  if(is.null(printlen)||printlen>=Nnode) 
-    print(round(x$ace$discrete,digits))
-  else {
-    print(round(x$ace$discrete[1:printlen,,drop=FALSE],digits))
-    cat("...\n")
-  }
+sim.multiTrend<-function(tree,x0=0,sig2=1,mu=0,...){
+	if(hasArg(plot)) plot<-list(...)$plot
+	else plot<-TRUE
+	if(inherits(tree,"simmap")){ 
+		tt<-map.to.singleton(tree)
+	} else { 
+		tt<-tree
+		tt$edge.length<-setNames(tt$edge.length,
+			rep("1",length(tt$edge.length)))
+	}
+	ss<-sort(unique(names(tt$edge.length)))
+	if(length(sig2)==1) sig2<-rep(sig2,length(ss))
+	if(length(mu)==1) mu<-rep(mu,length(ss))
+	if(is.null(names(sig2))) names(sig2)<-ss
+	if(is.null(names(mu))) names(mu)<-ss
+	sig2<-sig2[names(tt$edge.length)]
+	mu<-mu[names(tt$edge.length)]
+	delta<-rnorm(n=nrow(tt$edge),
+		mean=tt$edge.length*mu,sd=sqrt(tt$edge.length*sig2))
+	tt<-reorder(tt)
+	X<-matrix(x0,nrow(tt$edge),ncol(tt$edge))
+	for(i in 1:nrow(tt$edge)){
+		X[i,2]<-X[i,1]+delta[i]
+		ii<-which(tt$edge[,1]==tt$edge[i,2])
+		if(length(ii)>0) X[ii,1]<-X[i,2]
+	}
+	if(plot){
+		xx<-c(
+			sapply(1:Ntip(tt),
+			function(ii,ee,x) x[which(ee[,2]==ii),2],
+			ee=tt$edge,x=X),
+			X[1,1],
+			sapply(2:tt$Nnode+Ntip(tt),
+				function(ii,ee,x) x[which(ee[,2]==ii),2],
+				ee=tt$edge,x=X))
+		xx<-setNames(xx,c(tt$tip.label,
+			1:tt$Nnode+Ntip(tt)))
+		if(hasArg(col)) col<-list(...)$col
+		else col<-palette()[1:length(ss)]
+		edge_col<-if(is.null(names(col))) setNames(col,ss) else col
+		tt$maps<-as.list(tt$edge.length)
+		for(i in 1:length(tt$maps)) 
+			tt$maps[[i]]<-setNames(tt$maps[[i]],
+				names(tt$edge.length)[i])
+		phenogram(tt,xx,ftype="off",colors=edge_col,lwd=1)
+	}
+	setNames(
+		sapply(1:Ntip(tt),
+			function(ii,ee,x) x[which(ee[,2]==ii),2],
+			ee=tt$edge,x=X),
+		tt$tip.label)
 }
